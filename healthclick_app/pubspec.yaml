@@ -23,5 +23,6 @@ dev_dependencies:
 flutter:
   assets:
     - assets/Saude.png
+    - assets/google.png
     
   uses-material-design: true

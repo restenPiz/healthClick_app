@@ -1,6 +1,7 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:flutter/material.dart';
+import 'package:healthclick_app/screens/auth/CreateAccount.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -59,10 +60,14 @@ class _LoginState extends State<Login> {
               ),
               const SizedBox(height: 20),
               //?Creating account section
-              // Text('Create an account',
-              // style:TextStyle(fontSize: 15, fontWeight: FontWeight.bold,color:Colors.red)),
               GestureDetector(
                 onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) =>
+                            CreateAccount()), 
+                  );
                 },
                 child: Text(
                   "Create an account",
@@ -124,13 +129,8 @@ class _LoginState extends State<Login> {
                       ),
                     ),
                     const SizedBox(height: 20),
-
-                    // "Or Sign Up With" Text
                     Text("Or Sign Up With"),
-
                     const SizedBox(height: 20),
-
-                    // Google Button
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
@@ -144,17 +144,23 @@ class _LoginState extends State<Login> {
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
-                          children: const [
-                            Icon(Icons.g_mobiledata_outlined, size: 30, color: Colors.red), // Google icon
+                          children: [
+                            Image.asset(
+                              "assets/google.png",
+                              width: 24, 
+                              height: 24,
+                            ),
                             SizedBox(width: 10),
-                            Text('Continue with Google', style: TextStyle(fontSize: 16)),
+                            Text(
+                              'Continue with Google',
+                              style: TextStyle(
+                                  fontSize: 16, fontWeight: FontWeight.bold),
+                            ),
                           ],
                         ),
                       ),
                     ),
                     const SizedBox(height: 20),
-
-                    // Apple Button
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(

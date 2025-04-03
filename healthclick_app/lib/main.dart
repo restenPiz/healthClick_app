@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:healthclick_app/screens/auth/login.dart';
+import 'package:healthclick_app/screens/auth/Login.dart';
 
 void main() {
   runApp(const MyApp());
