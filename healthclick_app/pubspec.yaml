@@ -24,5 +24,6 @@ flutter:
   assets:
     - assets/Saude.png
     - assets/google.png
+    - assets/background.jpg
     
   uses-material-design: true
