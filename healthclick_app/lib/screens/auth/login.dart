@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:healthclick_app/screens/auth/CreateAccount.dart';
+import 'package:healthclick_app/screens/auth/ForgotPassword.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -97,6 +98,11 @@ class _LoginState extends State<Login> {
                   ),
                   GestureDetector(
                     onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => ForgotPassword()),
+                      );
                     },
                     child: Text(
                       "Forgot Password?",
@@ -121,11 +127,11 @@ class _LoginState extends State<Login> {
                           Navigator.pop(context);
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue,
+                          backgroundColor: Colors.green,
                           foregroundColor: Colors.white,
-                          padding: EdgeInsets.symmetric(vertical: 16),
+                          padding: EdgeInsets.symmetric(vertical: 20),
                         ),
-                        child: const Text('Login',style: TextStyle(fontSize: 16),),
+                        child: const Text('Login',style: TextStyle(fontSize: 20),),
                       ),
                     ),
                     const SizedBox(height: 20),
@@ -140,7 +146,7 @@ class _LoginState extends State<Login> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.white,
                           foregroundColor: Colors.black,
-                          padding: EdgeInsets.symmetric(vertical: 16),
+                          padding: EdgeInsets.symmetric(vertical: 20),
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -154,7 +160,7 @@ class _LoginState extends State<Login> {
                             Text(
                               'Continue with Google',
                               style: TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.bold),
+                                  fontSize: 20, fontWeight: FontWeight.bold),
                             ),
                           ],
                         ),
@@ -170,7 +176,7 @@ class _LoginState extends State<Login> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.black,
                           foregroundColor: Colors.white,
-                          padding: EdgeInsets.symmetric(vertical: 16),
+                          padding: EdgeInsets.symmetric(vertical: 20),
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -179,7 +185,7 @@ class _LoginState extends State<Login> {
                                 size: 30, color: Colors.white), // Apple icon
                             SizedBox(width: 10),
                             Text('Continue with Apple',
-                                style: TextStyle(fontSize: 16)),
+                                style: TextStyle(fontSize: 20)),
                           ],
                         ),
                       ),

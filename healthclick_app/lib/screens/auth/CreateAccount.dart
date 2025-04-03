@@ -97,13 +97,13 @@ class _CreateAccountState extends State<CreateAccount> {
                           Navigator.pop(context);
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue,
+                          backgroundColor: Colors.green,
                           foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          padding: const EdgeInsets.symmetric(vertical: 20),
                         ),
                         child: const Text(
                           'Sign Up',
-                          style: TextStyle(fontSize: 16),
+                          style: TextStyle(fontSize: 20),
                         ),
                       ),
                     ),
@@ -119,7 +119,7 @@ class _CreateAccountState extends State<CreateAccount> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.white,
                           foregroundColor: Colors.black,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          padding: const EdgeInsets.symmetric(vertical: 20),
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -133,7 +133,7 @@ class _CreateAccountState extends State<CreateAccount> {
                             const Text(
                               'Continue with Google',
                               style: TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.bold),
+                                  fontSize: 20, fontWeight: FontWeight.bold),
                             ),
                           ],
                         ),
@@ -149,7 +149,7 @@ class _CreateAccountState extends State<CreateAccount> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.black,
                           foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          padding: const EdgeInsets.symmetric(vertical: 20),
                         ),
                         child: const Row(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -158,7 +158,7 @@ class _CreateAccountState extends State<CreateAccount> {
                                 size: 30, color: Colors.white), // Apple icon
                             SizedBox(width: 10),
                             Text('Continue with Apple',
-                                style: TextStyle(fontSize: 16)),
+                                style: TextStyle(fontSize: 20)),
                           ],
                         ),
                       ),
