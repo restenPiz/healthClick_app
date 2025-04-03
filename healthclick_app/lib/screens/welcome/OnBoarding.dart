@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:healthclick_app/screens/welcome/HomePage.dart';
 
 class OnBoarding extends StatefulWidget {
   const OnBoarding({super.key});
@@ -17,13 +18,16 @@ class _OnBoardingState extends State<OnBoarding> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // const SizedBox(
+              //   height: 20,
+              // ),
               Center(
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(20),
                   child: Image.asset(
-                    "assets/background.jpg",
+                    "assets/back.png",
                     width: 500,
-                    height: 500,
+                    height: 550,
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -54,7 +58,7 @@ class _OnBoardingState extends State<OnBoarding> {
                     // Navigator.pop(context);
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => OnBoarding()),
+                      MaterialPageRoute(builder: (context) => HomePage()),
                     );
                   },
                   style: ElevatedButton.styleFrom(

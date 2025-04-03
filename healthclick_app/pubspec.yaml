@@ -25,5 +25,7 @@ flutter:
     - assets/Saude.png
     - assets/google.png
     - assets/background.jpg
+    - assets/dif.jpg
+    - assets/back.png
     
   uses-material-design: true

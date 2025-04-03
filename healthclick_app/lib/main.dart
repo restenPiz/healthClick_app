@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:healthclick_app/screens/auth/Login.dart';
+import 'package:healthclick_app/screens/welcome/HomePage.dart';
 import 'package:healthclick_app/screens/welcome/OnBoarding.dart';
 
 void main() {
