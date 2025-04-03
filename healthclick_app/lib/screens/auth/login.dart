@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:healthclick_app/screens/auth/CreateAccount.dart';
 import 'package:healthclick_app/screens/auth/ForgotPassword.dart';
+import 'package:healthclick_app/screens/welcome/OnBoarding.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -124,7 +125,12 @@ class _LoginState extends State<Login> {
                       width: double.infinity, // ✅ Makes button full width
                       child: ElevatedButton(
                         onPressed: () {
-                          Navigator.pop(context);
+                          // Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => OnBoarding()),
+                          );
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.green,
