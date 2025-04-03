@@ -9,6 +9,7 @@ environment:
   sdk: ^3.5.3
 
 dependencies:
+  getwidget: ^2.0.4
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.8
