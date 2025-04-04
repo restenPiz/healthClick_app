@@ -41,7 +41,7 @@ final List<Map<String, String>> products = [
     // Adicione mais produtos conforme necessário
   ];
 
-    int _currentIndex = 2;
+    int _currentIndex = 0;
 
   void _onTap(int index) {
     setState(() {
