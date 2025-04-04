@@ -34,6 +34,17 @@ final List<Map<String, String>> products = [
   // Adicione mais produtos conforme necessário
 ];
 
+int _currentIndex = 0;
+
+  final List<Widget> _screens = [
+    Center(child: Text("Início")),
+    Center(child: Text("Carrinho")),
+    Center(child: Text("Medicamentos")),
+    Center(child: Text("Farmácias")),
+    Center(child: Text("Perfil")),
+  ];
+
+
 class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
@@ -102,9 +113,6 @@ class _HomePageState extends State<HomePage> {
               Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,children: [
                 Row(children: [
                   const Text('Categorias',style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),),
-                ],),
-                Row(children: [
-                  const Text('Ver Todos',style: TextStyle(color: Colors.blue,fontWeight: FontWeight.bold, fontSize: 17),),
                 ],),
               ],),
               const SizedBox(
@@ -198,9 +206,30 @@ class _HomePageState extends State<HomePage> {
               ),
               SizedBox(height:30),
               //?Card of Products
-              const Text(
-                'Produtos',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      const Text(
+                        'Productos',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 17),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      const Text(
+                        'Ver Todos',
+                        style: TextStyle(
+                            color: Colors.blue,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 17),
+                      ),
+                    ],
+                  ),
+                ],
               ),
               const SizedBox(height: 20),
               // Product Cards Grid
@@ -262,6 +291,35 @@ class _HomePageState extends State<HomePage> {
             ],
           ),        
         ),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        onTap: (index) => setState(() => _currentIndex = index),
+        selectedItemColor: Colors.green,
+        unselectedItemColor: Colors.grey,
+        type: BottomNavigationBarType.fixed,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Início',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.shopping_cart),
+            label: 'Cart',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.medical_services),
+            label: 'Medicamentos',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.local_hospital),
+            label: 'Farmácias',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Perfil',
+          ),
+        ],
       ),
     );
   }
