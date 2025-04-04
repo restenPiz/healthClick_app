@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors
+// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
 import 'package:flutter/material.dart';
 import 'package:getwidget/getwidget.dart';
@@ -54,7 +54,7 @@ class _HomePageState extends State<HomePage> {
                   "Ola Mauro Peniel",
                   style: TextStyle(fontSize: 15), 
                 ),
-                subtitle: Text("O que vce deseja ?",
+                subtitle: Text("O que voce deseja ?",
                   style: TextStyle(fontWeight: FontWeight.bold,fontSize: 17),
                 ),
                 trailing:
@@ -99,7 +99,14 @@ class _HomePageState extends State<HomePage> {
                 },
               ),
               const SizedBox(height: 50,),
-              const Text('Categorias',style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),),
+              Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,children: [
+                Row(children: [
+                  const Text('Categorias',style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),),
+                ],),
+                Row(children: [
+                  const Text('Ver Todos',style: TextStyle(color: Colors.blue,fontWeight: FontWeight.bold, fontSize: 17),),
+                ],),
+              ],),
               const SizedBox(
                 height: 20,
               ),
@@ -110,54 +117,79 @@ class _HomePageState extends State<HomePage> {
                 child: Row(
                   children: [
                     ClipRRect(
-                      borderRadius: BorderRadius.circular(20), // Aplique o arredondamento aqui
+                      borderRadius: BorderRadius.circular(20),
                       child: Container(
                         width: 170,
                         height: 50,
-                        color: Colors.green, // Cor de fundo
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                              color: Colors.green, width: 1.5), // Borda verde
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Colors.black12,
+                              blurRadius: 6,
+                              offset: Offset(0, 3),
+                            ),
+                          ],
+                        ),
                         child: ListTile(
-                          leading: const Icon(Icons.alarm,color: Colors.white,),
-                          title: const Text('Categoria 1',style: TextStyle(color: Colors.white),),
+                          leading: const Icon(Icons.alarm, color: Colors.black),
+                          title: const Text('Categoria 1',
+                              style: TextStyle(color: Colors.black)),
                         ),
                       ),
                     ),
                     SizedBox(width: 10,),
                     ClipRRect(
-                      borderRadius: BorderRadius.circular(
-                          20), // Aplique o arredondamento aqui
+                      borderRadius: BorderRadius.circular(20),
                       child: Container(
                         width: 170,
                         height: 50,
-                        color: Colors.green, // Cor de fundo
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                              color: Colors.green, width: 1.5), // Borda verde
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Colors.black12,
+                              blurRadius: 6,
+                              offset: Offset(0, 3),
+                            ),
+                          ],
+                        ),
                         child: ListTile(
-                          leading: const Icon(
-                            Icons.alarm,
-                            color: Colors.white,
-                          ),
-                          title: const Text(
-                            'Categoria 1',
-                            style: TextStyle(color: Colors.white),
-                          ),
+                          leading: const Icon(Icons.alarm, color: Colors.black),
+                          title: const Text('Categoria 1',
+                              style: TextStyle(color: Colors.black)),
                         ),
                       ),
                     ),
                     SizedBox(width: 10),
                     ClipRRect(
-                      borderRadius: BorderRadius.circular(
-                          20), // Aplique o arredondamento aqui
+                      borderRadius: BorderRadius.circular(20),
                       child: Container(
                         width: 170,
                         height: 50,
-                        color: Colors.green, // Cor de fundo
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                              color: Colors.green, width: 1.5), // Borda verde
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Colors.black12,
+                              blurRadius: 6,
+                              offset: Offset(0, 3),
+                            ),
+                          ],
+                        ),
                         child: ListTile(
-                          leading: const Icon(
-                            Icons.alarm,
-                            color: Colors.white,
-                          ),
-                          title: const Text(
-                            'Categoria 1',
-                            style: TextStyle(color: Colors.white),
-                          ),
+                          leading: const Icon(Icons.alarm, color: Colors.black),
+                          title: const Text('Categoria 1',
+                              style: TextStyle(color: Colors.black)),
                         ),
                       ),
                     ),
@@ -190,11 +222,12 @@ class _HomePageState extends State<HomePage> {
                     ),
                     child: Column(
                       children: [
+                        SizedBox(height: 10,),
                         ClipRRect(
                           borderRadius: BorderRadius.circular(20),
                           child: Image.asset(
                             products[index]['image']!,
-                            width: 150,
+                            width: 190,
                             height: 150,
                             fit: BoxFit.cover,
                           ),
@@ -204,12 +237,15 @@ class _HomePageState extends State<HomePage> {
                           products[index]['name']!,
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
-                        Spacer(),
+                        SizedBox(
+                          height: 20,
+                        ),
                         ElevatedButton(
                           onPressed: () {
                             // Ação do botão "Add to Cart"
                           },
-                          child: Text('Add to Cart'),
+                          // ignore: sort_child_properties_last
+                          child: const Text('Add to Cart'),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.green,
                             foregroundColor: Colors.white,
@@ -218,7 +254,6 @@ class _HomePageState extends State<HomePage> {
                             ),
                           ),
                         ),
-                        SizedBox(height: 20,),
                       ],
                     ),
                   );
