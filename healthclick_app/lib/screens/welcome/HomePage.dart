@@ -1,40 +1,30 @@
-// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
-
 import 'package:flutter/material.dart';
 import 'package:getwidget/getwidget.dart';
+import 'package:healthclick_app/screens/layouts/AppBottom.dart';
+import 'package:healthclick_app/screens/product/Product.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();
-
 }
 
-final List<String> imageList = [
-  "assets/background.jpg",
-  "assets/back1.jpg",
-  "assets/back2.jpg",
-  "assets/back3.jpg",
-];
+class _HomePageState extends State<HomePage> {
+  int _currentIndex = 0;
 
-final List<Map<String, String>> products = [
-  {
-    "image": "assets/back1.jpg",
-    "name": "Produto 1",
-  },
-  {
-    "image": "assets/back1.jpg",
-    "name": "Produto 2",
-  },
-  {
-    "image": "assets/back1.jpg",
-    "name": "Produto 3",
-  },
-  // Adicione mais produtos conforme necessário
-];
+  final List<String> imageList = [
+    "assets/background.jpg",
+    "assets/back1.jpg",
+    "assets/back2.jpg",
+    "assets/back3.jpg",
+  ];
 
-int _currentIndex = 0;
+  final List<Map<String, String>> products = [
+    {"image": "assets/back1.jpg", "name": "Produto 1"},
+    {"image": "assets/back1.jpg", "name": "Produto 2"},
+    {"image": "assets/back1.jpg", "name": "Produto 3"},
+  ];
 
   final List<Widget> _screens = [
     Center(child: Text("Início")),
@@ -44,59 +34,64 @@ int _currentIndex = 0;
     Center(child: Text("Perfil")),
   ];
 
+  void _onTap(int index) {
+    setState(() {
+      _currentIndex = index;
+    });
+  }
 
-class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SingleChildScrollView(
-        child: Padding(padding: const EdgeInsets.all(16.0),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // User Greeting Section
               const ListTile(
                 leading: CircleAvatar(
-                  radius: 25, // Adjust size
-                  backgroundImage: AssetImage(
-                      "assets/dif.jpg"), 
+                  radius: 25,
+                  backgroundImage: AssetImage("assets/dif.jpg"),
                 ),
                 title: Text(
-                  "Ola Mauro Peniel",
-                  style: TextStyle(fontSize: 15), 
+                  "Olá Mauro Peniel",
+                  style: TextStyle(fontSize: 15),
                 ),
-                subtitle: Text("O que voce deseja ?",
-                  style: TextStyle(fontWeight: FontWeight.bold,fontSize: 17),
+                subtitle: Text(
+                  "O que você deseja?",
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
                 ),
-                trailing:
-                    Icon(Icons.alarm),
+                trailing: Icon(Icons.alarm),
               ),
-              const SizedBox(height: 30,),
+              const SizedBox(height: 30),
+
+              // Search Section
               const TextField(
                 decoration: InputDecoration(
                   border: OutlineInputBorder(),
-                  hintText: 'Pesquisar o Producto',
+                  hintText: 'Pesquisar o Produto',
                   prefixIcon: Icon(Icons.search),
                 ),
               ),
-              const SizedBox(
-                height: 30,
-              ),
-              //?Image Section
-               GFCarousel(
-                autoPlay: true, // Enable auto play
-                autoPlayInterval:
-                    Duration(seconds: 3), // Interval for auto play
+              const SizedBox(height: 30),
+
+              // Image Carousel
+              GFCarousel(
+                autoPlay: true,
+                autoPlayInterval: Duration(seconds: 3),
                 items: imageList.map(
                   (url) {
                     return Container(
-                      width: 500, // Set width of image
-                      height: 250, // Set height of image
+                      width: 500,
+                      height: 250,
                       margin: EdgeInsets.all(8.0),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(20),
                         child: Image.asset(
-                          url, // Use Image.asset for local images
+                          url,
                           fit: BoxFit.cover,
                         ),
                       ),
@@ -105,142 +100,96 @@ class _HomePageState extends State<HomePage> {
                 ).toList(),
                 onPageChanged: (index) {
                   setState(() {
-                    index;
+                    // Use this if you want to handle page changes
                   });
                 },
               ),
-              const SizedBox(height: 50,),
-              Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,children: [
-                Row(children: [
-                  const Text('Categorias',style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),),
-                ],),
-              ],),
-              const SizedBox(
-                height: 20,
-              ),
-              //?Cards Carousel
-              SingleChildScrollView(
-                scrollDirection:
-                    Axis.horizontal, // Habilita o scroll horizontal
-                child: Row(
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(20),
-                      child: Container(
-                        width: 170,
-                        height: 50,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                              color: Colors.green, width: 1.5), // Borda verde
-                          boxShadow: const [
-                            BoxShadow(
-                              color: Colors.black12,
-                              blurRadius: 6,
-                              offset: Offset(0, 3),
-                            ),
-                          ],
-                        ),
-                        child: ListTile(
-                          leading: const Icon(Icons.alarm, color: Colors.black),
-                          title: const Text('Categoria 1',
-                              style: TextStyle(color: Colors.black)),
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: 10,),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(20),
-                      child: Container(
-                        width: 170,
-                        height: 50,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                              color: Colors.green, width: 1.5), // Borda verde
-                          boxShadow: const [
-                            BoxShadow(
-                              color: Colors.black12,
-                              blurRadius: 6,
-                              offset: Offset(0, 3),
-                            ),
-                          ],
-                        ),
-                        child: ListTile(
-                          leading: const Icon(Icons.alarm, color: Colors.black),
-                          title: const Text('Categoria 1',
-                              style: TextStyle(color: Colors.black)),
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: 10),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(20),
-                      child: Container(
-                        width: 170,
-                        height: 50,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                              color: Colors.green, width: 1.5), // Borda verde
-                          boxShadow: const [
-                            BoxShadow(
-                              color: Colors.black12,
-                              blurRadius: 6,
-                              offset: Offset(0, 3),
-                            ),
-                          ],
-                        ),
-                        child: ListTile(
-                          leading: const Icon(Icons.alarm, color: Colors.black),
-                          title: const Text('Categoria 1',
-                              style: TextStyle(color: Colors.black)),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height:30),
-              //?Card of Products
+              const SizedBox(height: 50),
+
+              // Categories Section
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    children: [
-                      const Text(
-                        'Productos',
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 17),
+                  const Text('Categorias',
+                      style:
+                          TextStyle(fontWeight: FontWeight.bold, fontSize: 17)),
+                ],
+              ),
+              const SizedBox(height: 20),
+
+              // Category Cards Section
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: List.generate(3, (index) {
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 10),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(20),
+                        child: Container(
+                          width: 170,
+                          height: 50,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: Colors.green, width: 1.5),
+                            boxShadow: const [
+                              BoxShadow(
+                                  color: Colors.black12,
+                                  blurRadius: 6,
+                                  offset: Offset(0, 3)),
+                            ],
+                          ),
+                          child: ListTile(
+                            leading:
+                                const Icon(Icons.alarm, color: Colors.black),
+                            title: Text('Categoria ${index + 1}',
+                                style: TextStyle(color: Colors.black)),
+                          ),
+                        ),
                       ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      const Text(
-                        'Ver Todos',
-                        style: TextStyle(
-                            color: Colors.blue,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 17),
-                      ),
-                    ],
+                    );
+                  }),
+                ),
+              ),
+
+              SizedBox(height: 30),
+
+              // Products Section
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Produtos',
+                      style:
+                          TextStyle(fontWeight: FontWeight.bold, fontSize: 17)),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => Product()),
+                      );
+                    },
+                    child: const Text(
+                      'Ver Todos',
+                      style: TextStyle(
+                          color: Colors.blue,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 17),
+                    ),
                   ),
                 ],
               ),
               const SizedBox(height: 20),
-              // Product Cards Grid
+
+              // Product Grid
               GridView.builder(
                 shrinkWrap: true,
                 physics: NeverScrollableScrollPhysics(),
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2, // 2 columns for product cards
+                  crossAxisCount: 2,
                   crossAxisSpacing: 10,
                   mainAxisSpacing: 10,
-                  childAspectRatio: 0.75, // Adjust aspect ratio as needed
+                  childAspectRatio: 0.75,
                 ),
                 itemCount: products.length,
                 itemBuilder: (context, index) {
@@ -251,7 +200,7 @@ class _HomePageState extends State<HomePage> {
                     ),
                     child: Column(
                       children: [
-                        SizedBox(height: 10,),
+                        SizedBox(height: 10),
                         ClipRRect(
                           borderRadius: BorderRadius.circular(20),
                           child: Image.asset(
@@ -266,15 +215,12 @@ class _HomePageState extends State<HomePage> {
                           products[index]['name']!,
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
-                        SizedBox(
-                          height: 20,
-                        ),
+                        SizedBox(height: 20),
                         ElevatedButton(
                           onPressed: () {
-                            // Ação do botão "Add to Cart"
+                            // Implement the action for "Add to Cart" button
                           },
-                          // ignore: sort_child_properties_last
-                          child: const Text('Add to Cart'),
+                          child: const Text('Adicionar ao Carrinho'),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.green,
                             foregroundColor: Colors.white,
@@ -289,37 +235,12 @@ class _HomePageState extends State<HomePage> {
                 },
               ),
             ],
-          ),        
+          ),
         ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
+      bottomNavigationBar: AppBottomNav(
         currentIndex: _currentIndex,
-        onTap: (index) => setState(() => _currentIndex = index),
-        selectedItemColor: Colors.green,
-        unselectedItemColor: Colors.grey,
-        type: BottomNavigationBarType.fixed,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Início',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_cart),
-            label: 'Cart',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.medical_services),
-            label: 'Medicamentos',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.local_hospital),
-            label: 'Farmácias',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Perfil',
-          ),
-        ],
+        onTap: _onTap,
       ),
     );
   }
