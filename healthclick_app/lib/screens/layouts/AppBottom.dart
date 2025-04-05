@@ -25,15 +25,15 @@ class _AppBottomNavState extends State<AppBottomNav> {
   Widget build(BuildContext context) {
     return BottomNavigationBar(
       currentIndex:
-          widget.currentIndex, // Usando o currentIndex passado como parâmetro
+          widget.currentIndex, 
       onTap: (index) {
         widget.onTap(
-            index); // Atualiza o índice atual e navega para a página correspondente
+            index); 
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
               builder: (context) =>
-                  _screens[index]), // Redireciona para a página selecionada
+                  _screens[index]), 
         );
       },
       selectedItemColor: Colors.green,
@@ -43,10 +43,6 @@ class _AppBottomNavState extends State<AppBottomNav> {
         BottomNavigationBarItem(
           icon: Icon(Icons.home),
           label: 'Início',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.shopping_cart),
-          label: 'Carrinho',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.medical_services),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:getwidget/getwidget.dart';
 import 'package:healthclick_app/screens/layouts/AppBottom.dart';
 import 'package:healthclick_app/screens/product/Product.dart';
+import 'package:healthclick_app/screens/product/ProductDetails.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -64,7 +65,7 @@ class _HomePageState extends State<HomePage> {
                   "O que você deseja?",
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
                 ),
-                trailing: Icon(Icons.alarm),
+                trailing: Icon(Icons.shopping_cart)
               ),
               const SizedBox(height: 30),
 
@@ -193,71 +194,78 @@ class _HomePageState extends State<HomePage> {
                 ),
                 itemCount: products.length,
                 itemBuilder: (context, index) {
-                  return Card(
-                    elevation: 2, // Menor elevação para o cartão
-                    shape: RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.circular(12), // Menor raio para borda
-                    ),
-                    child: Column(
-                      children: [
-                        const ListTile(
-                          leading: Text(
-                            'Categoria',
-                            style: TextStyle(fontSize: 13),
-                          ),
-                        ),
-                        // const SizedBox(height: 20), // Menor espaço acima da imagem
-                       ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
-                          child: Image.asset(
-                            products[index]['image']!,
-                            width: 189, // Menor largura da imagem
-                            height: 120, // Menor altura da imagem
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                        const SizedBox(
-                            height: 6), // Menor espaço entre imagem e texto
-                        ListTile(
-                          leading: Text(
-                          products[index]['name']!,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize:
-                                15, // Tamanho menor da fonte do nome do produto
-                          ),
-                          textAlign: TextAlign.center, // Texto centralizado
-                        ),
-                        ),
-                        // const SizedBox(
-                        //     height:
-                        //         8), 
-                        const Divider(
-                          thickness: 2,
-                          indent: 20,   
-                          endIndent: 20,
-                        ),
-                        ListTile(
-                          leading: const Text('100MZN',style: TextStyle(fontSize: 14,color: Colors.blue),),
-                          trailing: ElevatedButton(
-                          onPressed: () {
-                          },
-                          child: const Icon(Icons.add),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.green,
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(
-                                  100), 
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const ProductDetails()),
+                      );
+                    },
+                    child: Card(
+                      elevation: 2, // Menor elevação para o cartão
+                      shape: RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius.circular(12), // Menor raio para borda
+                      ),
+                      child: Column(
+                        children: [
+                          const ListTile(
+                            leading: Text(
+                              'Categoria',
+                              style: TextStyle(fontSize: 13),
                             ),
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 6,
-                                horizontal: 12),
                           ),
-                        ),
-                        ),
-                      ],
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Image.asset(
+                              products[index]['image']!,
+                              width: 189, // Menor largura da imagem
+                              height: 120, // Menor altura da imagem
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                          const SizedBox(
+                            height: 6, // Menor espaço entre imagem e texto
+                          ),
+                          ListTile(
+                            leading: Text(
+                              products[index]['name']!,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize:
+                                    15, // Tamanho menor da fonte do nome do produto
+                              ),
+                              textAlign: TextAlign.center, // Texto centralizado
+                            ),
+                          ),
+                          const Divider(
+                            thickness: 2,
+                            indent: 20,
+                            endIndent: 20,
+                          ),
+                          ListTile(
+                            leading: const Text('100MZN',
+                                style: TextStyle(
+                                    fontSize: 14, color: Colors.blue)),
+                            trailing: ElevatedButton(
+                              onPressed: () {
+                                // Ação do botão
+                              },
+                              child: const Icon(Icons.add),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.green,
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(100),
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 6, horizontal: 12),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   );
                 },
@@ -270,6 +278,12 @@ class _HomePageState extends State<HomePage> {
         currentIndex: _currentIndex,
         onTap: _onTap,
       ),
+      floatingActionButton:
+          FloatingActionButton(
+            backgroundColor: Colors.green,
+            child: const Icon(Icons.shopping_cart,color: Colors.white,)
+            ,onPressed: () {}
+          ),
     );
   }
 }
