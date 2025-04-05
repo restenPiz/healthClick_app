@@ -76,6 +76,14 @@ final List<Map<String, String>> products = [
               const SizedBox(
                 height: 20,
               ),
+              const TextField(
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(),
+                  hintText: 'Pesquisar o Produto',
+                  prefixIcon: Icon(Icons.search),
+                ),
+              ),
+              const SizedBox(height: 20),
               //?Cards of products
               GridView.builder(
                 shrinkWrap: true,
@@ -114,7 +122,7 @@ final List<Map<String, String>> products = [
                           ),
                         ),
                         const SizedBox(
-                            height: 6), // Menor espaço entre imagem e texto
+                            height: 6), // https://web.facebook.com/share/p/1FqAvEhNqi/
                         ListTile(
                           leading: Text(
                             products[index]['name']!,
