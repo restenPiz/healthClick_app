@@ -107,10 +107,10 @@ class _HomePageState extends State<HomePage> {
               const SizedBox(height: 50),
 
               // Categories Section
-              Row(
+              const Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Categorias',
+                  Text('Categorias',
                       style:
                           TextStyle(fontWeight: FontWeight.bold, fontSize: 17)),
                 ],
@@ -144,7 +144,7 @@ class _HomePageState extends State<HomePage> {
                             leading:
                                 const Icon(Icons.alarm, color: Colors.black),
                             title: Text('Categoria ${index + 1}',
-                                style: TextStyle(color: Colors.black)),
+                                style: const TextStyle(color: Colors.black)),
                           ),
                         ),
                       ),
@@ -153,7 +153,7 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
 
-              SizedBox(height: 30),
+              const SizedBox(height: 30),
 
               // Products Section
               Row(
@@ -186,47 +186,61 @@ class _HomePageState extends State<HomePage> {
                 shrinkWrap: true,
                 physics: NeverScrollableScrollPhysics(),
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 10,
-                  mainAxisSpacing: 10,
-                  childAspectRatio: 0.75,
+                  crossAxisCount: 2, // Duas colunas
+                  crossAxisSpacing: 8, // Espaço entre as colunas
+                  mainAxisSpacing: 8, // Espaço entre as linhas
+                  childAspectRatio:
+                      1, // Ajuste o childAspectRatio para reduzir a altura
                 ),
                 itemCount: products.length,
                 itemBuilder: (context, index) {
                   return Card(
-                    elevation: 4,
+                    elevation: 2, // Menor elevação para o cartão
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius:
+                          BorderRadius.circular(12), // Menor raio para borda
                     ),
                     child: Column(
                       children: [
-                        SizedBox(height: 10),
+                        SizedBox(height: 20), // Menor espaço acima da imagem
                         ClipRRect(
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius: BorderRadius.circular(12),
                           child: Image.asset(
                             products[index]['image']!,
-                            width: 190,
-                            height: 150,
+                            width: 140, // Menor largura da imagem
+                            height: 100, // Menor altura da imagem
                             fit: BoxFit.cover,
                           ),
                         ),
-                        const SizedBox(height: 10),
+                        SizedBox(
+                            height: 6), // Menor espaço entre imagem e texto
                         Text(
                           products[index]['name']!,
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize:
+                                17, // Tamanho menor da fonte do nome do produto
+                          ),
+                          textAlign: TextAlign.center, // Texto centralizado
                         ),
-                        SizedBox(height: 20),
+                        SizedBox(
+                            height:
+                                8), // Menor espaço entre o nome do produto e o botão
                         ElevatedButton(
                           onPressed: () {
-                            // Implement the action for "Add to Cart" button
+                            // Ação para o botão "Add to Cart"
                           },
-                          child: const Text('Adicionar ao Carrinho'),
+                          child: const Text('Add to Cart'),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.green,
                             foregroundColor: Colors.white,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
+                              borderRadius: BorderRadius.circular(
+                                  12), // Raio da borda do botão
                             ),
+                            padding: EdgeInsets.symmetric(
+                                vertical: 6,
+                                horizontal: 12), // Menor padding do botão
                           ),
                         ),
                       ],

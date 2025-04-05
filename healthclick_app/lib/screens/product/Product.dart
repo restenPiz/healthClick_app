@@ -81,52 +81,62 @@ final List<Map<String, String>> products = [
                 shrinkWrap: true,
                 physics: NeverScrollableScrollPhysics(),
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2, // 2 columns for product cards
-                  crossAxisSpacing: 10,
-                  mainAxisSpacing: 10,
-                  childAspectRatio: 0.75, // Adjust aspect ratio as needed
+                  crossAxisCount: 2, // Duas colunas
+                  crossAxisSpacing: 8, // Espaço entre as colunas
+                  mainAxisSpacing: 8, // Espaço entre as linhas
+                  childAspectRatio:
+                      1, // Ajuste o childAspectRatio para reduzir a altura
                 ),
                 itemCount: products.length,
                 itemBuilder: (context, index) {
                   return Card(
-                    elevation: 4,
+                    elevation: 2, // Menor elevação para o cartão
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius:
+                          BorderRadius.circular(12), // Menor raio para borda
                     ),
                     child: Column(
                       children: [
-                        SizedBox(
-                          height: 10,
-                        ),
+                        SizedBox(height: 20), // Menor espaço acima da imagem
                         ClipRRect(
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius: BorderRadius.circular(
+                              12), 
                           child: Image.asset(
                             products[index]['image']!,
-                            width: 190,
-                            height: 150,
+                            width: 140, // Menor largura da imagem
+                            height: 100, // Menor altura da imagem
                             fit: BoxFit.cover,
                           ),
                         ),
-                        const SizedBox(height: 10),
+                        SizedBox(
+                            height: 6), // Menor espaço entre imagem e texto
                         Text(
                           products[index]['name']!,
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize:
+                                17, // Tamanho menor da fonte do nome do produto
+                          ),
+                          textAlign: TextAlign.center, // Texto centralizado
                         ),
                         SizedBox(
-                          height: 20,
-                        ),
+                            height:
+                                8), // Menor espaço entre o nome do produto e o botão
                         ElevatedButton(
                           onPressed: () {
-                            // Ação do botão "Add to Cart"
+                            // Ação para o botão "Add to Cart"
                           },
-                          // ignore: sort_child_properties_last
                           child: const Text('Add to Cart'),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.green,
                             foregroundColor: Colors.white,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
+                              borderRadius: BorderRadius.circular(
+                                  12), // Raio da borda do botão
                             ),
+                            padding: EdgeInsets.symmetric(
+                                vertical: 6,
+                                horizontal: 12), // Menor padding do botão
                           ),
                         ),
                       ],
