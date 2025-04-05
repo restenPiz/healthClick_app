@@ -22,16 +22,16 @@ class _HomePageState extends State<HomePage> {
 
   final List<Map<String, String>> products = [
     {"image": "assets/back1.jpg", "name": "Produto 1"},
-    {"image": "assets/back1.jpg", "name": "Produto 2"},
-    {"image": "assets/back1.jpg", "name": "Produto 3"},
+    {"image": "assets/back3.jpg", "name": "Produto 2"},
+    {"image": "assets/back3.jpg", "name": "Produto 3"},
   ];
 
   final List<Widget> _screens = [
-    Center(child: Text("Início")),
-    Center(child: Text("Carrinho")),
-    Center(child: Text("Medicamentos")),
-    Center(child: Text("Farmácias")),
-    Center(child: Text("Perfil")),
+    const Center(child: Text("Início")),
+    const Center(child: Text("Carrinho")),
+    const Center(child: Text("Medicamentos")),
+    const Center(child: Text("Farmácias")),
+    const Center(child: Text("Perfil")),
   ];
 
   void _onTap(int index) {
@@ -81,13 +81,13 @@ class _HomePageState extends State<HomePage> {
               // Image Carousel
               GFCarousel(
                 autoPlay: true,
-                autoPlayInterval: Duration(seconds: 3),
+                autoPlayInterval: const Duration(seconds: 3),
                 items: imageList.map(
                   (url) {
                     return Container(
                       width: 500,
                       height: 250,
-                      margin: EdgeInsets.all(8.0),
+                      margin: const EdgeInsets.all(8.0),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(20),
                         child: Image.asset(
@@ -166,7 +166,7 @@ class _HomePageState extends State<HomePage> {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => Product()),
+                        MaterialPageRoute(builder: (context) => const Product()),
                       );
                     },
                     child: const Text(
@@ -180,17 +180,16 @@ class _HomePageState extends State<HomePage> {
                 ],
               ),
               const SizedBox(height: 20),
-
-              // Product Grid
+              //?Product section
               GridView.builder(
                 shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2, // Duas colunas
                   crossAxisSpacing: 8, // Espaço entre as colunas
                   mainAxisSpacing: 8, // Espaço entre as linhas
                   childAspectRatio:
-                      1, // Ajuste o childAspectRatio para reduzir a altura
+                      0.75, // Ajuste o childAspectRatio para reduzir a altura
                 ),
                 itemCount: products.length,
                 itemBuilder: (context, index) {
@@ -202,46 +201,61 @@ class _HomePageState extends State<HomePage> {
                     ),
                     child: Column(
                       children: [
-                        SizedBox(height: 20), // Menor espaço acima da imagem
-                        ClipRRect(
+                        const ListTile(
+                          leading: Text(
+                            'Categoria',
+                            style: TextStyle(fontSize: 13),
+                          ),
+                        ),
+                        // const SizedBox(height: 20), // Menor espaço acima da imagem
+                       ClipRRect(
                           borderRadius: BorderRadius.circular(12),
                           child: Image.asset(
                             products[index]['image']!,
-                            width: 140, // Menor largura da imagem
-                            height: 100, // Menor altura da imagem
+                            width: 189, // Menor largura da imagem
+                            height: 120, // Menor altura da imagem
                             fit: BoxFit.cover,
                           ),
                         ),
-                        SizedBox(
+                        const SizedBox(
                             height: 6), // Menor espaço entre imagem e texto
-                        Text(
+                        ListTile(
+                          leading: Text(
                           products[index]['name']!,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize:
-                                17, // Tamanho menor da fonte do nome do produto
+                                15, // Tamanho menor da fonte do nome do produto
                           ),
                           textAlign: TextAlign.center, // Texto centralizado
                         ),
-                        SizedBox(
-                            height:
-                                8), // Menor espaço entre o nome do produto e o botão
-                        ElevatedButton(
+                        ),
+                        // const SizedBox(
+                        //     height:
+                        //         8), 
+                        const Divider(
+                          thickness: 2,
+                          indent: 20,   
+                          endIndent: 20,
+                        ),
+                        ListTile(
+                          leading: const Text('100MZN',style: TextStyle(fontSize: 14,color: Colors.blue),),
+                          trailing: ElevatedButton(
                           onPressed: () {
-                            // Ação para o botão "Add to Cart"
                           },
-                          child: const Text('Add to Cart'),
+                          child: const Icon(Icons.add),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.green,
                             foregroundColor: Colors.white,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(
-                                  12), // Raio da borda do botão
+                                  100), 
                             ),
-                            padding: EdgeInsets.symmetric(
+                            padding: const EdgeInsets.symmetric(
                                 vertical: 6,
-                                horizontal: 12), // Menor padding do botão
+                                horizontal: 12),
                           ),
+                        ),
                         ),
                       ],
                     ),
