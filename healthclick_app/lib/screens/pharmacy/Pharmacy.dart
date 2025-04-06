@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:healthclick_app/screens/layouts/AppBottom.dart';
+import 'package:healthclick_app/screens/pharmacy/PharmacyDetails.dart';
 
 class Pharmacy extends StatefulWidget {
   const Pharmacy({super.key});
@@ -78,12 +79,11 @@ class _PharmacyState extends State<Pharmacy> {
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 10),
-              // Adicionando ListView com os dados das farmácias
               ListView.builder(
                 shrinkWrap:
-                    true, // Para garantir que a ListView não expanda além do necessário
+                    true,
                 physics:
-                    NeverScrollableScrollPhysics(), // Para desabilitar o scroll interno
+                    NeverScrollableScrollPhysics(), 
                 itemCount: pharmacies.length,
                 itemBuilder: (context, index) {
                   final pharmacy = pharmacies[index];
@@ -101,7 +101,11 @@ class _PharmacyState extends State<Pharmacy> {
                       subtitle: Text(pharmacy['address']!),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () {
-                        // Ação ao clicar na farmácia, por exemplo, abrir detalhes
+                       Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const PharmacyDetails()),
+                        );
                       },
                     ),
                   );
