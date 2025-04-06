@@ -15,7 +15,11 @@ class _PharmacyState extends State<Pharmacy> {
         child: Padding(
           padding: EdgeInsets.all(16.0),
           child: Column(
-            
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              //?Main content starts here
+            ],
           ),
         ),
       ),
