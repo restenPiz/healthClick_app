@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:healthclick_app/screens/layouts/AppBottom.dart';
 
 class Profile extends StatefulWidget {
   const Profile({super.key});
@@ -8,10 +9,17 @@ class Profile extends StatefulWidget {
 }
 
 class _ProfileState extends State<Profile> {
+  int _currentIndex = 3;
+
+  void _onTap(int index) {
+    setState(() {
+      _currentIndex = index;
+    });
+  }
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: SingleChildScrollView(
+    return Scaffold(
+      body: const SingleChildScrollView(
         child: Padding(
           padding: EdgeInsets.all(16.0),
           child: Column(
@@ -23,6 +31,10 @@ class _ProfileState extends State<Profile> {
             ],
           ),
         ),
+      ),
+      bottomNavigationBar: AppBottomNav(
+        currentIndex: _currentIndex,
+        onTap: _onTap,
       ),
     );
   }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:healthclick_app/screens/pharmacy/Pharmacy.dart';
 import 'package:healthclick_app/screens/product/Product.dart';
 import 'package:healthclick_app/screens/welcome/HomePage.dart';
+import 'package:healthclick_app/screens/profile/Profile.dart'; // Importe a tela de perfil
 
 class AppBottomNav extends StatefulWidget {
   final int currentIndex;
@@ -22,8 +23,9 @@ class _AppBottomNavState extends State<AppBottomNav> {
 
   final List<Widget> _screens = [
     const HomePage(),
-    const Product(), 
-    const Pharmacy(), 
+    const Product(),
+    const Pharmacy(),
+    const Profile(), // Adicionando a tela de perfil
   ];
 
   @override
@@ -59,10 +61,11 @@ class _AppBottomNavState extends State<AppBottomNav> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
-            label: 'Perfil',
+            label: 'Perfil', // Novo item
           ),
         ],
       ),
     );
   }
 }
+

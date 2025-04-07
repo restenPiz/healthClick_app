@@ -13,7 +13,7 @@ class Pharmacy extends StatefulWidget {
 
 class _PharmacyState extends State<Pharmacy> {
 
-   int _currentIndex = 0;
+   int _currentIndex = 2;
 
   void _onTap(int index) {
     setState(() {
