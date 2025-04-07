@@ -68,16 +68,16 @@ class _PharmacyDetailsState extends State<PharmacyDetails> {
           ),
         ),
       ),
-      bottomNavigationBar: AppBottomNav(
-        currentIndex: _currentIndex,
-        onTap: _onTap,
-      ),
+      // bottomNavigationBar: AppBottomNav(
+      //   currentIndex: _currentIndex,
+      //   onTap: _onTap,
+      // ),
       bottomSheet: GFBottomSheet(
         controller: _controller,
         maxContentHeight: 150,
         stickyHeaderHeight: 100,
         stickyHeader: Container(
-          decoration: BoxDecoration(color: Colors.white,
+          decoration: const BoxDecoration(color: Colors.white,
               boxShadow: [BoxShadow(color: Colors.black45, blurRadius: 0)]
           ),
           child: const GFListTile(
@@ -90,7 +90,7 @@ class _PharmacyDetailsState extends State<PharmacyDetails> {
         ),
         contentBody: Container(
           height: 200,
-          margin: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+          margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
           child: ListView(
             shrinkWrap: true,
             physics: const ScrollPhysics(),
@@ -106,7 +106,7 @@ class _PharmacyDetailsState extends State<PharmacyDetails> {
         ),
         stickyFooter: Container(
           color: GFColors.SUCCESS,
-          child: Row(
+          child: const Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               Text(
@@ -127,7 +127,7 @@ class _PharmacyDetailsState extends State<PharmacyDetails> {
       ),
       floatingActionButton: FloatingActionButton(
           backgroundColor: GFColors.SUCCESS,
-          child: _controller.isBottomSheetOpened ? Icon(Icons.keyboard_arrow_down):Icon(Icons.keyboard_arrow_up),
+          child: _controller.isBottomSheetOpened ? const Icon(Icons.keyboard_arrow_down):const Icon(Icons.keyboard_arrow_up),
           onPressed: () {
             _controller.isBottomSheetOpened
                 ? _controller.hideBottomSheet()
