@@ -17,52 +17,60 @@ class _ProductDetailsState extends State<ProductDetails> {
       _currentIndex = index;
     });
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SingleChildScrollView(
-        child: Padding(padding: const EdgeInsets.all(16.0),
-        child: Column(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const ListTile(
-                leading: CircleAvatar(
-                  radius: 25, // Adjust size
-                  backgroundImage: AssetImage("assets/dif.jpg"),
+              // ListTile modificada com o IconButton de voltar
+              ListTile(
+                leading: IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () {
+                    Navigator.pop(context); // Voltar para a tela anterior
+                  },
                 ),
-                title: Text(
+                title: const Text(
                   "Ola Mauro Peniel",
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
                 ),
-                trailing: Icon(Icons.shopping_cart),
+                trailing: const Icon(Icons.shopping_cart),
               ),
               const SizedBox(
                 height: 30,
               ),
               const Center(
-                child: Text('Detalhes do Producto',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+                child: Text('Detalhes do Produto',
+                    style:
+                        TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
               ),
-              const SizedBox(height: 30,),
+              const SizedBox(height: 30),
               Container(
                 width: 500,
                 height: 400,
                 margin: const EdgeInsets.all(8.0),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(20),
-                  child: Image.asset('assets/back3.jpg',
+                  child: Image.asset(
+                    'assets/back3.jpg',
                     fit: BoxFit.cover,
                   ),
                 ),
-              ),  
+              ),
               const SizedBox(
                 height: 20,
               ),
               ListTile(
-                leading: const Text('Paracetamol',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 19,)),
+                leading: const Text(
+                  'Paracetamol',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 19),
+                ),
                 trailing: ClipRRect(
                   borderRadius: BorderRadius.circular(20),
                   child: Container(
@@ -70,24 +78,32 @@ class _ProductDetailsState extends State<ProductDetails> {
                     height: 24,
                     color: Colors.blue,
                     child: const Center(
-                      child: Text('Categoria',style: TextStyle(color: Colors.white,fontSize: 15),),
-                    ),
+                      child: Text(
+                        'Categoria',
+                        style: TextStyle(color: Colors.white, fontSize: 15),
+                      ),
                     ),
                   ),
+                ),
               ),
               const SizedBox(
                 height: 10,
               ),
-              const Text('Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrys standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged.',textAlign: TextAlign.justify),
+              const Text(
+                'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrys standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged.',
+                textAlign: TextAlign.justify,
+              ),
               const SizedBox(
                 height: 10,
               ),
               const ListTile(
-                leading: Text('100MT',
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20,
-                        color: Colors.blue)),
+                leading: Text(
+                  '100MT',
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
+                      color: Colors.blue),
+                ),
               ),
               const SizedBox(
                 height: 10,
@@ -115,17 +131,6 @@ class _ProductDetailsState extends State<ProductDetails> {
           ),
         ),
       ),
-      bottomNavigationBar: AppBottomNav(
-        currentIndex: _currentIndex,
-        onTap: _onTap,
-      ),
-      // floatingActionButton: FloatingActionButton(
-      //     backgroundColor: Colors.green,
-      //     child: const Icon(
-      //       Icons.shopping_cart,
-      //       color: Colors.white,
-      //     ),
-      //     onPressed: () {}),
     );
   }
 }

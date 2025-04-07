@@ -43,16 +43,18 @@ class _PharmacyDetailsState extends State<PharmacyDetails> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               //?Main Content
-              const ListTile(
-                leading: CircleAvatar(
-                  radius: 25,
-                  backgroundImage: AssetImage("assets/dif.jpg"),
+              ListTile(
+                leading: IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () {
+                    Navigator.pop(context); // Voltar para a tela anterior
+                  },
                 ),
-                title: Text(
-                  "Olá Mauro Peniel",
+                title: const Text(
+                  "Ola Mauro Peniel",
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
                 ),
-                trailing: Icon(Icons.shopping_cart),
+                trailing: const Icon(Icons.shopping_cart),
               ),
               const SizedBox(height: 30),
               Center(
