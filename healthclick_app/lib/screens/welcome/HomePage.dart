@@ -27,14 +27,6 @@ class _HomePageState extends State<HomePage> {
     {"image": "assets/back3.jpg", "name": "Produto 3"},
   ];
 
-  final List<Widget> _screens = [
-    const Center(child: Text("Início")),
-    const Center(child: Text("Carrinho")),
-    const Center(child: Text("Medicamentos")),
-    const Center(child: Text("Farmácias")),
-    const Center(child: Text("Perfil")),
-  ];
-
   void _onTap(int index) {
     setState(() {
       _currentIndex = index;
