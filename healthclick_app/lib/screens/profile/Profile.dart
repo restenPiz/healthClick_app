@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:healthclick_app/screens/auth/Login.dart';
 import 'package:healthclick_app/screens/layouts/AppBottom.dart';
 
 class Profile extends StatefulWidget {
@@ -94,11 +95,14 @@ class _ProfileState extends State<Profile> {
                 width: double.infinity, // ✅ Makes button full width
                 child: ElevatedButton(
                   onPressed: () {
-                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const Login()),
+                    );
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: Colors.black,
+                    backgroundColor: Colors.red,
+                    foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 20),
                   ),
                   child: const Text(
