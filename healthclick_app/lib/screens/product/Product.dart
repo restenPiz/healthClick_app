@@ -68,7 +68,6 @@ final List<Map<String, String>> products = [
                   "Ola Mauro Peniel",
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
                 ),
-                trailing: Icon(Icons.shopping_cart),
               ),
               const SizedBox(height: 30,),
               const Text('Todos Productos',
@@ -77,11 +76,25 @@ final List<Map<String, String>> products = [
               const SizedBox(
                 height: 20,
               ),
-              const TextField(
+              TextField(
                 decoration: InputDecoration(
-                  border: OutlineInputBorder(),
+                  border: OutlineInputBorder(
+                    borderRadius:
+                        BorderRadius.circular(30), // Aumenta o arredondamento
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    borderSide: BorderSide(
+                        color:
+                            Colors.grey), // Cor da borda quando não está focado
+                  ),
+                  focusedBorder:OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    borderSide:
+                        BorderSide(color: Colors.blue), // Cor da borda ao focar
+                  ),
                   hintText: 'Pesquisar o Produto',
-                  prefixIcon: Icon(Icons.search),
+                  prefixIcon: const Icon(Icons.search),
                 ),
               ),
               const SizedBox(height: 20),

@@ -65,19 +65,47 @@ class _ProfileEditState extends State<ProfileEdit> {
                 endIndent: 20,
               ),
               const SizedBox(height: 30),
-              const TextField(
+              TextField(
                 decoration: InputDecoration(
-                  border: OutlineInputBorder(),
+                  border: OutlineInputBorder(
+                    borderRadius:
+                        BorderRadius.circular(30), // Aumenta o arredondamento
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    borderSide: const BorderSide(
+                        color:
+                            Colors.grey), // Cor da borda quando não está focado
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    borderSide:
+                        const BorderSide(color: Colors.blue), // Cor da borda ao focar
+                  ),
                   hintText: 'Escreva o seu nome',
-                  prefixIcon: Icon(Icons.person_2),
+                  prefixIcon: const Icon(Icons.person_2),
                 ),
               ),
               const SizedBox(height: 15,),
-              const TextField(
+              TextField(
                 decoration: InputDecoration(
-                  border: OutlineInputBorder(),
+                  border: OutlineInputBorder(
+                    borderRadius:
+                        BorderRadius.circular(30), // Aumenta o arredondamento
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    borderSide: const BorderSide(
+                        color:
+                            Colors.grey), // Cor da borda quando não está focado
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    borderSide:
+                        const BorderSide(color: Colors.blue), // Cor da borda ao focar
+                  ),
                   hintText: 'Escreva o seu nome',
-                  prefixIcon: Icon(Icons.email),
+                  prefixIcon: const Icon(Icons.email),
                 ),
               ),
               const SizedBox(height: 20,),

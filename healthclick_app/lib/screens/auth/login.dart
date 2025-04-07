@@ -44,7 +44,21 @@ class _LoginState extends State<Login> {
               //? Input Field
               TextField(
                 decoration: InputDecoration(
-                  border: OutlineInputBorder(),
+                  border: OutlineInputBorder(
+                    borderRadius:
+                        BorderRadius.circular(30), // Aumenta o arredondamento
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    borderSide: BorderSide(
+                        color:
+                            Colors.grey), // Cor da borda quando não está focado
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    borderSide:
+                        BorderSide(color: Colors.blue), // Cor da borda ao focar
+                  ),
                   hintText: 'Enter your email',
                   prefixIcon: Icon(Icons.email),
                 ),
@@ -53,11 +67,21 @@ class _LoginState extends State<Login> {
 
               //? Password Field
               TextField(
-                obscureText: true, // Hide password input
+                obscureText: true, // Esconde o texto (ideal para senhas)
                 decoration: InputDecoration(
-                  border: OutlineInputBorder(),
                   hintText: 'Enter your password',
                   prefixIcon: Icon(Icons.lock),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30), // Aumenta o arredondamento
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    borderSide: BorderSide(color: Colors.grey), // Cor da borda quando não está focado
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    borderSide: BorderSide(color: Colors.blue), // Cor da borda ao focar
+                  ),
                 ),
               ),
               const SizedBox(height: 20),

@@ -40,7 +40,6 @@ class _ProductDetailsState extends State<ProductDetails> {
                   "Ola Mauro Peniel",
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
                 ),
-                trailing: const Icon(Icons.shopping_cart),
               ),
               const SizedBox(
                 height: 30,

@@ -40,31 +40,73 @@ class _CreateAccountState extends State<CreateAccount> {
               const SizedBox(height: 10),
 
               //? Input Field
-              const TextField(
+              TextField(
                 decoration: InputDecoration(
-                  border: OutlineInputBorder(),
+                  border: OutlineInputBorder(
+                    borderRadius:
+                        BorderRadius.circular(30), // Aumenta o arredondamento
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    borderSide: const BorderSide(
+                        color:
+                            Colors.grey), // Cor da borda quando não está focado
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    borderSide:
+                        const BorderSide(color: Colors.blue), // Cor da borda ao focar
+                  ),
                   hintText: 'Your Email Address',
-                  prefixIcon: Icon(Icons.email),
+                  prefixIcon: const Icon(Icons.email),
                 ),
               ),
               const SizedBox(height: 20),
               //? Password Field
-              const TextField(
+              TextField(
                 obscureText: true, // Hide password input
                 decoration: InputDecoration(
-                  border: OutlineInputBorder(),
+                 border: OutlineInputBorder(
+                    borderRadius:
+                        BorderRadius.circular(30), // Aumenta o arredondamento
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    borderSide: const BorderSide(
+                        color:
+                            Colors.grey), // Cor da borda quando não está focado
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    borderSide:
+                        const BorderSide(color: Colors.blue), // Cor da borda ao focar
+                  ),
                   hintText: 'Your Password',
-                  prefixIcon: Icon(Icons.lock),
+                  prefixIcon: const Icon(Icons.lock),
                 ),
               ),
               const SizedBox(height: 20),
               //? Password Field
-              const TextField(
+              TextField(
                 obscureText: true, // Hide password input
                 decoration: InputDecoration(
-                  border: OutlineInputBorder(),
+                  border: OutlineInputBorder(
+                    borderRadius:
+                        BorderRadius.circular(30), // Aumenta o arredondamento
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    borderSide: const BorderSide(
+                        color:
+                            Colors.grey), // Cor da borda quando não está focado
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    borderSide:
+                        const BorderSide(color: Colors.blue), // Cor da borda ao focar
+                  ),
                   hintText: 'Your Password Confirmation',
-                  prefixIcon: Icon(Icons.lock),
+                  prefixIcon: const Icon(Icons.lock),
                 ),
               ),
               const SizedBox(height: 20),

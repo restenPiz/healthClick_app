@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:healthclick_app/models/CartProvider.dart';
-// import 'package:healthclick_app/screens/auth/Login.dart';
-import 'package:healthclick_app/screens/welcome/HomePage.dart';
+import 'package:healthclick_app/screens/auth/Login.dart';
+// import 'package:healthclick_app/screens/welcome/HomePage.dart';
 import 'package:provider/provider.dart';
 
 
@@ -26,7 +26,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.white),
         useMaterial3: true,
       ),
-      home: const HomePage(),
+      home: const Login(),
     );
   }
 }

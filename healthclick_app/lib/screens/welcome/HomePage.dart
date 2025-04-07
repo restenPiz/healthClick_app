@@ -60,15 +60,29 @@ class _HomePageState extends State<HomePage> {
                     "O que você deseja?",
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
                   ),
-                  trailing: Icon(Icons.shopping_cart)),
+                ),
               const SizedBox(height: 30),
 
               // Search Section
-              const TextField(
+              TextField(
                 decoration: InputDecoration(
-                  border: OutlineInputBorder(),
+                  border: OutlineInputBorder(
+                    borderRadius:
+                        BorderRadius.circular(30), // Aumenta o arredondamento
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    borderSide: const BorderSide(
+                        color:
+                            Colors.grey), // Cor da borda quando não está focado
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    borderSide:
+                        const BorderSide(color: Colors.blue), // Cor da borda ao focar
+                  ),
                   hintText: 'Pesquisar o Produto',
-                  prefixIcon: Icon(Icons.search),
+                  prefixIcon: const Icon(Icons.search),
                 ),
               ),
               const SizedBox(height: 30),
@@ -125,7 +139,7 @@ class _HomePageState extends State<HomePage> {
                           decoration: BoxDecoration(
                             color: const Color(0xFFEFF5F6),
                             borderRadius: BorderRadius.circular(20),
-                            // border: Border.all(color: Colors.green, width: 1.5),
+                            border: Border.all(color: Colors.green, width: 1.5),
                             boxShadow: const [
                               BoxShadow(
                                 color: Colors.black26, // sombra mais visível
@@ -198,10 +212,10 @@ class _HomePageState extends State<HomePage> {
                       );
                     },
                     child: Card(
-                      elevation: 2, // Menor elevação para o cartão
+                      elevation: 2, 
                       shape: RoundedRectangleBorder(
                         borderRadius:
-                            BorderRadius.circular(12), // Menor raio para borda
+                            BorderRadius.circular(12), 
                       ),
                       child: Column(
                         children: [

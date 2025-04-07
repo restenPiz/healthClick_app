@@ -29,9 +29,23 @@ class _ForgotPasswordState extends State<ForgotPassword> {
               const SizedBox(height: 15,),
               const Center(child: Text('Enter your email address to reset your password.'),),
               const SizedBox(height: 20,),
-              const TextField(
+              TextField(
                 decoration: InputDecoration(
-                  border: OutlineInputBorder(),
+                  border: OutlineInputBorder(
+                    borderRadius:
+                        BorderRadius.circular(30), // Aumenta o arredondamento
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    borderSide: BorderSide(
+                        color:
+                            Colors.grey), // Cor da borda quando não está focado
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    borderSide:
+                        BorderSide(color: Colors.blue), // Cor da borda ao focar
+                  ),
                   hintText: 'Enter your email',
                   prefixIcon: Icon(Icons.email),
                 ),
