@@ -20,8 +20,8 @@ class AppBottomNav extends StatefulWidget {
 
 class _AppBottomNavState extends State<AppBottomNav> {
   final List<Widget> _screens = [
-    const HomePage(), // Página "Início"
-    const Product(), // Página "Medicamentos"
+    const HomePage(), 
+    const Product(), 
     const Pharmacy(),
     const Profile(),
   ];
