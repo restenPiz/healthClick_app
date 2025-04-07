@@ -4,6 +4,7 @@ import 'package:healthclick_app/screens/pharmacy/Pharmacy.dart';
 import 'package:healthclick_app/screens/pharmacy/PharmacyDetails.dart';
 import 'package:healthclick_app/screens/product/Product.dart';
 import 'package:healthclick_app/screens/product/ProductDetails.dart';
+import 'package:healthclick_app/screens/profile/Profile.dart';
 import 'package:healthclick_app/screens/welcome/HomePage.dart';
 import 'package:healthclick_app/screens/welcome/OnBoarding.dart';
 import 'package:healthclick_app/screens/layouts/AppBottom.dart';
@@ -24,8 +25,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.white),
         useMaterial3: true,
       ),
-      home: const HomePage(),
-      // home: AppBottomNav(),
+      home: const Profile(),
     );
   }
 }
