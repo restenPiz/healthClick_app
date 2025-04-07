@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:healthclick_app/screens/auth/Login.dart';
 
 class ProfileEdit extends StatefulWidget {
   const ProfileEdit({super.key});
@@ -10,16 +11,96 @@ class ProfileEdit extends StatefulWidget {
 class _ProfileEditState extends State<ProfileEdit> {
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return Scaffold(
       body: SingleChildScrollView(
         child: Padding(
-          padding: EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(16.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               //?Main Content
-              
+              ListTile(
+                leading: IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () {
+                    Navigator.pop(context); // Voltar para a tela anterior
+                  },
+                ),
+                title:const Center(
+                    child: Text(
+                    "Editar Perfil",
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20,color: Colors.black),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 30),
+              const Center(
+                child: CircleAvatar(
+                  radius: 100,
+                  backgroundImage: AssetImage("assets/dif.jpg"),
+                ),
+              ),
+              const SizedBox(height: 20),
+              const Center(
+                child: Text(
+                  'Mauro Peniel',
+                  style: TextStyle(
+                      fontSize: 25,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black),
+                ),
+              ),
+              const SizedBox(height: 10),
+              const Center(
+                child: Text(
+                  'mauropeniel7@gmail.com',
+                  style: TextStyle(fontSize: 18),
+                ),
+              ),
+              const SizedBox(height: 30),
+              const Divider(
+                thickness: 2,
+                indent: 20,
+                endIndent: 20,
+              ),
+              const SizedBox(height: 30),
+              const TextField(
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(),
+                  hintText: 'Escreva o seu nome',
+                  prefixIcon: Icon(Icons.person_2),
+                ),
+              ),
+              const SizedBox(height: 15,),
+              const TextField(
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(),
+                  hintText: 'Escreva o seu nome',
+                  prefixIcon: Icon(Icons.email),
+                ),
+              ),
+              const SizedBox(height: 20,),
+              SizedBox(
+                width: double.infinity, // ✅ Makes button full width
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const Login()),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 20),
+                  ),
+                  child: const Text(
+                    'Actualizar os Dados',
+                    style: TextStyle(fontSize: 20),
+                  ),
+                ),
+              ),
             ],
           ),
         ),

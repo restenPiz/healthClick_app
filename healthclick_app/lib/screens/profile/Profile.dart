@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:healthclick_app/screens/auth/Login.dart';
 import 'package:healthclick_app/screens/layouts/AppBottom.dart';
+import 'package:healthclick_app/screens/profile/ProfileEdit.dart';
 
 class Profile extends StatefulWidget {
   const Profile({super.key});
@@ -59,7 +60,12 @@ class _ProfileState extends State<Profile> {
               ),
               const SizedBox(height: 10),
               GestureDetector(
-                onTap: (){},
+                onTap: (){
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const ProfileEdit()),
+                  );
+                },
                 child: const ListTile(
                   leading: Icon(Icons.person),
                   title: Text('Editar Perfil',style: TextStyle(fontSize: 18,color: Colors.black),),
