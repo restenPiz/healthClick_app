@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:healthclick_app/screens/auth/Login.dart';
-import 'package:healthclick_app/screens/pharmacy/Pharmacy.dart';
-import 'package:healthclick_app/screens/pharmacy/PharmacyDetails.dart';
-import 'package:healthclick_app/screens/product/Product.dart';
-import 'package:healthclick_app/screens/product/ProductDetails.dart';
-import 'package:healthclick_app/screens/profile/Profile.dart';
-import 'package:healthclick_app/screens/profile/ProfileEdit.dart';
+import 'package:healthclick_app/models/CartProvider.dart';
+// import 'package:healthclick_app/screens/auth/Login.dart';
 import 'package:healthclick_app/screens/welcome/HomePage.dart';
-import 'package:healthclick_app/screens/welcome/OnBoarding.dart';
-import 'package:healthclick_app/screens/layouts/AppBottom.dart';
+import 'package:provider/provider.dart';
+
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => CartProvider(),
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
