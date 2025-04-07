@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:getwidget/getwidget.dart';
-import 'package:healthclick_app/screens/layouts/AppBottom.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class PharmacyDetails extends StatefulWidget {
   const PharmacyDetails({super.key});
@@ -10,7 +10,7 @@ class PharmacyDetails extends StatefulWidget {
 }
 
 class _PharmacyDetailsState extends State<PharmacyDetails> {
-   int _currentIndex = 0;
+  int _currentIndex = 0;
 
   void _onTap(int index) {
     setState(() {
@@ -19,6 +19,18 @@ class _PharmacyDetailsState extends State<PharmacyDetails> {
   }
 
   final GFBottomSheetController _controller = GFBottomSheetController();
+  late GoogleMapController mapController; // Controlador do mapa
+  late CameraPosition _initialCameraPosition;
+
+  @override
+  void initState() {
+    super.initState();
+    // Definindo a posição inicial do mapa (exemplo com coordenadas de Maputo, Moçambique)
+    _initialCameraPosition = const CameraPosition(
+      target: LatLng(-25.968, 32.589), // Defina as coordenadas da farmácia
+      zoom: 14.0, // Nível de zoom
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +42,7 @@ class _PharmacyDetailsState extends State<PharmacyDetails> {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              //?Main Content 
+              //?Main Content
               const ListTile(
                 leading: CircleAvatar(
                   radius: 25,
@@ -55,85 +67,79 @@ class _PharmacyDetailsState extends State<PharmacyDetails> {
                       fit: BoxFit.cover,
                     ),
                   ),
-                ), 
+                ),
               ),
-              const SizedBox(height:30),
-              const Text('Farmacia Tuia',style: TextStyle(color: Colors.black, fontSize: 20,fontWeight:FontWeight.bold),),
-              const SizedBox(height:15),
+              const SizedBox(height: 30),
               const Text(
-                  'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrys standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.',
-                  textAlign: TextAlign.justify),
+                'Farmacia Tuia',
+                style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 15),
+              const Text(
+                'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrys standard dummy text ever since the 1500s.It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using.Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrys standard dummy text ever since the 1500s.It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using.',
+                textAlign: TextAlign.justify,
+              ),
               //?Start with the google Map
             ],
           ),
         ),
       ),
-      // bottomNavigationBar: AppBottomNav(
-      //   currentIndex: _currentIndex,
-      //   onTap: _onTap,
-      // ),
       bottomSheet: GFBottomSheet(
         controller: _controller,
-        maxContentHeight: 150,
+        maxContentHeight: 800, // Ajuste o valor para caber o mapa
         stickyHeaderHeight: 100,
         stickyHeader: Container(
-          decoration: const BoxDecoration(color: Colors.white,
-              boxShadow: [BoxShadow(color: Colors.black45, blurRadius: 0)]
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            boxShadow: [BoxShadow(color: Colors.black45, blurRadius: 0)],
           ),
           child: const GFListTile(
             avatar: GFAvatar(
-              backgroundImage: AssetImage('assets image here'),
+              backgroundImage: AssetImage('assets/image_here'),
             ),
-            titleText: 'GetWidget',
-            subTitleText: 'Open source UI library',
+            titleText: 'Farmácia Tuia',
+            subTitleText: 'Localização da Farmácia',
           ),
         ),
         contentBody: Container(
-          height: 200,
+          height: 300, // Tamanho do mapa no bottomSheet
           margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-          child: ListView(
-            shrinkWrap: true,
-            physics: const ScrollPhysics(),
-            children: const [
-              Center(
-                  child: Text(
-                    'Getwidget reduces your overall app development time to minimum 30% because of its pre-build clean UI widget that you can use in flutter app development. We have spent more than 1000+ hours to build this library to make flutter developer’s life easy.',
-                    style: TextStyle(
-                        fontSize: 15, wordSpacing: 0.3, letterSpacing: 0.2),
-                  ))
-            ],
+          child: GoogleMap(
+            initialCameraPosition: _initialCameraPosition,
+            onMapCreated: (GoogleMapController controller) {
+              mapController = controller;
+            },
+            markers: {
+              const Marker(
+                markerId: MarkerId('farmaciaMarker'),
+                position: LatLng(-25.968, 32.589), // Coordenadas da farmácia
+                infoWindow: InfoWindow(
+                  title: 'Farmácia Tuia',
+                  snippet: 'Descrição da farmácia',
+                ),
+              ),
+            },
+            mapType: MapType.normal,
+            zoomGesturesEnabled: true,
+            zoomControlsEnabled: true,
+            myLocationEnabled: true,
           ),
         ),
-        stickyFooter: Container(
-          color: GFColors.SUCCESS,
-          child: const Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Text(
-                'Get in touch',
-                style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white),
-              ),
-              Text(
-                'info@getwidget.dev',
-                style: TextStyle(fontSize: 15, color: Colors.white),
-              ),
-            ],
-          ),
-        ),
-        stickyFooterHeight: 50,
       ),
       floatingActionButton: FloatingActionButton(
-          backgroundColor: GFColors.SUCCESS,
-          child: _controller.isBottomSheetOpened ? const Icon(Icons.keyboard_arrow_down):const Icon(Icons.keyboard_arrow_up),
-          onPressed: () {
-            _controller.isBottomSheetOpened
-                ? _controller.hideBottomSheet()
-                : _controller.showBottomSheet();
-          }
-          ),
+        backgroundColor: GFColors.SUCCESS,
+        child: _controller.isBottomSheetOpened
+            ? const Icon(Icons.keyboard_arrow_down)
+            : const Icon(Icons.keyboard_arrow_up),
+        onPressed: () {
+          _controller.isBottomSheetOpened
+              ? _controller.hideBottomSheet()
+              : _controller.showBottomSheet();
+        },
+      ),
     );
   }
 }
