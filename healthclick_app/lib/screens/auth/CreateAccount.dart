@@ -2,6 +2,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:healthclick_app/screens/auth/Login.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:healthclick_app/screens/welcome/OnBoarding.dart';
 
 class CreateAccount extends StatefulWidget {
   const CreateAccount({super.key});
@@ -11,6 +14,41 @@ class CreateAccount extends StatefulWidget {
 }
 
 class _CreateAccountState extends State<CreateAccount> {
+  
+  //*Creating a attributes
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController confirmPasswordController = TextEditingController();
+
+  //*Metodo to allow the user to signInWithGoogle account
+  Future<void> signInWithGoogle() async {
+    try {
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      if (googleUser == null) return; // Cancelado
+
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      await FirebaseAuth.instance.signInWithCredential(credential);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Logged in with Google')),
+      );
+
+      // Navegar para home
+      // Navigator.pushReplacement(...);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Google login failed: $e')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     bool isChecked = false;
@@ -41,6 +79,7 @@ class _CreateAccountState extends State<CreateAccount> {
 
               //? Input Field
               TextField(
+                controller: emailController,
                 decoration: InputDecoration(
                   border: OutlineInputBorder(
                     borderRadius:
@@ -64,6 +103,7 @@ class _CreateAccountState extends State<CreateAccount> {
               const SizedBox(height: 20),
               //? Password Field
               TextField(
+                controller: passwordController,
                 obscureText: true, // Hide password input
                 decoration: InputDecoration(
                  border: OutlineInputBorder(
@@ -88,6 +128,7 @@ class _CreateAccountState extends State<CreateAccount> {
               const SizedBox(height: 20),
               //? Password Field
               TextField(
+                controller: confirmPasswordController,
                 obscureText: true, // Hide password input
                 decoration: InputDecoration(
                   border: OutlineInputBorder(
@@ -135,8 +176,55 @@ class _CreateAccountState extends State<CreateAccount> {
                     SizedBox(
                       width: double.infinity, // ✅ Makes button full width
                       child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.pop(context);
+                        onPressed: () async {
+                          if (passwordController.text != confirmPasswordController.text) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Passwords do not match')),
+                            );
+                            return;
+                          }
+
+                          try {
+                            // ignore: unused_local_variable
+                            final credential = await FirebaseAuth.instance
+                                .createUserWithEmailAndPassword(
+                              email: emailController.text.trim(),
+                              password: passwordController.text.trim(),
+                            );
+
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Account created successfully')),
+                            );
+
+                            // Aqui você pode redirecionar para a home ou tela de login
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(builder: (context) => const OnBoarding()),
+                            );
+                          } catch (e) {
+                            String errorMessage = 'An error occurred';
+                            if (e is FirebaseAuthException) {
+                              switch (e.code) {
+                                case 'email-already-in-use':
+                                  errorMessage = 'Este email já está em uso.';
+                                  break;
+                                case 'invalid-email':
+                                  errorMessage = 'Email inválido.';
+                                  break;
+                                case 'weak-password':
+                                  errorMessage = 'A senha é muito fraca.';
+                                  break;
+                                default:
+                                  errorMessage = 'Erro: ${e.message}';
+                              }
+                            } else {
+                              errorMessage = e.toString();
+                            }
+
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(errorMessage)),
+                            );
+                          }
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.green,
@@ -155,9 +243,7 @@ class _CreateAccountState extends State<CreateAccount> {
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
+                        onPressed: signInWithGoogle,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.white,
                           foregroundColor: Colors.black,
@@ -177,30 +263,6 @@ class _CreateAccountState extends State<CreateAccount> {
                               style: TextStyle(
                                   fontSize: 20, fontWeight: FontWeight.bold),
                             ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.black,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 20),
-                        ),
-                        child: const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.apple,
-                                size: 30, color: Colors.white), // Apple icon
-                            SizedBox(width: 10),
-                            Text('Continue with Apple',
-                                style: TextStyle(fontSize: 20)),
                           ],
                         ),
                       ),

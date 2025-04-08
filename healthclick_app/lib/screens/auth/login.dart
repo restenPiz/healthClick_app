@@ -288,29 +288,29 @@ class _LoginState extends State<Login> {
                       ),
                     ),
                     const SizedBox(height: 20),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.black,
-                          foregroundColor: Colors.white,
-                          padding: EdgeInsets.symmetric(vertical: 20),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: const [
-                            Icon(Icons.apple,
-                                size: 30, color: Colors.white), // Apple icon
-                            SizedBox(width: 10),
-                            Text('Continue with Apple',
-                                style: TextStyle(fontSize: 20)),
-                          ],
-                        ),
-                      ),
-                    ),
+                    // SizedBox(
+                    //   width: double.infinity,
+                    //   child: ElevatedButton(
+                    //     onPressed: () {
+                    //       Navigator.pop(context);
+                    //     },
+                    //     style: ElevatedButton.styleFrom(
+                    //       backgroundColor: Colors.black,
+                    //       foregroundColor: Colors.white,
+                    //       padding: EdgeInsets.symmetric(vertical: 20),
+                    //     ),
+                    //     child: Row(
+                    //       mainAxisAlignment: MainAxisAlignment.center,
+                    //       children: const [
+                    //         Icon(Icons.apple,
+                    //             size: 30, color: Colors.white), // Apple icon
+                    //         SizedBox(width: 10),
+                    //         Text('Continue with Apple',
+                    //             style: TextStyle(fontSize: 20)),
+                    //       ],
+                    //     ),
+                    //   ),
+                    // ),
                   ],
                 ),
               ),
