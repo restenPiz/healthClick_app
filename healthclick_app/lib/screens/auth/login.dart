@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:healthclick_app/screens/auth/CreateAccount.dart';
 import 'package:healthclick_app/screens/auth/ForgotPassword.dart';
 import 'package:healthclick_app/screens/welcome/OnBoarding.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -13,6 +14,49 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
+
+  //*Defining the input names 
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  bool isChecked = false;
+
+  //*Start with the methods to manage the responses and redirects of login
+  Future<void> _login() async {
+    try {
+      final email = emailController.text.trim();
+      final password = passwordController.text.trim();
+
+      if (email.isEmpty || password.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Please enter both email and password.")),
+        );
+        return;
+      }
+
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => OnBoarding()),
+      );
+    } on FirebaseAuthException catch (e) {
+      String message = 'Login failed.';
+
+      if (e.code == 'user-not-found') {
+        message = 'User not found.';
+      } else if (e.code == 'wrong-password') {
+        message = 'Incorrect password.';
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message)),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     bool isChecked = false; // Checkbox state
@@ -43,6 +87,7 @@ class _LoginState extends State<Login> {
 
               //? Input Field
               TextField(
+                controller: emailController,
                 decoration: InputDecoration(
                   border: OutlineInputBorder(
                     borderRadius:
@@ -67,6 +112,7 @@ class _LoginState extends State<Login> {
 
               //? Password Field
               TextField(
+                controller: passwordController,
                 obscureText: true, // Esconde o texto (ideal para senhas)
                 decoration: InputDecoration(
                   hintText: 'Enter your password',
@@ -148,14 +194,7 @@ class _LoginState extends State<Login> {
                     SizedBox(
                       width: double.infinity, // ✅ Makes button full width
                       child: ElevatedButton(
-                        onPressed: () {
-                          // Navigator.pop(context);
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => OnBoarding()),
-                          );
-                        },
+                        onPressed: _login,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.green,
                           foregroundColor: Colors.white,
