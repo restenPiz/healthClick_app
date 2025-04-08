@@ -5,6 +5,7 @@ import 'package:healthclick_app/screens/auth/CreateAccount.dart';
 import 'package:healthclick_app/screens/auth/ForgotPassword.dart';
 import 'package:healthclick_app/screens/welcome/OnBoarding.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -15,10 +16,54 @@ class Login extends StatefulWidget {
 
 class _LoginState extends State<Login> {
 
+  //*Defining the attributes for make the google authentication
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
+
   //*Defining the input names 
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   bool isChecked = false;
+
+  final GoogleSignIn googleSignIn = GoogleSignIn(
+    clientId: '50654751468-08ooqne2n1fm05dn4l5199equ0ssgu0g.apps.googleusercontent.com',
+  );
+
+  //*Start with the signGoogle method
+  Future<User?> _signInWithGoogle() async {
+    try {
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      if (googleUser == null) {
+        return null;
+      }
+
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+
+      final OAuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      final UserCredential userCredential =
+          await _auth.signInWithCredential(credential);
+
+      return userCredential.user;
+    } catch (e) {
+      print("Erro ao fazer login com Google: $e");
+      return null;
+    }
+  }
+
+  Future<User?> _signInAnonymously() async {
+    try {
+      final UserCredential userCredential = await _auth.signInAnonymously();
+      return userCredential.user;
+    } catch (e) {
+      print("Erro ao fazer login anonimamente: $e");
+      return null;
+    }
+  }
 
   //*Start with the methods to manage the responses and redirects of login
   Future<void> _login() async {
@@ -209,8 +254,15 @@ class _LoginState extends State<Login> {
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.pop(context);
+                        onPressed: () async {
+                          User? user = await _signInWithGoogle();
+                          if (user != null) {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) => const OnBoarding()),
+                            );
+                          }
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.white,
