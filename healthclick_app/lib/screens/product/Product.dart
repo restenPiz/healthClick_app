@@ -270,6 +270,7 @@ class _ProductState extends State<Product> {
               "image":
                   'http://192.168.100.139:8000/storage/${product['product_file']}',
               "quantity": product['quantity'],
+              "category": product['category'] != null ? product['category']['category_name'] : 'Sem categoria',
             };
           }).toList();
         });
@@ -363,9 +364,10 @@ class _ProductState extends State<Product> {
                             ),
                             child: Column(
                               children: [
-                                const ListTile(
+                                ListTile(
                                   leading: Text(
-                                    'Categoria', // Você pode ajustar para mostrar a categoria real
+                                    // products[index]['category'],
+                                    "${products[index]['category']}",
                                     style: TextStyle(fontSize: 13),
                                   ),
                                 ),
@@ -402,7 +404,7 @@ class _ProductState extends State<Product> {
                                   leading: Text(
                                     '${products[index]['price']} MZN',
                                     style: const TextStyle(
-                                        fontSize: 14, color: Colors.blue),
+                                        fontSize: 14, color: Colors.green),
                                   ),
                                   trailing: ElevatedButton(
                                     onPressed: () {
