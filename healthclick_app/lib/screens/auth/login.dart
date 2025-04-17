@@ -121,7 +121,7 @@ class _LoginState extends State<Login> {
                   fit: BoxFit.cover,
                 ),
               ),
-              const SizedBox(height: 20),
+              // const SizedBox(height: 5),
 
               //? Title and Input
               const Text(
@@ -153,7 +153,7 @@ class _LoginState extends State<Login> {
                   prefixIcon: Icon(Icons.email),
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 10),
 
               //? Password Field
               TextField(
@@ -175,7 +175,7 @@ class _LoginState extends State<Login> {
                   ),
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 10),
               //?Creating account section
               GestureDetector(
                 onTap: () {
@@ -194,7 +194,7 @@ class _LoginState extends State<Login> {
                       color: Colors.red),
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 10),
               //?Remember me and Forget password section
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -230,7 +230,7 @@ class _LoginState extends State<Login> {
                   ),
                 ],
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 10),
               //?Login button section
               Center(
                 child: Column(
@@ -245,12 +245,12 @@ class _LoginState extends State<Login> {
                           foregroundColor: Colors.white,
                           padding: EdgeInsets.symmetric(vertical: 20),
                         ),
-                        child: const Text('Login',style: TextStyle(fontSize: 20),),
+                        child: const Text('Login',style: TextStyle(fontSize: 17),),
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 10),
                     Text("Or Sign Up With"),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 10),
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
@@ -267,7 +267,7 @@ class _LoginState extends State<Login> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.white,
                           foregroundColor: Colors.black,
-                          padding: EdgeInsets.symmetric(vertical: 20),
+                          padding: EdgeInsets.symmetric(vertical: 17),
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -287,30 +287,6 @@ class _LoginState extends State<Login> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 20),
-                    // SizedBox(
-                    //   width: double.infinity,
-                    //   child: ElevatedButton(
-                    //     onPressed: () {
-                    //       Navigator.pop(context);
-                    //     },
-                    //     style: ElevatedButton.styleFrom(
-                    //       backgroundColor: Colors.black,
-                    //       foregroundColor: Colors.white,
-                    //       padding: EdgeInsets.symmetric(vertical: 20),
-                    //     ),
-                    //     child: Row(
-                    //       mainAxisAlignment: MainAxisAlignment.center,
-                    //       children: const [
-                    //         Icon(Icons.apple,
-                    //             size: 30, color: Colors.white), // Apple icon
-                    //         SizedBox(width: 10),
-                    //         Text('Continue with Apple',
-                    //             style: TextStyle(fontSize: 20)),
-                    //       ],
-                    //     ),
-                    //   ),
-                    // ),
                   ],
                 ),
               ),
