@@ -76,12 +76,12 @@ class _OnBoardingState extends State<OnBoarding> {
                   child: Image.asset(
                     "assets/back.png",
                     width: 500,
-                    height: 550,
+                    height: 400,
                     fit: BoxFit.cover,
                   ),
                 ),
               ),
-              const SizedBox(height: 50),
+              const SizedBox(height: 20),
               const Text(
                 'Bem Vindo ao Aplicativo SaúdeClick',
                 style: TextStyle(
@@ -95,7 +95,7 @@ class _OnBoardingState extends State<OnBoarding> {
                 style: TextStyle(fontSize: 15),
                 textAlign: TextAlign.justify,
               ),
-              const SizedBox(height: 50),
+              const SizedBox(height: 20),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -116,12 +116,12 @@ class _OnBoardingState extends State<OnBoarding> {
                   ),
                 ),
               ),
-              const SizedBox(height: 20),
-              if (_currentPosition != null)
-                Text(
-                  'Sua localização:\nLatitude: ${_currentPosition!.latitude}, Longitude: ${_currentPosition!.longitude}',
-                  style: const TextStyle(fontSize: 14, color: Colors.grey),
-                ),
+              // const SizedBox(height: 20),
+              // if (_currentPosition != null)
+              //   Text(
+              //     'Sua localização:\nLatitude: ${_currentPosition!.latitude}, Longitude: ${_currentPosition!.longitude}',
+              //     style: const TextStyle(fontSize: 14, color: Colors.grey),
+              //   ),
             ],
           ),
         ),

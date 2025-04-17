@@ -243,7 +243,7 @@ class _LoginState extends State<Login> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.green,
                           foregroundColor: Colors.white,
-                          padding: EdgeInsets.symmetric(vertical: 20),
+                          padding: EdgeInsets.symmetric(vertical: 15),
                         ),
                         child: const Text('Login',style: TextStyle(fontSize: 17),),
                       ),
@@ -267,7 +267,7 @@ class _LoginState extends State<Login> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.white,
                           foregroundColor: Colors.black,
-                          padding: EdgeInsets.symmetric(vertical: 17),
+                          padding: EdgeInsets.symmetric(vertical: 15),
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -281,7 +281,7 @@ class _LoginState extends State<Login> {
                             Text(
                               'Continue with Google',
                               style: TextStyle(
-                                  fontSize: 20, fontWeight: FontWeight.bold),
+                                  fontSize: 17, fontWeight: FontWeight.bold),
                             ),
                           ],
                         ),
