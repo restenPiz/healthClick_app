@@ -28,29 +28,29 @@ class _HomePageState extends State<HomePage> {
     "assets/back3.jpg",
   ];
 
-  // List<Map<String, dynamic>> categories = [];
-  // Future<void> getCategories() async {
-  //   try {
-  //     var url = Uri.parse('http://192.168.100.139:8000/api/categories');
-  //     var response = await http.get(url);
+  List<Map<String, dynamic>> categories = [];
+  Future<void> getCategories() async {
+    try {
+      var url = Uri.parse('http://192.168.100.139:8000/api/categories');
+      var response = await http.get(url);
 
-  //     if (response.statusCode == 200) {
-  //       var jsonData = json.decode(response.body);
-  //       List<dynamic> data = jsonData['categories'];
+      if (response.statusCode == 200) {
+        var jsonData = json.decode(response.body);
+        List<dynamic> data = jsonData['categories'];
 
-  //       setState(() {
-  //         categories = data.map((category) {
-  //           return {
-  //             "name": category['category_name'],
-  //           };
-  //         }).toList();
-  //       });
-  //     }
-  //   }catch (e) {
-  //     print('Erro: $e');
-  //     throw Exception('Falha ao carregar categorias');
-  //   }
-  // }
+        setState(() {
+          categories = data.map((category) {
+            return {
+              "name": category['category_name'],
+            };
+          }).toList();
+        });
+      }
+    }catch (e) {
+      print('Erro: $e');
+      throw Exception('Falha ao carregar categorias');
+    }
+  }
 
   final String baseUrl = 'http://192.168.100.139:8000/api/products';
   List<Map<String, dynamic>> products = [];
@@ -96,7 +96,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     getProducts(); 
-    // getCategories(); 
+    getCategories(); 
   }
 
   void _onTap(int index) {
@@ -197,36 +197,44 @@ class _HomePageState extends State<HomePage> {
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
-                  children: List.generate(3, (index) {
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 10),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(20),
-                        child: Container(
-                          width: 133,
-                          height: 55,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFEFF5F6),
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(color: Colors.green, width: 1.5),
-                            boxShadow: const [
-                              BoxShadow(
-                                color: Colors.black26, // sombra mais visível
-                                blurRadius: 8,
-                                offset: Offset(0, 4),
+                  children: categories.isEmpty 
+                      ? [Center(child: CircularProgressIndicator())]
+                      : categories.asMap().entries.map((entry) {
+                          int index = entry.key;
+                          Map<String, dynamic> category = entry.value;
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 10),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(20),
+                              child: Container(
+                                width: 140,
+                                height: 55,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFEFF5F6),
+                                  borderRadius: BorderRadius.circular(20),
+                                  // border: Border.all( width: 1.5),
+                                  boxShadow: const [
+                                    BoxShadow(
+                                      color: Colors.black,
+                                      blurRadius: 10,
+                                      spreadRadius: 1,
+                                      offset: Offset(0, 4),
+                                    ),
+                                  ],
+                                ),
+                                child: ListTile(
+                                  leading: const Icon(Icons.category,
+                                      color: Colors.black),
+                                  title: Text(
+                                    category['name'] ?? 'Sem nome',
+                                    style: const TextStyle(color: Colors.black),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
                               ),
-                            ],
-                          ),
-                          child: ListTile(
-                            // leading: const Icon(Icons.local_hospital,
-                            //     color: Colors.green),
-                            title: Text('Categoria ${index + 1}',
-                                style: const TextStyle(color: Colors.green)),
-                          ),
-                        ),
-                      ),
-                    );
-                  }),
+                            ),
+                          );
+                        }).toList(),
                 ),
               ),
 
