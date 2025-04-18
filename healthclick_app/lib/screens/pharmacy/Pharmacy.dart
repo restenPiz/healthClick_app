@@ -75,7 +75,7 @@ class _PharmacyState extends State<Pharmacy> {
               const SizedBox(height: 20),
               //?ListView of pharmacies
               const Text(
-                "Farmácias Próximass",
+                "Farmácias Próximas",
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               ListView.builder(

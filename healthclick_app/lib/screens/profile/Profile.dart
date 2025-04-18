@@ -38,7 +38,7 @@ class _ProfileState extends State<Profile> {
               const SizedBox(height: 30),
               const Center(
                 child: CircleAvatar(
-                  radius: 100,
+                  radius: 70,
                   backgroundImage: AssetImage("assets/dif.jpg"),
                 ),
               ),
@@ -109,11 +109,11 @@ class _ProfileState extends State<Profile> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.red,
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 20),
+                    padding: const EdgeInsets.symmetric(vertical: 15),
                   ),
                   child: const Text(
                     'Logout',
-                    style: TextStyle(fontSize: 20),
+                    style: TextStyle(fontSize: 17),
                   ),
                 ),
               ),
