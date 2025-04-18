@@ -60,6 +60,7 @@ class _PharmacyState extends State<Pharmacy> {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              SizedBox(height:15),
               //?Main content starts here
               ListTile(
                 leading: const CircleAvatar(
@@ -71,13 +72,12 @@ class _PharmacyState extends State<Pharmacy> {
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
                 ),
               ),
-              const SizedBox(height: 30),
+              const SizedBox(height: 20),
               //?ListView of pharmacies
               const Text(
-                "Farmácias Próximas",
+                "Farmácias Próximass",
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: 10),
               ListView.builder(
                 shrinkWrap:
                     true,
