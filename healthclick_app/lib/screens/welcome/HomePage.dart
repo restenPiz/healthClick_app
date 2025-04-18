@@ -6,6 +6,9 @@ import 'package:provider/provider.dart';
 import 'package:healthclick_app/screens/layouts/AppBottom.dart';
 import 'package:healthclick_app/screens/product/Product.dart';
 import 'package:healthclick_app/screens/product/ProductDetails.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -18,17 +21,82 @@ class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
 
   final List<String> imageList = [
-    "assets/background.jpg",
+    // "assets/background.jpg",
     "assets/back1.jpg",
     "assets/back2.jpg",
     "assets/back3.jpg",
   ];
 
-  final List<Map<String, String>> products = [
-    {"image": "assets/back1.jpg", "name": "Produto 1"},
-    {"image": "assets/back3.jpg", "name": "Produto 2"},
-    {"image": "assets/back3.jpg", "name": "Produto 3"},
-  ];
+  // List<Map<String, dynamic>> categories = [];
+  // Future<void> getCategories() async {
+  //   try {
+  //     var url = Uri.parse('http://192.168.100.139:8000/api/categories');
+  //     var response = await http.get(url);
+
+  //     if (response.statusCode == 200) {
+  //       var jsonData = json.decode(response.body);
+  //       List<dynamic> data = jsonData['categories'];
+
+  //       setState(() {
+  //         categories = data.map((category) {
+  //           return {
+  //             "name": category['category_name'],
+  //           };
+  //         }).toList();
+  //       });
+  //     }
+  //   }catch (e) {
+  //     print('Erro: $e');
+  //     throw Exception('Falha ao carregar categorias');
+  //   }
+  // }
+
+  final String baseUrl = 'http://192.168.100.139:8000/api/products';
+  List<Map<String, dynamic>> products = [];
+
+  Future<void> getProducts() async {
+    try {
+      var url = Uri.parse('http://192.168.100.139:8000/api/products');
+      var response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        var jsonData = json.decode(response.body);
+        List<dynamic> data = jsonData['products'];
+
+        setState(() {
+          products = data.map((product) {
+            // Imprima o caminho para debug
+            print(
+                'Caminho da imagem: http://192.168.100.139:8000/storage/${product['product_file']}');
+
+            return {
+              "name": product['product_name'],
+              "price": product['product_price'],
+              "description": product['product_description'],
+              "image":
+                  'http://192.168.100.139:8000/storage/${product['product_file']}',
+              "quantity": product['quantity'],
+              "category": product['category'] != null
+                  ? product['category']['category_name']
+                  : 'Sem categoria',
+            };
+          }).toList();
+        });
+      } else {
+        throw Exception('Falha ao carregar produtos: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Erro: $e');
+      throw Exception('Falha ao carregar produtos');
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getProducts(); 
+    // getCategories(); 
+  }
 
   void _onTap(int index) {
     setState(() {
@@ -46,6 +114,7 @@ class _HomePageState extends State<HomePage> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              const SizedBox(height: 10),
               // User Greeting Section
               const ListTile(
                   leading: CircleAvatar(
@@ -191,102 +260,97 @@ class _HomePageState extends State<HomePage> {
               const SizedBox(height: 20),
 
               // Product section
-              GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2, // Duas colunas
-                  crossAxisSpacing: 8, // Espaço entre as colunas
-                  mainAxisSpacing: 8, // Espaço entre as linhas
-                  childAspectRatio:
-                      0.75, // Ajuste o childAspectRatio para reduzir a altura
-                ),
-                itemCount: products.length,
-                itemBuilder: (context, index) {
-                  return GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const ProductDetails()),
-                      );
-                    },
-                    child: Card(
-                      elevation: 2, 
-                      shape: RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.circular(12), 
+              products.isNotEmpty
+                  ? GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2, // Duas colunas
+                        crossAxisSpacing: 8,
+                        mainAxisSpacing: 8,
+                        childAspectRatio: 0.48, // 0.75 Ajuste do childAspectRatio
                       ),
-                      child: Column(
-                        children: [
-                          const ListTile(
-                            leading: Text(
-                              'Categoria',
-                              style: TextStyle(fontSize: 13),
+                      itemCount: products.length,
+                      itemBuilder: (context, index) {
+                        return GestureDetector(
+                          onTap: () {
+                          },
+                          child: Card(
+                            elevation: 2,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
                             ),
-                          ),
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: Image.asset(
-                              products[index]['image']!,
-                              width: 189, // Menor largura da imagem
-                              height: 120, // Menor altura da imagem
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                          const SizedBox(
-                            height: 6, // Menor espaço entre imagem e texto
-                          ),
-                          ListTile(
-                            leading: Text(
-                              products[index]['name']!,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize:
-                                    15, // Tamanho menor da fonte do nome do produto
-                              ),
-                              textAlign: TextAlign.center, // Texto centralizado
-                            ),
-                          ),
-                          const Divider(
-                            thickness: 2,
-                            indent: 20,
-                            endIndent: 20,
-                          ),
-                          ListTile(
-                            leading: const Text('100MZN',
-                                style: TextStyle(
-                                    fontSize: 14, color: Colors.blue)),
-                            trailing: ElevatedButton(
-                              onPressed: () {
-                                // Ação do botão: Adicionar ao carrinho
-                                CartItem newItem = CartItem(
-                                  name: products[index]['name']!,
-                                  image: products[index]['image']!,
-                                  price: 100.0, // Defina o preço real aqui
-                                );
-                                Provider.of<CartProvider>(context,
-                                        listen: false)
-                                    .addItem(newItem);
-                              },
-                              child: const Icon(Icons.add),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.green,
-                                foregroundColor: Colors.white,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(100),
+                            child: Column(
+                              children: [
+                                ListTile(
+                                  leading: Text(
+                                    // products[index]['category'],
+                                    "${products[index]['category']}",
+                                    style: TextStyle(fontSize: 13),
+                                  ),
                                 ),
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 6, horizontal: 12),
-                              ),
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Image.network(
+                                      products[index]['image']!,
+                                      fit: BoxFit.cover,
+                                      errorBuilder:
+                                          (context, error, stackTrace) {
+                                        return Text('Erro ao carregar imagem');
+                                      },
+                                    ),
+                                ),
+                                const SizedBox(
+                                  height: 6,
+                                ),
+                                ListTile(
+                                  leading: Text(
+                                    products[index]['name']!,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 15,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                                const Divider(
+                                  thickness: 2,
+                                  indent: 20,
+                                  endIndent: 20,
+                                ),
+                                ListTile(
+                                  leading: Text(
+                                    '${products[index]['price']} MZN',
+                                    style: const TextStyle(
+                                        fontSize: 14, color: Colors.green),
+                                  ),
+                                  trailing: ElevatedButton(
+                                    onPressed: () {
+                                      // Ação do botão, por exemplo, adicionar ao carrinho
+                                    },
+                                    child: const Icon(Icons.add),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.green,
+                                      foregroundColor: Colors.white,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(100),
+                                      ),
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 6, horizontal: 12),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
+                        );
+                      },
+                    )
+                  : const Center(
+                      child:
+                          CircularProgressIndicator()),
             ],
           ),
         ),
