@@ -22,7 +22,8 @@ class _HomePageState extends State<HomePage> {
 
   final List<String> imageList = [
     // "assets/background.jpg",
-    "assets/back1.jpg",
+    "assets/back2.jpg",
+    "assets/back3.jpg",
     "assets/back2.jpg",
     "assets/back3.jpg",
   ];
@@ -64,7 +65,7 @@ class _HomePageState extends State<HomePage> {
         List<dynamic> data = jsonData['products'];
 
         setState(() {
-          products = data.map((product) {
+          products = data.take(2).map((product) {
             // Imprima o caminho para debug
             print(
                 'Caminho da imagem: http://192.168.100.139:8000/storage/${product['product_file']}');
@@ -132,7 +133,6 @@ class _HomePageState extends State<HomePage> {
                 ),
               const SizedBox(height: 30),
 
-              // Search Section
               TextField(
                 decoration: InputDecoration(
                   border: OutlineInputBorder(
@@ -203,8 +203,8 @@ class _HomePageState extends State<HomePage> {
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(20),
                         child: Container(
-                          width: 170,
-                          height: 50,
+                          width: 133,
+                          height: 55,
                           decoration: BoxDecoration(
                             color: const Color(0xFFEFF5F6),
                             borderRadius: BorderRadius.circular(20),
@@ -218,8 +218,8 @@ class _HomePageState extends State<HomePage> {
                             ],
                           ),
                           child: ListTile(
-                            leading: const Icon(Icons.local_hospital,
-                                color: Colors.green),
+                            // leading: const Icon(Icons.local_hospital,
+                            //     color: Colors.green),
                             title: Text('Categoria ${index + 1}',
                                 style: const TextStyle(color: Colors.green)),
                           ),
@@ -284,8 +284,7 @@ class _HomePageState extends State<HomePage> {
                             child: Column(
                               children: [
                                 ListTile(
-                                  leading: Text(
-                                    // products[index]['category'],
+                                  title: Text(
                                     "${products[index]['category']}",
                                     style: TextStyle(fontSize: 13),
                                   ),

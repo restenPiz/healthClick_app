@@ -339,7 +339,7 @@ class _ProductState extends State<Product> {
                   prefixIcon: const Icon(Icons.search),
                 ),
               ),
-              const SizedBox(height: 20),
+              ///const SizedBox(height: 20),
               //? Cards of products
               products.isNotEmpty
                   ? GridView.builder(

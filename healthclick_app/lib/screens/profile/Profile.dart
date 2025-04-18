@@ -81,7 +81,7 @@ class _ProfileState extends State<Profile> {
               ListTile(
                 leading: const Icon(Icons.dark_mode),
                 title: const Text(
-                  'Mudar Para o Modo Noturno',
+                  'Dark Mode',
                   style: TextStyle(fontSize: 18, color: Colors.black),
                 ),
                 trailing: Switch(
