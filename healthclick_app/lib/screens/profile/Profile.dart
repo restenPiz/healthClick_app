@@ -62,7 +62,7 @@ class _ProfileState extends State<Profile> {
                 indent: 20,
                 endIndent: 20,
               ),
-              const SizedBox(height: 10),
+              // const SizedBox(height: 2),
               GestureDetector(
                 onTap: (){
                   Navigator.push(
@@ -75,13 +75,13 @@ class _ProfileState extends State<Profile> {
                   title: Text('Editar Perfil',style: TextStyle(fontSize: 18,color: Colors.black),),
                 ),
               ),
-              const SizedBox(height: 10),
+              // const SizedBox(height: 2),
               const Divider(
                 thickness: 2,
                 indent: 20,
                 endIndent: 20,
               ),
-              const SizedBox(height: 10),
+              // const SizedBox(height: 10),
               ListTile(
                 leading: const Icon(Icons.dark_mode),
                 title: const Text(
@@ -94,7 +94,7 @@ class _ProfileState extends State<Profile> {
                   activeColor: Colors.blue,
                 ),
               ),
-              const SizedBox(height: 10),
+              // const SizedBox(height: 10),
                const Divider(
                 thickness: 2,
                 indent: 20,
