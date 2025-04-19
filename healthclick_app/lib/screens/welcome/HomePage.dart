@@ -201,9 +201,9 @@ class _HomePageState extends State<HomePage> {
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
-                  children: categories.isEmpty 
-                      ? [Center(child: CircularProgressIndicator())]
-                      : categories.asMap().entries.map((entry) {
+                  children: //categories.isEmpty 
+                      // ? [Center(child: CircularProgressIndicator())] :
+                       categories.asMap().entries.map((entry) {
                           int index = entry.key;
                           Map<String, dynamic> category = entry.value;
                           return Padding(

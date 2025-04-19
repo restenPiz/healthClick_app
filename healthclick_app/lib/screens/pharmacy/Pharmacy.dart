@@ -125,10 +125,10 @@ class _PharmacyState extends State<Pharmacy> {
                       subtitle: Text('Proprietario: ${pharmacy['userName']!}'),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () {
-                       Navigator.push(
+                        Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => const PharmacyDetails()),
+                              builder: (_) => PharmacyDetails(pharmacy: pharmacy)),
                         );
                       },
                     ),

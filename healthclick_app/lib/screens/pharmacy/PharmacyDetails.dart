@@ -1,10 +1,11 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:getwidget/getwidget.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class PharmacyDetails extends StatefulWidget {
-  const PharmacyDetails({super.key});
+    final Map<String, dynamic> pharmacy;
+  const PharmacyDetails({super.key, required this.pharmacy});
+
 
   @override
   State<PharmacyDetails> createState() => _PharmacyDetailsState();
@@ -35,7 +36,7 @@ class _PharmacyDetailsState extends State<PharmacyDetails> {
 
   @override
   Widget build(BuildContext context) {
-    User? currentUser = FirebaseAuth.instance.currentUser;
+    final pharmacy = widget.pharmacy; 
     return Scaffold(
       body: SingleChildScrollView(
         child: Padding(
@@ -45,6 +46,7 @@ class _PharmacyDetailsState extends State<PharmacyDetails> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               //?Main Content
+              const SizedBox(height: 10),
               ListTile(
                 leading: IconButton(
                   icon: const Icon(Icons.arrow_back),
@@ -53,40 +55,44 @@ class _PharmacyDetailsState extends State<PharmacyDetails> {
                   },
                 ),
                 
-                title: Text(
-                  "Olá ${currentUser?.displayName ?? currentUser?.email?.split('@')[0] ?? 'Visitante'}",
-                  style: const TextStyle(
-                      fontSize: 15,
+                title: const Text(
+                  "Detalhes da Farmacia",
+                  style: TextStyle(
+                      fontSize: 20,
                       fontWeight: FontWeight.bold,
                       color: Colors.black),
                 ),
               ),
-              const SizedBox(height: 30),
               Center(
                 child: Container(
-                  width: 500,
+                  // width: 500,
+                  width: double.infinity,
                   height: 400,
                   margin: const EdgeInsets.all(8.0),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(20),
-                    child: Image.asset(
-                      'assets/back3.jpg',
+                    child: Image.network(
+                      (pharmacy['image'] != null
+                            ? 
+                                'http://192.168.100.139:8000/storage/${pharmacy['image']}'
+                            : AssetImage('assets/images/default_pharmacy.png')
+                                as ImageProvider) as String,
                       fit: BoxFit.cover,
                     ),
                   ),
                 ),
               ),
               const SizedBox(height: 30),
-              const Text(
-                'Farmacia Tuia',
-                style: TextStyle(
+              Text(
+                pharmacy['name'],
+                style:  const TextStyle(
                     color: Colors.black,
                     fontSize: 20,
                     fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 15),
-              const Text(
-                'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrys standard dummy text ever since the 1500s.It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using.Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrys standard dummy text ever since the 1500s.It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using.',
+              Text(
+                pharmacy['description'],
                 textAlign: TextAlign.justify,
               ),
               //?Start with the google Map
@@ -103,11 +109,15 @@ class _PharmacyDetailsState extends State<PharmacyDetails> {
             color: Colors.white,
             boxShadow: [BoxShadow(color: Colors.black45, blurRadius: 0)],
           ),
-          child: const GFListTile(
+          child: GFListTile(
             avatar: GFAvatar(
-              backgroundImage: AssetImage('assets/image_here'),
+              backgroundImage: pharmacy['image'] != null
+                            ? NetworkImage(
+                                'http://192.168.100.139:8000/storage/${pharmacy['image']}')
+                            : AssetImage('assets/images/default_pharmacy.png')
+                                as ImageProvider,
             ),
-            titleText: 'Farmácia Tuia',
+            titleText: pharmacy['name'],
             subTitleText: 'Localização da Farmácia',
           ),
         ),
