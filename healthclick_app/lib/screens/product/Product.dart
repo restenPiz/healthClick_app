@@ -227,6 +227,7 @@
 //   }
 // }
 import 'dart:convert';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:getwidget/getwidget.dart';
 import 'package:healthclick_app/screens/layouts/AppBottom.dart';
@@ -297,6 +298,8 @@ class _ProductState extends State<Product> {
 
   @override
   Widget build(BuildContext context) {
+
+    User? currentUser = FirebaseAuth.instance.currentUser;
     return Scaffold(
       body: SingleChildScrollView(
         child: Padding(
@@ -306,14 +309,16 @@ class _ProductState extends State<Product> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height:20),
-              const ListTile(
+              ListTile(
                 leading: CircleAvatar(
                   radius: 25,
-                  backgroundImage: AssetImage("assets/dif.jpg"),
+                  backgroundImage: currentUser?.photoURL != null
+                      ? NetworkImage(currentUser!.photoURL!)
+                      : const AssetImage("assets/dif.jpg") as ImageProvider,
                 ),
                 title: Text(
-                  "Ola Mauro Peniel",
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
+                  "Olá ${currentUser?.displayName ?? currentUser?.email?.split('@')[0] ?? 'Visitante'}",
+                  style: const TextStyle(fontSize: 15,fontWeight: FontWeight.bold,color:Colors.black),
                 ),
               ),
               const SizedBox(height: 30),

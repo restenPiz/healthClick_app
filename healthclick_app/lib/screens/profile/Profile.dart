@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:healthclick_app/screens/auth/Login.dart';
 import 'package:healthclick_app/screens/layouts/AppBottom.dart';
@@ -22,6 +23,7 @@ class _ProfileState extends State<Profile> {
   }
   @override
   Widget build(BuildContext context) {
+     User? currentUser = FirebaseAuth.instance.currentUser;
     return Scaffold(
       body: SingleChildScrollView(
         child: Padding(
@@ -36,21 +38,23 @@ class _ProfileState extends State<Profile> {
                 child: Text('Perfil',style: TextStyle(fontSize: 25,fontWeight: FontWeight.bold,color: Colors.black),),
               ),
               const SizedBox(height: 30),
-              const Center(
+              Center(
                 child: CircleAvatar(
                   radius: 70,
-                  backgroundImage: AssetImage("assets/dif.jpg"),
+                  backgroundImage: currentUser?.photoURL != null
+                      ? NetworkImage(currentUser!.photoURL!)
+                      : const AssetImage("assets/dif.jpg") as ImageProvider,
                 ),
               ),
               const SizedBox(height:20),
-              const Center(
-                child: Text('Mauro Peniel',
+              Center(
+                child: Text("${currentUser?.displayName ?? currentUser?.email?.split('@')[0] ?? 'Visitante'}",
                   style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold,color: Colors.black),
                 ),
               ),
               const SizedBox(height: 10),
-              const Center(
-                child: Text('mauropeniel7@gmail.com',style: TextStyle(fontSize: 18),),
+              Center(
+                child: Text("${currentUser?.email?? 'Visitante'}",style: TextStyle(fontSize: 18),),
               ),
               const SizedBox(height: 30),
               const Divider(

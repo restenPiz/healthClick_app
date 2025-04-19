@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:getwidget/getwidget.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -34,6 +35,7 @@ class _PharmacyDetailsState extends State<PharmacyDetails> {
 
   @override
   Widget build(BuildContext context) {
+    User? currentUser = FirebaseAuth.instance.currentUser;
     return Scaffold(
       body: SingleChildScrollView(
         child: Padding(
@@ -50,9 +52,13 @@ class _PharmacyDetailsState extends State<PharmacyDetails> {
                     Navigator.pop(context); // Voltar para a tela anterior
                   },
                 ),
-                title: const Text(
-                  "Ola Mauro Peniel",
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
+                
+                title: Text(
+                  "Olá ${currentUser?.displayName ?? currentUser?.email?.split('@')[0] ?? 'Visitante'}",
+                  style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black),
                 ),
               ),
               const SizedBox(height: 30),

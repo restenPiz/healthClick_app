@@ -2,6 +2,7 @@
 
 import 'dart:convert';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:healthclick_app/screens/layouts/AppBottom.dart';
 import 'package:healthclick_app/screens/pharmacy/PharmacyDetails.dart';
@@ -66,6 +67,7 @@ class _PharmacyState extends State<Pharmacy> {
 
   @override
   Widget build(BuildContext context) {
+    User? currentUser = FirebaseAuth.instance.currentUser;
     return Scaffold(
       body: SingleChildScrollView(
         child: Padding(
@@ -77,13 +79,18 @@ class _PharmacyState extends State<Pharmacy> {
               SizedBox(height:15),
               //?Main content starts here
               ListTile(
-                leading: const CircleAvatar(
+                leading: CircleAvatar(
                   radius: 25,
-                  backgroundImage: AssetImage("assets/dif.jpg"),
+                  backgroundImage: currentUser?.photoURL != null
+                      ? NetworkImage(currentUser!.photoURL!)
+                      : const AssetImage("assets/dif.jpg") as ImageProvider,
                 ),
-                title: const Text(
-                  "Olá Mauro Peniel",
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
+                title: Text(
+                  "Olá ${currentUser?.displayName ?? currentUser?.email?.split('@')[0] ?? 'Visitante'}",
+                  style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black),
                 ),
               ),
               const SizedBox(height: 20),
