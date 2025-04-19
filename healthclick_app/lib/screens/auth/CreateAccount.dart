@@ -68,7 +68,7 @@ class _CreateAccountState extends State<CreateAccount> {
                   fit: BoxFit.cover,
                 ),
               ),
-              const SizedBox(height: 20),
+              // const SizedBox(height: 20),
 
               //? Title and Input
               const Text(
@@ -100,7 +100,7 @@ class _CreateAccountState extends State<CreateAccount> {
                   prefixIcon: const Icon(Icons.email),
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 10),
               //? Password Field
               TextField(
                 controller: passwordController,
@@ -125,7 +125,7 @@ class _CreateAccountState extends State<CreateAccount> {
                   prefixIcon: const Icon(Icons.lock),
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 10),
               //? Password Field
               TextField(
                 controller: confirmPasswordController,
@@ -150,7 +150,7 @@ class _CreateAccountState extends State<CreateAccount> {
                   prefixIcon: const Icon(Icons.lock),
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 15),
               //?Creating account section
               Center(child: GestureDetector(
                 onTap: () {
@@ -167,7 +167,7 @@ class _CreateAccountState extends State<CreateAccount> {
                       color: Colors.red),
                 ),
               ),),
-              const SizedBox(height: 20),
+              const SizedBox(height: 15),
               //?Login button section
               Center(
                 child: Column(
@@ -229,17 +229,17 @@ class _CreateAccountState extends State<CreateAccount> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.green,
                           foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 20),
+                          padding: const EdgeInsets.symmetric(vertical: 15),
                         ),
                         child: const Text(
                           'Sign Up',
-                          style: TextStyle(fontSize: 20),
+                          style: TextStyle(fontSize: 17),
                         ),
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 5),
                     const Text("Or Sign Up With"),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 5),
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
@@ -247,7 +247,7 @@ class _CreateAccountState extends State<CreateAccount> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.white,
                           foregroundColor: Colors.black,
-                          padding: const EdgeInsets.symmetric(vertical: 20),
+                          padding: const EdgeInsets.symmetric(vertical: 15),
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -261,7 +261,7 @@ class _CreateAccountState extends State<CreateAccount> {
                             const Text(
                               'Continue with Google',
                               style: TextStyle(
-                                  fontSize: 20, fontWeight: FontWeight.bold),
+                                  fontSize: 17, fontWeight: FontWeight.bold),
                             ),
                           ],
                         ),

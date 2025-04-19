@@ -84,7 +84,7 @@ class _ProductState extends State<Product> {
                 title: Text(
                   "Olá ${currentUser?.displayName ?? currentUser?.email?.split('@')[0] ?? 'Visitante'}",
                   style: const TextStyle(
-                      fontSize: 15, fontWeight: FontWeight.bold),
+                      fontSize: 17, fontWeight: FontWeight.bold),
                 ),
               ),
               const SizedBox(height: 30),

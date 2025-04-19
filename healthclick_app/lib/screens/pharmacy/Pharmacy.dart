@@ -88,9 +88,8 @@ class _PharmacyState extends State<Pharmacy> {
                 title: Text(
                   "Olá ${currentUser?.displayName ?? currentUser?.email?.split('@')[0] ?? 'Visitante'}",
                   style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black),
+                      fontSize: 17,
+                      fontWeight: FontWeight.bold),
                 ),
               ),
               const SizedBox(height: 20),

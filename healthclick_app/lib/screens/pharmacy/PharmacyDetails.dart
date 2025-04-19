@@ -13,30 +13,40 @@ class PharmacyDetails extends StatefulWidget {
 
 class _PharmacyDetailsState extends State<PharmacyDetails> {
   int _currentIndex = 0;
-
-  void _onTap(int index) {
-    setState(() {
-      _currentIndex = index;
-    });
-  }
-
   final GFBottomSheetController _controller = GFBottomSheetController();
-  late GoogleMapController mapController; // Controlador do mapa
+  late GoogleMapController mapController;
   late CameraPosition _initialCameraPosition;
+  late LatLng pharmacyLocation;
 
   @override
   void initState() {
     super.initState();
-    // Definindo a posição inicial do mapa (exemplo com coordenadas de Maputo, Moçambique)
-    _initialCameraPosition = const CameraPosition(
-      target: LatLng(-25.968, 32.589), // Defina as coordenadas da farmácia
-      zoom: 14.0, // Nível de zoom
+
+    try {
+      // Extrair as coordenadas da string de localização da farmácia
+      List<String> coordinates = widget.pharmacy['location'].split(',');
+      double lat = double.parse(coordinates[0]);
+      double lng = double.parse(coordinates[1]);
+
+      // Definir a localização da farmácia
+      pharmacyLocation = LatLng(lat, lng);
+    } catch (e) {
+      // Fallback se houver erro ao processar as coordenadas
+      pharmacyLocation = const LatLng(-25.968, 32.589); // Coordenadas padrão
+      print('Erro ao processar coordenadas: $e');
+    }
+
+    // Usar a localização da farmácia como posição inicial do mapa
+    _initialCameraPosition = CameraPosition(
+      target: pharmacyLocation,
+      zoom: 15.0,
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final pharmacy = widget.pharmacy; 
+    final pharmacy = widget.pharmacy;
+
     return Scaffold(
       body: SingleChildScrollView(
         child: Padding(
@@ -45,48 +55,44 @@ class _PharmacyDetailsState extends State<PharmacyDetails> {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              //?Main Content
               const SizedBox(height: 10),
               ListTile(
                 leading: IconButton(
                   icon: const Icon(Icons.arrow_back),
                   onPressed: () {
-                    Navigator.pop(context); // Voltar para a tela anterior
+                    Navigator.pop(context);
                   },
                 ),
-                
                 title: const Text(
                   "Detalhes da Farmacia",
                   style: TextStyle(
                       fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black),
+                      fontWeight: FontWeight.bold),
                 ),
               ),
               Center(
                 child: Container(
-                  // width: 500,
                   width: double.infinity,
                   height: 400,
                   margin: const EdgeInsets.all(8.0),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(20),
-                    child: Image.network(
-                      (pharmacy['image'] != null
-                            ? 
-                                'http://192.168.100.139:8000/storage/${pharmacy['image']}'
-                            : AssetImage('assets/images/default_pharmacy.png')
-                                as ImageProvider) as String,
-                      fit: BoxFit.cover,
-                    ),
+                    child: pharmacy['image'] != null
+                        ? Image.network(
+                            'http://192.168.100.139:8000/storage/${pharmacy['image']}',
+                            fit: BoxFit.cover,
+                          )
+                        : Image.asset(
+                            'assets/images/default_pharmacy.png',
+                            fit: BoxFit.cover,
+                          ),
                   ),
                 ),
               ),
               const SizedBox(height: 30),
               Text(
                 pharmacy['name'],
-                style:  const TextStyle(
-                    color: Colors.black,
+                style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold),
               ),
@@ -95,34 +101,33 @@ class _PharmacyDetailsState extends State<PharmacyDetails> {
                 pharmacy['description'],
                 textAlign: TextAlign.justify,
               ),
-              //?Start with the google Map
             ],
           ),
         ),
       ),
       bottomSheet: GFBottomSheet(
         controller: _controller,
-        maxContentHeight: 800, // Ajuste o valor para caber o mapa
+        maxContentHeight: 600,
         stickyHeaderHeight: 100,
         stickyHeader: Container(
           decoration: const BoxDecoration(
-            color: Colors.white,
-            boxShadow: [BoxShadow(color: Colors.black45, blurRadius: 0)],
+            color: Colors.grey,
+          //  boxShadow: [BoxShadow(color: Colors.black45, blurRadius: 20)],
           ),
           child: GFListTile(
             avatar: GFAvatar(
               backgroundImage: pharmacy['image'] != null
-                            ? NetworkImage(
-                                'http://192.168.100.139:8000/storage/${pharmacy['image']}')
-                            : AssetImage('assets/images/default_pharmacy.png')
-                                as ImageProvider,
+                  ? NetworkImage(
+                      'http://192.168.100.139:8000/storage/${pharmacy['image']}')
+                  : const AssetImage('assets/images/default_pharmacy.png')
+                      as ImageProvider,
             ),
             titleText: pharmacy['name'],
             subTitleText: 'Localização da Farmácia',
           ),
         ),
         contentBody: Container(
-          height: 300, // Tamanho do mapa no bottomSheet
+          height: 300,
           margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
           child: GoogleMap(
             initialCameraPosition: _initialCameraPosition,
@@ -130,12 +135,12 @@ class _PharmacyDetailsState extends State<PharmacyDetails> {
               mapController = controller;
             },
             markers: {
-              const Marker(
-                markerId: MarkerId('farmaciaMarker'),
-                position: LatLng(-25.968, 32.589), // Coordenadas da farmácia
+              Marker(
+                markerId: const MarkerId('farmaciaMarker'),
+                position: pharmacyLocation,
                 infoWindow: InfoWindow(
-                  title: 'Farmácia Tuia',
-                  snippet: 'Descrição da farmácia',
+                  title: pharmacy['name'],
+                  snippet: 'Contato: ${pharmacy['contact']}',
                 ),
               ),
             },

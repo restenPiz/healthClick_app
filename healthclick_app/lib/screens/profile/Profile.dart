@@ -1,8 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:healthclick_app/ThemeProvider.dart';
 import 'package:healthclick_app/screens/auth/Login.dart';
 import 'package:healthclick_app/screens/layouts/AppBottom.dart';
 import 'package:healthclick_app/screens/profile/ProfileEdit.dart';
+import 'package:healthclick_app/screens/welcome/SplashLogin.dart';
+import 'package:provider/provider.dart';
 
 class Profile extends StatefulWidget {
   const Profile({super.key});
@@ -23,6 +26,8 @@ class _ProfileState extends State<Profile> {
   }
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    final isDarkMode = themeProvider.isDarkMode;
      User? currentUser = FirebaseAuth.instance.currentUser;
     return Scaffold(
       body: SingleChildScrollView(
@@ -33,11 +38,11 @@ class _ProfileState extends State<Profile> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               //?Start the main content
-              const SizedBox(height:20),
-              const Center(
-                child: Text('Perfil',style: TextStyle(fontSize: 25,fontWeight: FontWeight.bold,color: Colors.black),),
-              ),
-              const SizedBox(height: 30),
+              // const SizedBox(height:20),
+              // const Center(
+              //   child: Text('Perfil',style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold,color: Colors.black),),
+              // ),
+              const SizedBox(height: 80),
               Center(
                 child: CircleAvatar(
                   radius: 70,
@@ -49,7 +54,7 @@ class _ProfileState extends State<Profile> {
               const SizedBox(height:20),
               Center(
                 child: Text("${currentUser?.displayName ?? currentUser?.email?.split('@')[0] ?? 'Visitante'}",
-                  style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold,color: Colors.black),
+                  style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
                 ),
               ),
               const SizedBox(height: 10),
@@ -72,7 +77,7 @@ class _ProfileState extends State<Profile> {
                 },
                 child: const ListTile(
                   leading: Icon(Icons.person),
-                  title: Text('Editar Perfil',style: TextStyle(fontSize: 18,color: Colors.black),),
+                  title: Text('Editar Perfil',style: TextStyle(fontSize: 18),),
                 ),
               ),
               // const SizedBox(height: 2),
@@ -86,11 +91,11 @@ class _ProfileState extends State<Profile> {
                 leading: const Icon(Icons.dark_mode),
                 title: const Text(
                   'Dark Mode',
-                  style: TextStyle(fontSize: 18, color: Colors.black),
+                  style: TextStyle(fontSize: 18),
                 ),
                 trailing: Switch(
                   value: isDarkMode,
-                  onChanged: (value) {},
+                  onChanged: (value) => themeProvider.toggleTheme(value),
                   activeColor: Colors.blue,
                 ),
               ),
@@ -105,9 +110,13 @@ class _ProfileState extends State<Profile> {
                 width: double.infinity, // ✅ Makes button full width
                 child: ElevatedButton(
                   onPressed: () {
+                    // Navigator.push(
+                    //   context,
+                    //   MaterialPageRoute(builder: (context) => const Login()),
+                    // );
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const Login()),
+                      MaterialPageRoute(builder: (context) => const SplashLogin()),
                     );
                   },
                   style: ElevatedButton.styleFrom(

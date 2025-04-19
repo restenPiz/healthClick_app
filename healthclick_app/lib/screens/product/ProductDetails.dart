@@ -44,7 +44,6 @@ class _ProductDetailsState extends State<ProductDetails> {
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black,
                   ),
                 ),
               ),

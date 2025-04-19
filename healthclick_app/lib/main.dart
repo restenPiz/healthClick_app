@@ -30,6 +30,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:healthclick_app/ThemeProvider.dart';
 import 'package:healthclick_app/screens/welcome/HomePage.dart';
 import 'package:healthclick_app/screens/welcome/SplashLogin.dart';
 import 'firebase_options.dart'; // Importar as configurações geradas
@@ -45,7 +46,8 @@ void main() async {
   );
   runApp(
     ChangeNotifierProvider(
-      create: (_) => CartProvider(),
+      create: (_) => ThemeProvider(),
+      // create: (_) => CartProvider(),
       child: const MyApp(),
     ),
   );
@@ -56,14 +58,31 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'SaudeClick',
+      themeMode: themeProvider.themeMode,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.white),
-        useMaterial3: true,
+        brightness: Brightness.light,
+        primarySwatch: Colors.blue,
+      ),
+      darkTheme: ThemeData(
+        brightness: Brightness.dark,
+        primarySwatch: Colors.blue,
       ),
       home: const SplashLogin(),
     );
   }
+  // Widget build(BuildContext context) {
+  //   return MaterialApp(
+  //     debugShowCheckedModeBanner: false,
+  //     title: 'SaudeClick',
+  //     theme: ThemeData(
+  //       colorScheme: ColorScheme.fromSeed(seedColor: Colors.white),
+  //       useMaterial3: true,
+  //     ),
+  //     home: const SplashLogin(),
+  //   );
+  // }
 }
