@@ -31,6 +31,7 @@ class _ProductDetailsState extends State<ProductDetails> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              const SizedBox(height: 10,),
               ListTile(
                 leading: IconButton(
                   icon: const Icon(Icons.arrow_back),
@@ -38,23 +39,15 @@ class _ProductDetailsState extends State<ProductDetails> {
                     Navigator.pop(context);
                   },
                 ),
-                title: Text(
-                  "Olá ${currentUser?.displayName ?? currentUser?.email?.split('@')[0] ?? 'Visitante'}",
+                title: const Text(
+                  "Detalhes do Produto",
                   style: const TextStyle(
-                    fontSize: 15,
+                    fontSize: 20,
                     fontWeight: FontWeight.bold,
                     color: Colors.black,
                   ),
                 ),
               ),
-              const SizedBox(height: 30),
-              const Center(
-                child: Text(
-                  'Detalhes do Produto',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-                ),
-              ),
-              const SizedBox(height: 30),
               Container(
                 width: double.infinity,
                 height: 400,
@@ -121,11 +114,11 @@ class _ProductDetailsState extends State<ProductDetails> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green,
                       foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 20),
+                      padding: const EdgeInsets.symmetric(vertical: 15),
                     ),
                     child: const Text(
                       'Add to Cart',
-                      style: TextStyle(fontSize: 20),
+                      style: TextStyle(fontSize: 17),
                     ),
                   ),
                 ),
