@@ -6,6 +6,7 @@ import 'package:healthclick_app/screens/auth/ForgotPassword.dart';
 import 'package:healthclick_app/screens/welcome/OnBoarding.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:healthclick_app/screens/welcome/SplashScreen.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -85,7 +86,8 @@ class _LoginState extends State<Login> {
 
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => OnBoarding()),
+        // MaterialPageRoute(builder: (context) => OnBoarding()),
+        MaterialPageRoute(builder: (context) => SplashScreen()),
       );
     } on FirebaseAuthException catch (e) {
       String message = 'Login failed.';

@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:getwidget/getwidget.dart';
 import 'package:healthclick_app/models/CartProvider.dart';
@@ -107,6 +108,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+      User? currentUser = FirebaseAuth.instance.currentUser;
     return Scaffold(
       body: SingleChildScrollView(
         child: Padding(
@@ -117,16 +119,18 @@ class _HomePageState extends State<HomePage> {
             children: [
               const SizedBox(height: 10),
               // User Greeting Section
-              const ListTile(
+              ListTile(
                   leading: CircleAvatar(
-                    radius: 25,
-                    backgroundImage: AssetImage("assets/dif.jpg"),
-                  ),
-                  title: Text(
-                    "Olá Mauro Peniel",
-                    style: TextStyle(fontSize: 15),
-                  ),
-                  subtitle: Text(
+                  radius: 25,
+                  backgroundImage: currentUser?.photoURL != null
+                      ? NetworkImage(currentUser!.photoURL!)
+                      : const AssetImage("assets/dif.jpg") as ImageProvider,
+                ),
+                title: Text(
+                  "Olá ${currentUser?.displayName ?? currentUser?.email?.split('@')[0] ?? 'Visitante'}",
+                  style: const TextStyle(fontSize: 15),
+                ),
+                  subtitle: const Text(
                     "O que você deseja?",
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
                   ),
