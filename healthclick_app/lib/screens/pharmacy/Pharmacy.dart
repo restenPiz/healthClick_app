@@ -1,8 +1,11 @@
 // ignore_for_file: prefer_const_constructors
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:healthclick_app/screens/layouts/AppBottom.dart';
 import 'package:healthclick_app/screens/pharmacy/PharmacyDetails.dart';
+import 'package:http/http.dart' as http;
 
 class Pharmacy extends StatefulWidget {
   const Pharmacy({super.key});
@@ -15,40 +18,51 @@ class _PharmacyState extends State<Pharmacy> {
 
    int _currentIndex = 2;
 
+  //*Start method to fetch the datas
+  
+  List<Map<String, dynamic>> pharmacies = [];
+  Future<void> getPharmacies() async {
+    try {
+      var url = Uri.parse('http://192.168.100.139:8000/api/pharmacies');
+      var response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        var jsonData = json.decode(response.body);
+        List<dynamic> data = jsonData['pharmacies'];
+
+        setState(() {
+          pharmacies = data.map((pharmacy) {
+            return {
+              "id": pharmacy['id'],
+              "name": pharmacy['pharmacy_name'],
+              "location": pharmacy['pharmacy_location'],
+              "contact": pharmacy['pharmacy_contact'],
+              "image":
+                  pharmacy['pharmacy_file'], // Aqui está o arquivo da imagem
+              "description": pharmacy['pharmacy_description'],
+              "userEmail": pharmacy['user']['email'],  // Acessando o email do usuário
+              "userName": pharmacy['user']['name'],  
+            };
+          }).toList();
+        });
+      }
+    } catch (e) {
+      print('Erro: $e');
+      throw Exception('Falha ao carregar farmacias');
+    }
+  }
+
   void _onTap(int index) {
     setState(() {
       _currentIndex = index;
     });
   }
 
-  // Dados fictícios de farmácias
-  final List<Map<String, String>> pharmacies = [
-    {
-      'name': 'Farmácia São João',
-      'address': 'Rua A, 123',
-      'image': 'assets/pharmacy1.jpg'
-    },
-    {
-      'name': 'Farmácia Popular',
-      'address': 'Rua B, 456',
-      'image': 'assets/pharmacy2.jpg'
-    },
-    {
-      'name': 'Farmácia do Trabalhador',
-      'address': 'Rua C, 789',
-      'image': 'assets/pharmacy3.jpg'
-    },
-    {
-      'name': 'Farmácia Milagre',
-      'address': 'Rua D, 101',
-      'image': 'assets/pharmacy4.jpg'
-    },
-    {
-      'name': 'Farmácia Bem Estar',
-      'address': 'Rua E, 202',
-      'image': 'assets/pharmacy5.jpg'
-    },
-  ];
+  @override
+  void initState() {
+    super.initState();
+    getPharmacies();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -91,13 +105,17 @@ class _PharmacyState extends State<Pharmacy> {
                     child: ListTile(
                       leading: CircleAvatar(
                         radius: 25,
-                        backgroundImage: AssetImage(pharmacy['image']!),
+                         backgroundImage: pharmacy['image'] != null
+                            ? NetworkImage(
+                                'http://192.168.100.139:8000/storage/${pharmacy['image']}')
+                            : AssetImage('assets/images/default_pharmacy.png')
+                                as ImageProvider,
                       ),
                       title: Text(
                         pharmacy['name']!,
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
-                      subtitle: Text(pharmacy['address']!),
+                      subtitle: Text('Proprietario: ${pharmacy['userName']!}'),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () {
                        Navigator.push(
