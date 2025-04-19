@@ -11,7 +11,7 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
     // Redireciona após 2 segundos
-    Future.delayed(Duration(seconds: 2), () {
+    Future.delayed(Duration(seconds: 4), () {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => OnBoarding()),
@@ -30,8 +30,8 @@ class _SplashScreenState extends State<SplashScreen> {
             // Icon(Icons.health_and_safety, size: 80, color: Colors.green),
             Image.asset(
               "assets/Saude.png",
-              width: 150,
-              height: 150,
+              width: 240,
+              height: 240,
               fit: BoxFit.contain,
             ),
             SizedBox(height: 20),

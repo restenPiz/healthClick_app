@@ -1,10 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:healthclick_app/screens/auth/Login.dart';
-import 'package:healthclick_app/screens/layouts/AppBottom.dart';
 
 class ProductDetails extends StatefulWidget {
-  const ProductDetails({super.key});
+  final Map<String, dynamic> product;
+
+  const ProductDetails({super.key, required this.product});
 
   @override
   State<ProductDetails> createState() => _ProductDetailsState();
@@ -21,60 +21,61 @@ class _ProductDetailsState extends State<ProductDetails> {
 
   @override
   Widget build(BuildContext context) {
+    final product = widget.product; // ✅ Correto: dentro do build()
     User? currentUser = FirebaseAuth.instance.currentUser;
+
     return Scaffold(
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ListTile modificada com o IconButton de voltar
               ListTile(
                 leading: IconButton(
                   icon: const Icon(Icons.arrow_back),
                   onPressed: () {
-                    Navigator.pop(context); // Voltar para a tela anterior
+                    Navigator.pop(context);
                   },
                 ),
-                
                 title: Text(
                   "Olá ${currentUser?.displayName ?? currentUser?.email?.split('@')[0] ?? 'Visitante'}",
                   style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black),
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
                 ),
               ),
-              const SizedBox(
-                height: 30,
-              ),
+              const SizedBox(height: 30),
               const Center(
-                child: Text('Detalhes do Produto',
-                    style:
-                        TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+                child: Text(
+                  'Detalhes do Produto',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                ),
               ),
               const SizedBox(height: 30),
               Container(
-                width: 500,
+                width: double.infinity,
                 height: 400,
                 margin: const EdgeInsets.all(8.0),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(20),
-                  child: Image.asset(
-                    'assets/back3.jpg',
+                  child: Image.network(
+                    product['image'],
                     fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return const Icon(Icons.error);
+                    },
                   ),
                 ),
               ),
-              const SizedBox(
-                height: 20,
-              ),
+              const SizedBox(height: 20),
               ListTile(
-                leading: const Text(
-                  'Paracetamol',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 19),
+                leading: Text(
+                  product['name'],
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 19),
                 ),
                 trailing: ClipRRect(
                   borderRadius: BorderRadius.circular(20),
@@ -82,42 +83,39 @@ class _ProductDetailsState extends State<ProductDetails> {
                     width: 150,
                     height: 24,
                     color: Colors.blue,
-                    child: const Center(
+                    child: Center(
                       child: Text(
-                        'Categoria',
-                        style: TextStyle(color: Colors.white, fontSize: 15),
+                        product['category'],
+                        style:
+                            const TextStyle(color: Colors.white, fontSize: 15),
                       ),
                     ),
                   ),
                 ),
               ),
-              const SizedBox(
-                height: 10,
-              ),
-              const Text(
-                'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrys standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged.',
+              const SizedBox(height: 10),
+              Text(
+                product['description'],
                 textAlign: TextAlign.justify,
               ),
-              const SizedBox(
-                height: 10,
-              ),
-              const ListTile(
+              const SizedBox(height: 10),
+              ListTile(
                 leading: Text(
-                  '100MT',
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20,
-                      color: Colors.blue),
+                  '${product['price']} MZN',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                    color: Colors.blue,
+                  ),
                 ),
               ),
-              const SizedBox(
-                height: 10,
-              ),
+              const SizedBox(height: 10),
               Center(
                 child: SizedBox(
-                  width: double.infinity, // ✅ Makes button full width
+                  width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () {
+                      // Aqui podes chamar a lógica de adicionar ao carrinho
                       Navigator.pop(context);
                     },
                     style: ElevatedButton.styleFrom(

@@ -35,10 +35,6 @@ class _SplashLoginState extends State<SplashLogin> {
           height: 240,
           fit: BoxFit.cover,
         ),
-        // child: Text(
-        //   'Splash funcionando...',
-        //   style: TextStyle(fontSize: 20),
-        // ),
       ),
     );
   }
