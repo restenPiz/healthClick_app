@@ -34,10 +34,10 @@ class _ProfileEditState extends State<ProfileEdit> {
                   ),
                 ),
               ),
-              const SizedBox(height: 30),
+              const SizedBox(height: 50),
               const Center(
                 child: CircleAvatar(
-                  radius: 100,
+                  radius: 70,
                   backgroundImage: AssetImage("assets/dif.jpg"),
                 ),
               ),
@@ -64,7 +64,7 @@ class _ProfileEditState extends State<ProfileEdit> {
                 indent: 20,
                 endIndent: 20,
               ),
-              const SizedBox(height: 30),
+              const SizedBox(height: 25),
               TextField(
                 decoration: InputDecoration(
                   border: OutlineInputBorder(
@@ -86,7 +86,7 @@ class _ProfileEditState extends State<ProfileEdit> {
                   prefixIcon: const Icon(Icons.person_2),
                 ),
               ),
-              const SizedBox(height: 15,),
+              const SizedBox(height: 10,),
               TextField(
                 decoration: InputDecoration(
                   border: OutlineInputBorder(
@@ -104,7 +104,7 @@ class _ProfileEditState extends State<ProfileEdit> {
                     borderSide:
                         const BorderSide(color: Colors.blue), // Cor da borda ao focar
                   ),
-                  hintText: 'Escreva o seu nome',
+                  hintText: 'Escreva o seu email',
                   prefixIcon: const Icon(Icons.email),
                 ),
               ),
@@ -121,11 +121,11 @@ class _ProfileEditState extends State<ProfileEdit> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green,
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 20),
+                    padding: const EdgeInsets.symmetric(vertical: 15),
                   ),
                   child: const Text(
-                    'Actualizar os Dados',
-                    style: TextStyle(fontSize: 20),
+                    'Actualizar Dados',
+                    style: TextStyle(fontSize: 17),
                   ),
                 ),
               ),
