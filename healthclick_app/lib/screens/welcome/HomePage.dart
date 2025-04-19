@@ -272,96 +272,99 @@ class _HomePageState extends State<HomePage> {
               const SizedBox(height: 20),
 
               // Product section
-              products.isNotEmpty
-                  ? GridView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2, // Duas colunas
-                        crossAxisSpacing: 8,
-                        mainAxisSpacing: 8,
-                        childAspectRatio: 0.48, // 0.75 Ajuste do childAspectRatio
-                      ),
-                      itemCount: products.length,
-                      itemBuilder: (context, index) {
-                        return GestureDetector(
-                          onTap: () {
-                          },
-                          child: Card(
-                            elevation: 2,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+              GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 8,
+                  mainAxisSpacing: 8,
+                  childAspectRatio: 0.55,
+                ),
+                itemCount: products.length,
+                itemBuilder: (context, index) {
+                  final product = products[index];
+
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) => ProductDetails(product: product)),
+                      );
+                    },
+                    child: Card(
+                      elevation: 2,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          ListTile(
+                            leading: Text(
+                              product['category'] ?? 'Categoria',
+                              style: const TextStyle(fontSize: 13),
                             ),
-                            child: Column(
+                          ),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Image.network(
+                              product['image'],
+                              width: double.infinity,
+                              height: 150,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return const Icon(Icons.broken_image,
+                                    size: 120);
+                              },
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(
+                              product['name'],
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const Divider(
+                              thickness: 1, indent: 10, endIndent: 10),
+                          Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 8.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                ListTile(
-                                  title: Text(
-                                    "${products[index]['category']}",
-                                    style: TextStyle(fontSize: 13),
+                                Text(
+                                  "${product['price']} MZN",
+                                  style: const TextStyle(
+                                      fontSize: 14, color: Colors.blue),
+                                ),
+                                ElevatedButton(
+                                  onPressed: () {
+                                    // Adicionar ao carrinho
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.green,
+                                    shape: const CircleBorder(),
+                                    padding: const EdgeInsets.all(8),
                                   ),
-                                ),
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(12),
-                                  child: Image.network(
-                                      products[index]['image']!,
-                                      fit: BoxFit.cover,
-                                      errorBuilder:
-                                          (context, error, stackTrace) {
-                                        return Text('Erro ao carregar imagem');
-                                      },
-                                    ),
-                                ),
-                                const SizedBox(
-                                  height: 6,
-                                ),
-                                ListTile(
-                                  leading: Text(
-                                    products[index]['name']!,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 15,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
-                                const Divider(
-                                  thickness: 2,
-                                  indent: 20,
-                                  endIndent: 20,
-                                ),
-                                ListTile(
-                                  leading: Text(
-                                    '${products[index]['price']} MZN',
-                                    style: const TextStyle(
-                                        fontSize: 14, color: Colors.green),
-                                  ),
-                                  trailing: ElevatedButton(
-                                    onPressed: () {
-                                      // Ação do botão, por exemplo, adicionar ao carrinho
-                                    },
-                                    child: const Icon(Icons.add),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.green,
-                                      foregroundColor: Colors.white,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(100),
-                                      ),
-                                      padding: const EdgeInsets.symmetric(
-                                          vertical: 6, horizontal: 12),
-                                    ),
-                                  ),
+                                  child: const Icon(Icons.add,
+                                      color: Colors.white),
                                 ),
                               ],
                             ),
                           ),
-                        );
-                      },
-                    )
-                  : const Center(
-                      child:
-                          CircularProgressIndicator()),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
             ],
           ),
         ),
