@@ -45,9 +45,11 @@ void main() async {
         DefaultFirebaseOptions.currentPlatform, // Usar as opções do firebase
   );
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => ThemeProvider(),
-      // create: (_) => CartProvider(),
+     MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => CartProvider()),
+      ],
       child: const MyApp(),
     ),
   );
