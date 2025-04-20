@@ -4,9 +4,12 @@ import 'dart:convert';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:healthclick_app/models/CartProvider.dart';
+import 'package:healthclick_app/screens/cart/Cart.dart';
 import 'package:healthclick_app/screens/layouts/AppBottom.dart';
 import 'package:healthclick_app/screens/pharmacy/PharmacyDetails.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 
 class Pharmacy extends StatefulWidget {
   const Pharmacy({super.key});
@@ -68,6 +71,7 @@ class _PharmacyState extends State<Pharmacy> {
   @override
   Widget build(BuildContext context) {
     User? currentUser = FirebaseAuth.instance.currentUser;
+    final cart = Provider.of<CartProvider>(context);
     return Scaffold(
       body: SingleChildScrollView(
         child: Padding(
@@ -142,13 +146,44 @@ class _PharmacyState extends State<Pharmacy> {
         currentIndex: _currentIndex,
         onTap: _onTap,
       ),
-      floatingActionButton: FloatingActionButton(
-          backgroundColor: Colors.green,
-          child: const Icon(
-            Icons.shopping_cart,
-            color: Colors.white,
+      floatingActionButton: Stack(
+        alignment: Alignment.topRight,
+        children: [
+          FloatingActionButton(
+            backgroundColor: Colors.green,
+            child: const Icon(Icons.shopping_cart, color: Colors.white),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const Cart()),
+              );
+            },
           ),
-          onPressed: () {}),
+          if (cart.itemCount > 0)
+            Positioned(
+              right: 0,
+              child: Container(
+                padding: const EdgeInsets.all(2),
+                decoration: BoxDecoration(
+                  color: Colors.red,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                constraints: const BoxConstraints(
+                  minWidth: 18,
+                  minHeight: 18,
+                ),
+                child: Text(
+                  '${cart.itemCount}',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 }

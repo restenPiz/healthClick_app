@@ -1,9 +1,12 @@
 import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:healthclick_app/models/CartProvider.dart';
+import 'package:healthclick_app/screens/cart/Cart.dart';
 import 'package:healthclick_app/screens/layouts/AppBottom.dart';
 import 'package:healthclick_app/screens/product/ProductDetails.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 
 class Product extends StatefulWidget {
   const Product({super.key});
@@ -61,10 +64,58 @@ class _ProductState extends State<Product> {
       _currentIndex = index;
     });
   }
+  
+   void _addToCart(Map<String, dynamic> product, BuildContext context) {
+      try {
+        // Imprimir dados para depuração
+        print('Dados do produto: $product');
+        
+        // Verificar e obter valores com segurança
+        final String productId = product['id']?.toString() ?? 
+                            DateTime.now().millisecondsSinceEpoch.toString();
+        final String name = product['name']?.toString() ?? 'Produto';
+        final double price = product['price'] is num ? 
+                            (product['price'] as num).toDouble() : 0.0;
+        final String image = product['image']?.toString() ?? '';
+        
+        // Registrar valores para depuração
+        print('ID usado: $productId');
+        print('Nome usado: $name');
+        print('Preço usado: $price');
+        print('Imagem usada: $image');
+        
+        // Adicionar ao carrinho
+        final cart = Provider.of<CartProvider>(context, listen: false);
+        cart.addItem(productId, name, price, image);
+        
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Produto adicionado ao carrinho!'),
+            duration: const Duration(seconds: 2),
+            action: SnackBarAction(
+              label: 'DESFAZER',
+              onPressed: () {
+                cart.removeSingleItem(productId);
+              },
+            ),
+          ),
+        );
+      } catch (e) {
+        print('Erro ao adicionar ao carrinho: $e');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao adicionar ao carrinho: $e'),
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    }
 
   @override
   Widget build(BuildContext context) {
     User? currentUser = FirebaseAuth.instance.currentUser;
+    final cart = Provider.of<CartProvider>(context);
 
     return Scaffold(
       body: SingleChildScrollView(
@@ -183,9 +234,7 @@ class _ProductState extends State<Product> {
                                       fontSize: 14, color: Colors.blue),
                                 ),
                                 ElevatedButton(
-                                  onPressed: () {
-                                    // Adicionar ao carrinho
-                                  },
+                                  onPressed: () => _addToCart(product, context),
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.green,
                                     shape: const CircleBorder(),
@@ -211,12 +260,43 @@ class _ProductState extends State<Product> {
         currentIndex: _currentIndex,
         onTap: _onTap,
       ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.green,
-        child: const Icon(Icons.shopping_cart, color: Colors.white),
-        onPressed: () {
-          // Ação ao abrir o carrinho
-        },
+      floatingActionButton: Stack(
+        alignment: Alignment.topRight,
+        children: [
+          FloatingActionButton(
+            backgroundColor: Colors.green,
+            child: const Icon(Icons.shopping_cart, color: Colors.white),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const Cart()),
+              );
+            },
+          ),
+          if (cart.itemCount > 0)
+            Positioned(
+              right: 0,
+              child: Container(
+                padding: const EdgeInsets.all(2),
+                decoration: BoxDecoration(
+                  color: Colors.red,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                constraints: const BoxConstraints(
+                  minWidth: 18,
+                  minHeight: 18,
+                ),
+                child: Text(
+                  '${cart.itemCount}',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }

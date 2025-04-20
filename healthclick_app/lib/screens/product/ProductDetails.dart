@@ -1,5 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:healthclick_app/models/CartProvider.dart';
+import 'package:provider/provider.dart';
 
 class ProductDetails extends StatefulWidget {
   final Map<String, dynamic> product;
@@ -19,11 +21,58 @@ class _ProductDetailsState extends State<ProductDetails> {
     });
   }
 
+void _addToCart(Map<String, dynamic> product, BuildContext context) {
+    try {
+      // Imprimir dados para depuração
+      print('Dados do produto: $product');
+
+      // Verificar e obter valores com segurança
+      final String productId = product['id']?.toString() ??
+          DateTime.now().millisecondsSinceEpoch.toString();
+      final String name = product['name']?.toString() ?? 'Produto';
+      final double price =
+          product['price'] is num ? (product['price'] as num).toDouble() : 0.0;
+      final String image = product['image']?.toString() ?? '';
+
+      // Registrar valores para depuração
+      print('ID usado: $productId');
+      print('Nome usado: $name');
+      print('Preço usado: $price');
+      print('Imagem usada: $image');
+
+      // Adicionar ao carrinho
+      final cart = Provider.of<CartProvider>(context, listen: false);
+      cart.addItem(productId, name, price, image);
+
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Produto adicionado ao carrinho!'),
+          duration: const Duration(seconds: 2),
+          action: SnackBarAction(
+            label: 'DESFAZER',
+            onPressed: () {
+              cart.removeSingleItem(productId);
+            },
+          ),
+        ),
+      );
+    } catch (e) {
+      print('Erro ao adicionar ao carrinho: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erro ao adicionar ao carrinho: $e'),
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    }
+  }
+  
   @override
   Widget build(BuildContext context) {
     final product = widget.product; // ✅ Correto: dentro do build()
     User? currentUser = FirebaseAuth.instance.currentUser;
-
+    final cart = Provider.of<CartProvider>(context);
     return Scaffold(
       body: SingleChildScrollView(
         child: Padding(
@@ -106,10 +155,7 @@ class _ProductDetailsState extends State<ProductDetails> {
                 child: SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: () {
-                      // Aqui podes chamar a lógica de adicionar ao carrinho
-                      Navigator.pop(context);
-                    },
+                    onPressed: () => _addToCart(product, context),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green,
                       foregroundColor: Colors.white,
