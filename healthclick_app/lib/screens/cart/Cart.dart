@@ -9,6 +9,21 @@ import 'package:firebase_auth/firebase_auth.dart';
 class Cart extends StatelessWidget {
   const Cart({super.key});
 
+  Future<int?> buscarUserId(String firebaseUid) async {
+    print("Buscando user_id para Firebase UID: $firebaseUid"); // Log para depuração
+    final url = Uri.parse('http://192.168.100.139:8000/api/user-by-firebase/$firebaseUid');
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      print("User ID encontrado: ${data['user_id']}"); // Log do ID encontrado
+      return data['user_id'];
+    } else {
+      print("Erro ao buscar user_id: ${response.body}");
+      return null;
+    }
+  }
+
   Future<bool> _realizarPagamento(BuildContext context, String numero,
     String valor, CartProvider cart) async {
     final url = Uri.parse('http://192.168.100.139:8000/api/payment');
@@ -18,7 +33,8 @@ class Cart extends StatelessWidget {
     final payload = {
       "numero": numero,
       "valor": double.parse(valor),
-      "user_id": userId,
+      // "user_id": userId,
+       "firebase_uid": userId,
       "items": cart.items.entries
           .map((entry) => {
                 "name": entry.value.name,
@@ -107,7 +123,21 @@ class Cart extends StatelessWidget {
   }
 
   //*Method to fetch Sales
-  Future<List<dynamic>> _fetchOrderHistory(String userId) async {
+  Future<List<dynamic>> _fetchOrderHistory() async {
+  try {
+    // Obter o UID do usuário atual do Firebase
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      throw Exception('Usuário não autenticado');
+    }
+    
+    // Obter o user_id correspondente no backend usando a API
+    final userId = await buscarUserId(user.uid);
+    if (userId == null) {
+      throw Exception('ID de usuário não encontrado no backend');
+    }
+    
+    // Buscar o histórico de vendas
     final url = Uri.parse('http://192.168.100.139:8000/api/sales/$userId');
     final response = await http.get(url);
 
@@ -115,9 +145,89 @@ class Cart extends StatelessWidget {
       final responseData = json.decode(response.body);
       return responseData['data'];
     } else {
-      throw Exception('Erro ao buscar histórico');
+      throw Exception('Erro ao buscar histórico: ${response.statusCode}');
     }
+  } catch (e) {
+    print('Erro ao buscar histórico de compras: $e');
+    return [];
   }
+}
+
+
+
+void _showOrderHistory(BuildContext context) async {
+  showDialog(
+    context: context,
+    builder: (ctx) => const Center(
+      child: CircularProgressIndicator(),
+    ),
+  );
+  
+  try {
+    final orders = await _fetchOrderHistory();
+    
+    // Fechar o indicador de carregamento
+    Navigator.of(context).pop();
+    
+    // Mostrar o histórico
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (ctx) => Container(
+        height: MediaQuery.of(context).size.height * 0.7,
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Histórico de Compras',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
+            Expanded(
+              child: orders.isEmpty
+                ? const Center(child: Text('Nenhuma compra encontrada'))
+                : ListView.builder(
+                    itemCount: orders.length,
+                    itemBuilder: (ctx, i) {
+                      final order = orders[i];
+                      return Card(
+                        margin: const EdgeInsets.symmetric(vertical: 8),
+                        child: ListTile(
+                          title: Text(order['product_name'] ?? 'Produto'),
+                          subtitle: Text('Quantidade: ${order['quantity']}'),
+                          trailing: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text('${double.parse(order['price'].toString()).toStringAsFixed(2)} MZN'),
+                              Text(
+                                DateTime.parse(order['sold_at']).toString().substring(0, 16),
+                                style: TextStyle(fontSize: 12, color: Colors.grey),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+            ),
+          ],
+        ),
+      ),
+    );
+  } catch (e) {
+    // Fechar o indicador de carregamento se ainda estiver aberto
+    Navigator.of(context, rootNavigator: true).pop();
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Erro ao carregar histórico: $e'),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -156,40 +266,10 @@ class Cart extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.receipt_long),
             onPressed: () {
-              Scaffold.of(context).openEndDrawer();
+               _showOrderHistory(context);
             },
           ),
         ],
-      ),
-      endDrawer: Drawer(
-        child: SafeArea(
-          child: Column(
-            children: [
-              const Padding(
-                padding: EdgeInsets.all(16.0),
-                child: Text(
-                  'Resumo da Compra',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-              ),
-              Expanded(
-                child: cart.items.isEmpty
-                    ? const Center(child: Text('Carrinho vazio'))
-                    : ListView.builder(
-                        itemCount: cart.items.length,
-                        itemBuilder: (ctx, i) {
-                          final item = cart.items.values.toList()[i];
-                          return ListTile(
-                            title: Text(item.name),
-                            subtitle: Text('x${item.quantity}'),
-                            trailing: Text('${(item.price * item.quantity).toStringAsFixed(2)} MZN'),
-                          );
-                        },
-                      ),
-              ),
-            ],
-          ),
-        ),
       ),
       body: Column(
         children: [
