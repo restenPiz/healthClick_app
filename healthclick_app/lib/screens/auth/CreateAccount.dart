@@ -5,6 +5,8 @@ import 'package:healthclick_app/screens/auth/Login.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:healthclick_app/screens/welcome/OnBoarding.dart';
+import 'dart:convert'; // para jsonEncode
+import 'package:http/http.dart' as http; // para http.post
 
 class CreateAccount extends StatefulWidget {
   const CreateAccount({super.key});
@@ -185,18 +187,41 @@ class _CreateAccountState extends State<CreateAccount> {
                           }
 
                           try {
-                            // ignore: unused_local_variable
-                            final credential = await FirebaseAuth.instance
-                                .createUserWithEmailAndPassword(
-                              email: emailController.text.trim(),
-                              password: passwordController.text.trim(),
-                            );
+                            final email = emailController.text.trim();
+                            final password = passwordController.text.trim();
 
+                            // Cria o usuário no Firebase
+                            final credential = await FirebaseAuth.instance
+                                .createUserWithEmailAndPassword(email: email, password: password);
+
+                            final user = FirebaseAuth.instance.currentUser;
+
+                            if (user != null) {
+                              final uid = user.uid;
+
+                              // 🔁 Envia o UID e o email para o backend Laravel
+                              final response = await http.post(
+                                Uri.parse('http://192.168.100.139:8000/api/sync-firebase-uid'),
+                                headers: {'Content-Type': 'application/json'},
+                                body: jsonEncode({
+                                  'firebase_uid': user.uid,
+                                  'email': user.email ?? '',
+                                  'name': user.displayName ?? 'Usuário Firebase',
+                                }),
+                              );
+
+                              if (response.statusCode == 200) {
+                                print('✅ UID sincronizado com sucesso.');
+                              } else {
+                                print('❌ Erro ao sincronizar UID: ${response.body}');
+                              }
+                            }
+
+                            // Mostra sucesso e navega para a próxima tela
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(content: Text('Account created successfully')),
                             );
 
-                            // Aqui você pode redirecionar para a home ou tela de login
                             Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(builder: (context) => const OnBoarding()),
