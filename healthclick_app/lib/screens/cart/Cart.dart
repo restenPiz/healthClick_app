@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:healthclick_app/models/CartProvider.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
-
+import 'package:firebase_auth/firebase_auth.dart';
 class Cart extends StatelessWidget {
   const Cart({super.key});
 
@@ -106,6 +106,19 @@ class Cart extends StatelessWidget {
     }
   }
 
+  //*Method to fetch Sales
+  Future<List<dynamic>> _fetchOrderHistory(String userId) async {
+    final url = Uri.parse('http://192.168.100.139:8000/api/sales/$userId');
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final responseData = json.decode(response.body);
+      return responseData['data'];
+    } else {
+      throw Exception('Erro ao buscar histórico');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final cart = Provider.of<CartProvider>(context);
@@ -122,8 +135,7 @@ class Cart extends StatelessWidget {
                   context: context,
                   builder: (ctx) => AlertDialog(
                     title: const Text('Tem certeza?'),
-                    content: const Text(
-                        'Deseja remover todos os itens do carrinho?'),
+                    content: const Text('Deseja remover todos os itens do carrinho?'),
                     actions: [
                       TextButton(
                         child: const Text('Não'),
@@ -141,7 +153,43 @@ class Cart extends StatelessWidget {
                 );
               },
             ),
+          IconButton(
+            icon: const Icon(Icons.receipt_long),
+            onPressed: () {
+              Scaffold.of(context).openEndDrawer();
+            },
+          ),
         ],
+      ),
+      endDrawer: Drawer(
+        child: SafeArea(
+          child: Column(
+            children: [
+              const Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Text(
+                  'Resumo da Compra',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+              ),
+              Expanded(
+                child: cart.items.isEmpty
+                    ? const Center(child: Text('Carrinho vazio'))
+                    : ListView.builder(
+                        itemCount: cart.items.length,
+                        itemBuilder: (ctx, i) {
+                          final item = cart.items.values.toList()[i];
+                          return ListTile(
+                            title: Text(item.name),
+                            subtitle: Text('x${item.quantity}'),
+                            trailing: Text('${(item.price * item.quantity).toStringAsFixed(2)} MZN'),
+                          );
+                        },
+                      ),
+              ),
+            ],
+          ),
+        ),
       ),
       body: Column(
         children: [
