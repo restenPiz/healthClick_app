@@ -11,99 +11,100 @@ class Cart extends StatelessWidget {
 
   Future<bool> _realizarPagamento(BuildContext context, String numero,
     String valor, CartProvider cart) async {
-  final url = Uri.parse('http://192.168.100.139:8000/api/payment');
-  
-  // Construir payload
-  final payload = {
-    "numero": numero,
-    "valor": double.parse(valor),
-    "user_id": 1,
-    "items": cart.items.entries
-        .map((entry) => {
-              "name": entry.value.name,
-              "price": entry.value.price,
-              "quantity": entry.value.quantity,
-            })
-        .toList(),
-  };
-  
-  print('Payload enviado: ${json.encode(payload)}');
+    final url = Uri.parse('http://192.168.100.139:8000/api/payment');
+    final user = FirebaseAuth.instance.currentUser;
+    final userId = user?.uid;
 
-  try {
-    // Mostrar indicador de carregamento
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (ctx) => const Center(
-        child: CircularProgressIndicator(),
-      ),
-    );
+    final payload = {
+      "numero": numero,
+      "valor": double.parse(valor),
+      "user_id": userId,
+      "items": cart.items.entries
+          .map((entry) => {
+                "name": entry.value.name,
+                "price": entry.value.price,
+                "quantity": entry.value.quantity,
+              })
+          .toList(),
+    };
     
-    final response = await http.post(
-      url,
-      headers: {'Content-Type': 'application/json'},
-      body: json.encode(payload),
-    );
-    
-    // Fechar o indicador de carregamento
-    Navigator.of(context).pop();
-    
-    print('Status code: ${response.statusCode}');
-    print('Resposta completa: ${response.body}');
+    print('Payload enviado: ${json.encode(payload)}');
 
-    if (response.statusCode == 200) {
-      final responseData = json.decode(response.body);
+    try {
+      // Mostrar indicador de carregamento
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (ctx) => const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
       
-      if (responseData['status'] == 'success') {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Pagamento realizado com sucesso!'),
-            backgroundColor: Colors.green,
-          ),
-        );
-        return true;
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode(payload),
+      );
+      
+      // Fechar o indicador de carregamento
+      Navigator.of(context).pop();
+      
+      print('Status code: ${response.statusCode}');
+      print('Resposta completa: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        
+        if (responseData['status'] == 'success') {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Pagamento realizado com sucesso!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+          return true;
+        } else {
+          String message = responseData['message'] ?? 'Erro desconhecido';
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Falha: $message'),
+              backgroundColor: Colors.orange,
+            ),
+          );
+          return false;
+        }
       } else {
-        String message = responseData['message'] ?? 'Erro desconhecido';
+        Map<String, dynamic> errorData = {};
+        try {
+          errorData = json.decode(response.body);
+        } catch (e) {
+          // Se não for um JSON válido, usa o corpo como está
+        }
+        
+        String errorMessage = errorData['message'] ?? response.body;
+        
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Falha: $message'),
-            backgroundColor: Colors.orange,
+            content: Text('Erro ($response.statusCode): $errorMessage'),
+            backgroundColor: Colors.red,
           ),
         );
         return false;
       }
-    } else {
-      Map<String, dynamic> errorData = {};
-      try {
-        errorData = json.decode(response.body);
-      } catch (e) {
-        // Se não for um JSON válido, usa o corpo como está
-      }
+    } catch (e) {
+      // Fechar o indicador de carregamento se ainda estiver aberto
+      Navigator.of(context, rootNavigator: true).pop();
       
-      String errorMessage = errorData['message'] ?? response.body;
-      
+      print('Exceção: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Erro ($response.statusCode): $errorMessage'),
+          content: Text('Erro de conexão: $e'),
           backgroundColor: Colors.red,
         ),
       );
       return false;
     }
-  } catch (e) {
-    // Fechar o indicador de carregamento se ainda estiver aberto
-    Navigator.of(context, rootNavigator: true).pop();
-    
-    print('Exceção: $e');
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Erro de conexão: $e'),
-        backgroundColor: Colors.red,
-      ),
-    );
-    return false;
   }
-}
 
   @override
   Widget build(BuildContext context) {
