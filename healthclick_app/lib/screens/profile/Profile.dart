@@ -6,6 +6,7 @@ import 'package:healthclick_app/screens/layouts/AppBottom.dart';
 import 'package:healthclick_app/screens/profile/ProfileEdit.dart';
 import 'package:healthclick_app/screens/welcome/SplashLogin.dart';
 import 'package:provider/provider.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class Profile extends StatefulWidget {
   const Profile({super.key});
@@ -105,14 +106,18 @@ class _ProfileState extends State<Profile> {
               SizedBox(
                 width: double.infinity, // ✅ Makes button full width
                 child: ElevatedButton(
-                  onPressed: () {
-                    // Navigator.push(
-                    //   context,
-                    //   MaterialPageRoute(builder: (context) => const Login()),
-                    // );
-                    Navigator.push(
+                  onPressed: () async {
+                    //* Deslogar do Firebase
+                    await FirebaseAuth.instance.signOut();
+
+                    //* Deslogar do Google também (opcional mas recomendado)
+                    await GoogleSignIn().signOut();
+
+                    //* Navegar para tela de login (SplashLogin, por exemplo)
+                    Navigator.pushAndRemoveUntil(
                       context,
                       MaterialPageRoute(builder: (context) => const SplashLogin()),
+                      (route) => false, // Remove todas as rotas anteriores
                     );
                   },
                   style: ElevatedButton.styleFrom(

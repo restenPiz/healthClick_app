@@ -19,12 +19,14 @@ class AppBottomNav extends StatefulWidget {
 }
 
 class _AppBottomNavState extends State<AppBottomNav> {
+  
   final List<Widget> _screens = [
     const HomePage(), 
     const Product(), 
     const Pharmacy(),
     const Profile(),
   ];
+
   @override
   Widget build(BuildContext context) {
     return BottomNavigationBar(

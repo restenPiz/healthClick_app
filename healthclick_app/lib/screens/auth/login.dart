@@ -95,67 +95,67 @@ class _LoginState extends State<Login> {
 
   //*Start with the methods to manage the responses and redirects of login
   Future<void> _login() async {
-  try {
-    final email = emailController.text.trim();
-    final password = passwordController.text.trim();
+    try {
+      final email = emailController.text.trim();
+      final password = passwordController.text.trim();
 
-    if (email.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Please enter both email and password.")),
-      );
-      return;
-    }
-
-    // Autentica com Firebase
-    await FirebaseAuth.instance.signInWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
-
-    // Obtem o usuário autenticado
-    final user = FirebaseAuth.instance.currentUser;
-
-    if (user != null) {
-      final uid = user.uid;
-
-      // 🔁 Envia o UID e o e-mail para o backend Laravel
-      final response = await http.post(
-        Uri.parse('http://192.168.100.139:8000/api/sync-firebase-uid'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'firebase_uid': uid,
-          'email': email,
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        print('✅ UID sincronizado com sucesso.');
-      } else {
-        print('❌ Erro ao sincronizar UID: ${response.body}');
+      if (email.isEmpty || password.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Please enter both email and password.")),
+        );
+        return;
       }
+
+      // Autentica com Firebase
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      // Obtem o usuário autenticado
+      final user = FirebaseAuth.instance.currentUser;
+
+      if (user != null) {
+        final uid = user.uid;
+
+        // 🔁 Envia o UID e o e-mail para o backend Laravel
+        final response = await http.post(
+          Uri.parse('http://192.168.100.139:8000/api/sync-firebase-uid'),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({
+            'firebase_uid': uid,
+            'email': email,
+          }),
+        );
+
+        if (response.statusCode == 200) {
+          print('✅ UID sincronizado com sucesso.');
+        } else {
+          print('❌ Erro ao sincronizar UID: ${response.body}');
+        }
+      }
+
+      // Navega para próxima tela
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => SplashScreen()),
+      );
+    } on FirebaseAuthException catch (e) {
+      String message = 'Login failed.';
+
+      if (e.code == 'user-not-found') {
+        message = 'User not found.';
+      } else if (e.code == 'wrong-password') {
+        message = 'Incorrect password.';
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message)),
+      );
+    } catch (e) {
+      print('Erro inesperado: $e');
     }
-
-    // Navega para próxima tela
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => SplashScreen()),
-    );
-  } on FirebaseAuthException catch (e) {
-    String message = 'Login failed.';
-
-    if (e.code == 'user-not-found') {
-      message = 'User not found.';
-    } else if (e.code == 'wrong-password') {
-      message = 'Incorrect password.';
-    }
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
-  } catch (e) {
-    print('Erro inesperado: $e');
   }
-}
 
 
   @override
