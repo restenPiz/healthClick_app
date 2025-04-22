@@ -194,7 +194,7 @@ void _showOrderHistory(BuildContext context) async {
                       return Card(
                         margin: const EdgeInsets.symmetric(vertical: 8),
                         child: ListTile(
-                          title: Text(order['product_name'] ?? 'Produto'),
+                          title: Text(order['product']?['product_name'] ?? 'Produto'),
                           subtitle: Text('Quantidade: ${order['quantity']}'),
                           trailing: Column(
                             mainAxisAlignment: MainAxisAlignment.center,

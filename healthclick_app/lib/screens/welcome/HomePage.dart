@@ -9,6 +9,7 @@ import 'package:healthclick_app/screens/product/Product.dart';
 import 'package:healthclick_app/screens/product/ProductDetails.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:healthclick_app/screens/product/ProductCategory.dart';
 
 
 class HomePage extends StatefulWidget {
@@ -43,6 +44,7 @@ class _HomePageState extends State<HomePage> {
           categories = data.map((category) {
             return {
               "name": category['category_name'],
+               "id": category['id']
             };
           }).toList();
         });
@@ -256,36 +258,49 @@ class _HomePageState extends State<HomePage> {
                           Map<String, dynamic> category = entry.value;
                           return Padding(
                             padding: const EdgeInsets.only(right: 10),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(20),
-                              child: Container(
-                                width: 140,
-                                height: 55,
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFEFF5F6),
-                                  borderRadius: BorderRadius.circular(20),
-                                  // border: Border.all( width: 1.5),
-                                  boxShadow: const [
-                                    BoxShadow(
-                                      // color: Colors.black,
-                                      blurRadius: 10,
-                                      spreadRadius: 1,
-                                      offset: Offset(0, 4),
+                            child:GestureDetector(
+                              onTap: () {
+                                int categoryId = category['id'] ?? 0;;
+                                String categoryName = category['name'];
+
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => ProductCategory(
+                                      categoryId: categoryId,
+                                      categoryName: categoryName,
                                     ),
-                                  ],
-                                ),
-                                child: ListTile(
-                                  leading: const Icon(Icons.category,
-                                      color: Colors.black
+                                  ),
+                                );
+                              },
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(20),
+                                child: Container(
+                                  width: 140,
+                                  height: 55,
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFEFF5F6),
+                                    borderRadius: BorderRadius.circular(20),
+                                    boxShadow: const [
+                                      BoxShadow(
+                                        blurRadius: 10,
+                                        spreadRadius: 1,
+                                        offset: Offset(0, 4),
                                       ),
-                                  title: Text(
-                                    category['name'] ?? 'Sem nome',
-                                    style: const TextStyle(color: Colors.black),
-                                    overflow: TextOverflow.ellipsis,
+                                    ],
+                                  ),
+                                  child: ListTile(
+                                    leading: const Icon(Icons.category, color: Colors.black),
+                                    title: Text(
+                                      category['name'] ?? 'Sem nome',
+                                      style: const TextStyle(color: Colors.black),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
+
                           );
                         }).toList(),
                 ),
