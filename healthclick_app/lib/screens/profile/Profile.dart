@@ -38,10 +38,6 @@ class _ProfileState extends State<Profile> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               //?Start the main content
-              // const SizedBox(height:20),
-              // const Center(
-              //   child: Text('Perfil',style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold,color: Colors.black),),
-              // ),
               const SizedBox(height: 80),
               Center(
                 child: CircleAvatar(
