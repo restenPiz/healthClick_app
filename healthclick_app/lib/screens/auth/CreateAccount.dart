@@ -23,33 +23,53 @@ class _CreateAccountState extends State<CreateAccount> {
   final TextEditingController confirmPasswordController = TextEditingController();
 
   //*Metodo to allow the user to signInWithGoogle account
-  Future<void> signInWithGoogle() async {
-    try {
-      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-      if (googleUser == null) return; // Cancelado
+  Future<User?> _signInWithGoogle() async {
+  try {
+    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+    if (googleUser == null) return null; // Login cancelado
 
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
+    final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
 
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
+    final credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth.accessToken,
+      idToken: googleAuth.idToken,
+    );
 
-      await FirebaseAuth.instance.signInWithCredential(credential);
+    // Autenticar com Firebase
+    final userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+    final user = userCredential.user;
 
+    if (user == null) throw Exception('Erro ao autenticar com Firebase');
+
+    // Enviar para o backend
+    final response = await http.post(
+      Uri.parse('http://192.168.100.139:8000/api/sync-firebase-uid'), // Ajusta essa URL
+      body: {
+        'firebase_uid': user.uid,
+        'email': user.email ?? '',
+        'name': user.displayName ?? 'Google User',
+      },
+    );
+
+    if (response.statusCode == 200) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Logged in with Google')),
+        SnackBar(content: Text('✅ Login com Google e sincronização feita')),
       );
-
-      // Navegar para home
-      // Navigator.pushReplacement(...);
-    } catch (e) {
+    } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Google login failed: $e')),
+        SnackBar(content: Text('❌ Erro ao sincronizar UID: ${response.body}')),
       );
     }
+
+    return user;
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Google login falhou: $e')),
+    );
+    return null;
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -268,7 +288,7 @@ class _CreateAccountState extends State<CreateAccount> {
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
-                        onPressed: signInWithGoogle,
+                        onPressed: _signInWithGoogle,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.white,
                           foregroundColor: Colors.black,

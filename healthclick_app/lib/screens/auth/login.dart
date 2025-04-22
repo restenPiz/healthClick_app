@@ -27,36 +27,61 @@ class _LoginState extends State<Login> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   bool isChecked = false;
-
   final GoogleSignIn googleSignIn = GoogleSignIn(
     clientId: '50654751468-08ooqne2n1fm05dn4l5199equ0ssgu0g.apps.googleusercontent.com',
   );
 
   //*Start with the signGoogle method
   Future<User?> _signInWithGoogle() async {
-    try {
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-      if (googleUser == null) {
-        return null;
-      }
+  try {
+    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+    if (googleUser == null) return null; // Login cancelado
 
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
+    final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
 
-      final OAuthCredential credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
+    final credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth.accessToken,
+      idToken: googleAuth.idToken,
+    );
+
+    // Autenticar com Firebase
+    final userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+    final user = userCredential.user;
+
+    if (user == null) throw Exception('Erro ao autenticar com Firebase');
+
+    // Enviar para o backend
+    final response = await http.post(
+      Uri.parse('http://SEU_BACKEND_URL/api/sync-uid'), // Ajusta essa URL
+      body: {
+        'firebase_uid': user.uid,
+        'email': user.email ?? '',
+        'name': user.displayName ?? 'Google User',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('✅ Login com Google e sincronização feita')),
       );
-
-      final UserCredential userCredential =
-          await _auth.signInWithCredential(credential);
-
-      return userCredential.user;
-    } catch (e) {
-      print("Erro ao fazer login com Google: $e");
-      return null;
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('❌ Erro ao sincronizar UID: ${response.body}')),
+      );
     }
+
+    return user;
+  } catch (e, stackTrace) {
+    debugPrint('Erro ao fazer login com Google: $e');
+    debugPrint('StackTrace: $stackTrace');
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Google login falhou: ${e.toString()}')),
+    );
+    return null;
   }
+}
+
 
   Future<User?> _signInAnonymously() async {
     try {
