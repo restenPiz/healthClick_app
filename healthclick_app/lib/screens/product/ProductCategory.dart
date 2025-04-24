@@ -20,10 +20,14 @@ class ProductCategory extends StatefulWidget {
 }
 
 class _ProductCategoryState extends State<ProductCategory> {
-  
+
+  List<Map<String, dynamic>> filteredProducts = [];
   List<Map<String, dynamic>> products = [];
   int _currentIndex = 1;
   late String baseUrl;
+
+  //*Search input
+  TextEditingController searchController = TextEditingController();
 
   @override
   void initState() {
@@ -31,6 +35,18 @@ class _ProductCategoryState extends State<ProductCategory> {
     baseUrl = 'http://192.168.100.139:8000/api/products/category/${widget.categoryId}';
     getProducts();
     print("URL: $baseUrl");
+
+    searchController.addListener(() {
+      _filterProducts(searchController.text);
+    });
+  }
+
+
+  @override
+  void dispose() {
+    // Limpa o controlador quando o widget for descartado
+    searchController.dispose();
+    super.dispose();
   }
 
   Future<void> getProducts() async {
@@ -56,6 +72,7 @@ class _ProductCategoryState extends State<ProductCategory> {
                   : 'Sem categoria',
             };
           }).toList();
+          filteredProducts = List.from(products);
         });
       } else {
         throw Exception('Falha ao carregar produtos: ${response.statusCode}');
@@ -64,6 +81,27 @@ class _ProductCategoryState extends State<ProductCategory> {
       print('Erro: $e');
       throw Exception('Falha ao carregar produtos');
     }
+  }
+
+  //*Search Product Method
+  void _filterProducts(String searchText) {
+    setState(() {
+      if (searchText.isEmpty) {
+        // Se a pesquisa estiver vazia, mostre todos os produtos
+        filteredProducts = List.from(products);
+      } else {
+        // Filtra os produtos pelo nome, ignorando maiúsculas/minúsculas
+        filteredProducts = products.where((product) {
+          final productName = product['name'].toString().toLowerCase();
+          final categoryName = product['category'].toString().toLowerCase();
+          final searchLower = searchText.toLowerCase();
+          
+          // Pesquisa por nome ou categoria
+          return productName.contains(searchLower) || 
+                 categoryName.contains(searchLower);
+        }).toList();
+      }
+    });
   }
 
   void _onTap(int index) {
@@ -152,6 +190,7 @@ class _ProductCategoryState extends State<ProductCategory> {
               ),
               const SizedBox(height: 20),
               TextField(
+                controller: searchController, // Usando o controlador
                 decoration: InputDecoration(
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(30)),
@@ -165,7 +204,18 @@ class _ProductCategoryState extends State<ProductCategory> {
                   ),
                   hintText: 'Pesquisar o Produto',
                   prefixIcon: const Icon(Icons.search),
+                  // Adiciona um botão para limpar a pesquisa
+                  suffixIcon: searchController.text.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(Icons.clear),
+                          onPressed: () {
+                            searchController.clear();
+                            _filterProducts('');
+                          },
+                        )
+                      : null,
                 ),
+                onChanged: _filterProducts, // Chama _filterProducts quando o texto muda
               ),
               const SizedBox(height: 20),
               GridView.builder(
