@@ -153,81 +153,170 @@ class Cart extends StatelessWidget {
   }
 }
 
-
-
-void _showOrderHistory(BuildContext context) async {
-  showDialog(
-    context: context,
-    builder: (ctx) => const Center(
-      child: CircularProgressIndicator(),
-    ),
-  );
-  
-  try {
-    final orders = await _fetchOrderHistory();
-    
-    // Fechar o indicador de carregamento
-    Navigator.of(context).pop();
-    
-    // Mostrar o histórico
-    showModalBottomSheet(
+  void _showOrderHistory(BuildContext context) async {
+    showDialog(
       context: context,
-      isScrollControlled: true,
-      builder: (ctx) => Container(
-        height: MediaQuery.of(context).size.height * 0.7,
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Histórico de Compras',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-            Expanded(
-              child: orders.isEmpty
-                ? const Center(child: Text('Nenhuma compra encontrada'))
-                : ListView.builder(
-                    itemCount: orders.length,
-                    itemBuilder: (ctx, i) {
-                      final order = orders[i];
-                      return Card(
-                        margin: const EdgeInsets.symmetric(vertical: 8),
-                        child: ListTile(
-                          title: Text(order['product']?['product_name'] ?? 'Produto'),
-                          subtitle: Text('Quantidade: ${order['quantity']}'),
-                          trailing: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Text('${double.parse(order['price'].toString()).toStringAsFixed(2)} MZN'),
-                              Text(
-                                DateTime.parse(order['sold_at']).toString().substring(0, 16),
-                                style: TextStyle(fontSize: 12, color: Colors.grey),
-                              ),
-                            ],
+      builder: (ctx) => const Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
+    
+    try {
+      final orders = await _fetchOrderHistory();
+      
+      // Fechar o indicador de carregamento
+      Navigator.of(context).pop();
+      
+      // Mostrar o histórico
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        builder: (ctx) => Container(
+          height: MediaQuery.of(context).size.height * 0.7,
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Histórico de Compras',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+              Expanded(
+                child: orders.isEmpty
+                  ? const Center(child: Text('Nenhuma compra encontrada'))
+                  : ListView.builder(
+                      itemCount: orders.length,
+                      itemBuilder: (ctx, i) {
+                        final order = orders[i];
+                        return Card(
+                          margin: const EdgeInsets.symmetric(vertical: 8),
+                          child: ListTile(
+                            title: Text(order['product']?['product_name'] ?? 'Produto'),
+                            // subtitle: Text('Quantidade: ${order['quantity']}'),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('Quantidade: ${order['quantity']}'),
+                                Text('Status: ${order['delivery']?['status'] ?? 'Sem entrega'}'),
+                                const SizedBox(height: 8),
+                                Center(
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      _showDeliveryForm(context, order['id']);
+                                    },
+                                    child: const Text("Delivery"),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            trailing: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Text('${double.parse(order['price'].toString()).toStringAsFixed(2)} MZN'),
+                                Text(
+                                  DateTime.parse(order['sold_at']).toString().substring(0, 16),
+                                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      );
-                    },
-                  ),
+                        );
+                      },
+                    ),
+              ),
+            ],
+          ),
+        ),
+      );
+    } catch (e) {
+      // Fechar o indicador de carregamento se ainda estiver aberto
+      Navigator.of(context, rootNavigator: true).pop();
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erro ao carregar histórico: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+
+  void _showDeliveryForm(BuildContext context, int saleId) {
+    final _addressController = TextEditingController();
+    final _contactController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text("Informar Dados de Entrega"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: _addressController,
+              decoration: const InputDecoration(
+                labelText: "Endereço de entrega",
+              ),
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: _contactController,
+              decoration: const InputDecoration(
+                labelText: "Contacto",
+              ),
+              keyboardType: TextInputType.phone,
             ),
           ],
         ),
-      ),
-    );
-  } catch (e) {
-    // Fechar o indicador de carregamento se ainda estiver aberto
-    Navigator.of(context, rootNavigator: true).pop();
-    
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Erro ao carregar histórico: $e'),
-        backgroundColor: Colors.red,
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancelar"),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final address = _addressController.text.trim();
+              final contact = _contactController.text.trim();
+
+              if (address.isEmpty || contact.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Preencha todos os campos')),
+                );
+                return;
+              }
+
+              // Aqui envia para o backend
+              final response = await http.post(
+                Uri.parse("http://192.168.100.139:8000/api/deliveries"),
+                headers: {"Content-Type": "application/json"},
+                body: jsonEncode({
+                  "sale_id": saleId,
+                  "delivery_address": address,
+                  "contact": contact,
+                }),
+              );
+
+              if (response.statusCode == 200 || response.statusCode == 201) {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("Pedido de entrega enviado com sucesso!")),
+                );
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text("Erro ao enviar: ${response.body}")),
+                );
+              }
+            },
+            child: const Text("Confirmar Entrega"),
+          ),
+        ],
       ),
     );
   }
-}
+
 
   @override
   Widget build(BuildContext context) {

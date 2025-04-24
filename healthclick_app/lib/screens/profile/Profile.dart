@@ -77,6 +77,15 @@ class _ProfileState extends State<Profile> {
                   title: Text('Editar Perfil',style: TextStyle(fontSize: 18),),
                 ),
               ),
+              const Divider(
+                thickness: 2,
+                indent: 20,
+                endIndent: 20,
+              ),
+              const ListTile(
+                leading: Icon(Icons.settings),
+                title:Text('Definicoes'),
+              ),
               // const SizedBox(height: 2),
               const Divider(
                 thickness: 2,
