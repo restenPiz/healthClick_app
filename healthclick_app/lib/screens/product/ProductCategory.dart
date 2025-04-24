@@ -218,97 +218,107 @@ class _ProductCategoryState extends State<ProductCategory> {
                 onChanged: _filterProducts, // Chama _filterProducts quando o texto muda
               ),
               const SizedBox(height: 20),
-              GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 8,
-                  mainAxisSpacing: 8,
-                  childAspectRatio: 0.55,
-                ),
-                itemCount: products.length,
-                itemBuilder: (context, index) {
-                  final product = products[index];
+              filteredProducts.isEmpty
+                  ? const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(20.0),
+                        child: Text(
+                          'Nenhum produto encontrado',
+                          style: TextStyle(fontSize: 16),
+                        ),
+                      ),
+                    )
+                  : GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 8,
+                        mainAxisSpacing: 8,
+                        childAspectRatio: 0.55,
+                      ),
+                      itemCount: filteredProducts.length, // Usa a lista filtrada
+                      itemBuilder: (context, index) {
+                        final product = filteredProducts[index]; // Usa a lista filtrada
 
-                  return GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (_) => ProductDetails(product: product)),
-                      );
-                    },
-                    child: Card(
-                      elevation: 2,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12)),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          ListTile(
-                            leading: Text(
-                              product['category'] ?? 'Categoria',
-                              style: const TextStyle(fontSize: 13),
-                            ),
-                          ),
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: Image.network(
-                              product['image'],
-                              width: double.infinity,
-                              height: 150,
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) {
-                                return const Icon(Icons.broken_image,
-                                    size: 120);
-                              },
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(
-                              product['name'],
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 15,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          const Divider(
-                              thickness: 1, indent: 10, endIndent: 10),
-                          Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 8.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        return GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) => ProductDetails(product: product)),
+                            );
+                          },
+                          child: Card(
+                            elevation: 2,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12)),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  "${product['price']} MZN",
-                                  style: const TextStyle(
-                                      fontSize: 14, color: Colors.blue),
-                                ),
-                                ElevatedButton(
-                                  onPressed: () => _addToCart(product, context),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.green,
-                                    shape: const CircleBorder(),
-                                    padding: const EdgeInsets.all(8),
+                                ListTile(
+                                  leading: Text(
+                                    product['category'] ?? 'Categoria',
+                                    style: const TextStyle(fontSize: 13),
                                   ),
-                                  child: const Icon(Icons.add,
-                                      color: Colors.white),
+                                ),
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Image.network(
+                                    product['image'],
+                                    width: double.infinity,
+                                    height: 150,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return const Icon(Icons.broken_image,
+                                          size: 120);
+                                    },
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(
+                                    product['name'],
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 15,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                const Divider(
+                                    thickness: 1, indent: 10, endIndent: 10),
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(horizontal: 8.0),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        "${product['price']} MZN",
+                                        style: const TextStyle(
+                                            fontSize: 14, color: Colors.blue),
+                                      ),
+                                      ElevatedButton(
+                                        onPressed: () => _addToCart(product, context),
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.green,
+                                          shape: const CircleBorder(),
+                                          padding: const EdgeInsets.all(8),
+                                        ),
+                                        child: const Icon(Icons.add,
+                                            color: Colors.white),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ],
                             ),
                           ),
-                        ],
-                      ),
+                        );
+                      },
                     ),
-                  );
-                },
-              ),
             ],
           ),
         ),
