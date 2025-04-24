@@ -85,6 +85,7 @@ class _HomePageState extends State<HomePage> {
                   : 'Sem categoria',
             };
           }).toList();
+          // filteredProducts = List.from(products); 
         });
       } else {
         throw Exception('Falha ao carregar produtos: ${response.statusCode}');
@@ -185,30 +186,7 @@ class _HomePageState extends State<HomePage> {
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
                   ),
                 ),
-              const SizedBox(height: 30),
-
-              TextField(
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(
-                    borderRadius:
-                        BorderRadius.circular(30), // Aumenta o arredondamento
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(30),
-                    borderSide: const BorderSide(
-                        color:
-                            Colors.grey), // Cor da borda quando não está focado
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(30),
-                    borderSide:
-                        const BorderSide(color: Colors.blue), // Cor da borda ao focar
-                  ),
-                  hintText: 'Pesquisar o Produto',
-                  prefixIcon: const Icon(Icons.search),
-                ),
-              ),
-              const SizedBox(height: 30),
+              const SizedBox(height: 15),
               GFCarousel(
                 autoPlay: true,
                 autoPlayInterval: const Duration(seconds: 3),
@@ -234,7 +212,7 @@ class _HomePageState extends State<HomePage> {
                   });
                 },
               ),
-              const SizedBox(height: 50),
+              const SizedBox(height: 20),
 
               // Categories Section
               const Row(
@@ -306,7 +284,7 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
 
-              const SizedBox(height: 30),
+              const SizedBox(height: 20),
 
               // Products Section
               Row(
@@ -333,7 +311,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ],
               ),
-              const SizedBox(height: 20),
+              // const SizedBox(height: 20),
 
               // Product section
               GridView.builder(
