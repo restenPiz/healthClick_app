@@ -143,7 +143,21 @@ class Cart extends StatelessWidget {
 
     if (response.statusCode == 200) {
       final responseData = json.decode(response.body);
-      return responseData['data'];
+      final salesData = responseData['data'];
+      
+      // Para cada venda, buscar informações de entrega
+      for (var sale in salesData) {
+        final deliveryUrl = Uri.parse('http://192.168.100.139:8000/api/delivery/${sale['id']}');
+        final deliveryResponse = await http.get(deliveryUrl);
+        
+        if (deliveryResponse.statusCode == 200) {
+          final deliveryData = json.decode(deliveryResponse.body);
+          // Adicionar informações de entrega ao objeto de venda
+          sale['delivery'] = deliveryData['data'].isNotEmpty ? deliveryData['data'][0] : null;
+        }
+      }
+      
+      return salesData;
     } else {
       throw Exception('Erro ao buscar histórico: ${response.statusCode}');
     }
@@ -160,13 +174,13 @@ class Cart extends StatelessWidget {
         child: CircularProgressIndicator(),
       ),
     );
-    
+
     try {
       final orders = await _fetchOrderHistory();
-      
+
       // Fechar o indicador de carregamento
       Navigator.of(context).pop();
-      
+
       // Mostrar o histórico
       showModalBottomSheet(
         context: context,
@@ -184,47 +198,64 @@ class Cart extends StatelessWidget {
               const SizedBox(height: 16),
               Expanded(
                 child: orders.isEmpty
-                  ? const Center(child: Text('Nenhuma compra encontrada'))
-                  : ListView.builder(
-                      itemCount: orders.length,
-                      itemBuilder: (ctx, i) {
-                        final order = orders[i];
-                        return Card(
-                          margin: const EdgeInsets.symmetric(vertical: 8),
-                          child: ListTile(
-                            title: Text(order['product']?['product_name'] ?? 'Produto'),
-                            // subtitle: Text('Quantidade: ${order['quantity']}'),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text('Quantidade: ${order['quantity']}'),
-                                Text('Status: ${order['delivery']?['status'] ?? 'Sem entrega'}'),
-                                const SizedBox(height: 8),
-                                Center(
-                                  child: ElevatedButton(
-                                    onPressed: () {
-                                      _showDeliveryForm(context, order['id']);
-                                    },
-                                    child: const Text("Delivery"),
+                    ? const Center(child: Text('Nenhuma compra encontrada'))
+                    : ListView.builder(
+                        itemCount: orders.length,
+                        itemBuilder: (ctx, i) {
+                          final order = orders[i];
+
+                          // Verificar se existe entrega e qual o status
+                          final hasDelivery = order['delivery'] != null;
+                          final deliveryStatus = hasDelivery
+                              ? order['delivery']['status']
+                              : 'pendente';
+
+                          return Card(
+                            margin: const EdgeInsets.symmetric(vertical: 8),
+                            child: ListTile(
+                              title: Text(order['product']?['product_name'] ??
+                                  'Produto'),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('Quantidade: ${order['quantity']}'),
+                                  Text(
+                                      'Status: ${hasDelivery ? deliveryStatus : "Sem entrega"}'),
+                                  const SizedBox(height: 8),
+                                  // Mostrar o botão de delivery apenas quando não houver entrega ou o status for pendente
+                                  if (!hasDelivery ||
+                                      deliveryStatus.toLowerCase() ==
+                                          'pendente')
+                                    Center(
+                                      child: ElevatedButton(
+                                        onPressed: () {
+                                          _showDeliveryForm(
+                                              context, order['id']);
+                                        },
+                                        child: const Text("Delivery"),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                              trailing: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Text(
+                                      '${double.parse(order['price'].toString()).toStringAsFixed(2)} MZN'),
+                                  Text(
+                                    DateTime.parse(order['sold_at'])
+                                        .toString()
+                                        .substring(0, 16),
+                                    style: const TextStyle(
+                                        fontSize: 12, color: Colors.grey),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                            trailing: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Text('${double.parse(order['price'].toString()).toStringAsFixed(2)} MZN'),
-                                Text(
-                                  DateTime.parse(order['sold_at']).toString().substring(0, 16),
-                                  style: TextStyle(fontSize: 12, color: Colors.grey),
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
-                    ),
+                          );
+                        },
+                      ),
               ),
             ],
           ),
@@ -233,7 +264,7 @@ class Cart extends StatelessWidget {
     } catch (e) {
       // Fechar o indicador de carregamento se ainda estiver aberto
       Navigator.of(context, rootNavigator: true).pop();
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Erro ao carregar histórico: $e'),
