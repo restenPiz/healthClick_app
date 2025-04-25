@@ -448,15 +448,6 @@ class Cart extends StatelessWidget {
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
-                        // onPressed: () {
-                        //   ScaffoldMessenger.of(context).showSnackBar(
-                        //     const SnackBar(
-                        //       content: Text(
-                        //           'Funcionalidade de pagamento em desenvolvimento.'),
-                        //       duration: Duration(seconds: 2),
-                        //     ),
-                        //   );
-                        // },
                         onPressed: () async {
                           final numeroController = TextEditingController();
 
