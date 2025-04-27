@@ -25,6 +25,7 @@ class _ProfileState extends State<Profile> {
       _currentIndex = index;
     });
   }
+  
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
@@ -83,8 +84,8 @@ class _ProfileState extends State<Profile> {
                 endIndent: 20,
               ),
               const ListTile(
-                leading: Icon(Icons.settings),
-                title:Text('Definicoes'),
+                leading: Icon(Icons.help),
+                title:Text('Ajuda'),
               ),
               // const SizedBox(height: 2),
               const Divider(
