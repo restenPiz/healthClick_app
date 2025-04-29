@@ -21,12 +21,18 @@ class Pharmacy extends StatefulWidget {
 
 class _PharmacyState extends State<Pharmacy> {
   int _currentIndex = 2;
+  bool _isLoading =
+      false; // Adicionando um estado para controlar o carregamento
 
   List<Map<String, dynamic>> pharmacies = [];
 
   Future<void> getPharmacies() async {
+    setState(() {
+      _isLoading = true; // Ativar indicador de carregamento
+    });
+
     try {
-      var url = Uri.parse('http://cloudev.org/api/api/pharmacies');
+      var url = Uri.parse('http://cloudev.org/api/pharmacies');
       var response = await http.get(url);
 
       if (response.statusCode == 200) {
@@ -46,9 +52,18 @@ class _PharmacyState extends State<Pharmacy> {
               "userName": pharmacy['user']['name'],
             };
           }).toList();
+          _isLoading = false; // Desativar indicador de carregamento
         });
+      } else {
+        setState(() {
+          _isLoading = false; // Desativar indicador mesmo em caso de erro
+        });
+        throw Exception('Falha ao carregar farmácias: ${response.statusCode}');
       }
     } catch (e) {
+      setState(() {
+        _isLoading = false; // Desativar indicador mesmo em caso de erro
+      });
       print('Erro: $e');
       throw Exception('Falha ao carregar farmácias');
     }
@@ -73,18 +88,36 @@ class _PharmacyState extends State<Pharmacy> {
 
     return Scaffold(
       body: CustomRefreshIndicator(
+        // Configurando opções similares à página de produtos
         onRefresh: () async {
-          await getPharmacies();
+          return getPharmacies();
         },
-        builder: (context, child, controller) {
-          return AnimatedBuilder(
-            animation: controller,
-            builder: (context, _) {
-              return Transform.translate(
-                offset: Offset(0.0, 100 * controller.value),
-                child: child,
-              );
-            },
+        trigger: IndicatorTrigger.leadingEdge,
+        builder: (
+          BuildContext context,
+          Widget child,
+          IndicatorController controller,
+        ) {
+          return Stack(
+            children: <Widget>[
+              child,
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: AnimatedOpacity(
+                  opacity: controller.value > 0.0 ? 1.0 : 0.0,
+                  duration: const Duration(milliseconds: 200),
+                  child: Container(
+                    height: 80,
+                    alignment: Alignment.center,
+                    child: controller.state == IndicatorState.loading
+                        ? const CircularProgressIndicator(color: Colors.green)
+                        : const Icon(Icons.arrow_downward, color: Colors.green),
+                  ),
+                ),
+              ),
+            ],
           );
         },
         child: SingleChildScrollView(
@@ -105,8 +138,8 @@ class _PharmacyState extends State<Pharmacy> {
                   ),
                   title: Text(
                     "Olá ${currentUser?.displayName ?? currentUser?.email?.split('@')[0] ?? 'Visitante'}",
-                    style:
-                        const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                        fontSize: 17, fontWeight: FontWeight.bold),
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -114,41 +147,61 @@ class _PharmacyState extends State<Pharmacy> {
                   "Farmácias Próximas",
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
-                ListView.builder(
-                  shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  itemCount: pharmacies.length,
-                  itemBuilder: (context, index) {
-                    final pharmacy = pharmacies[index];
-                    return Card(
-                      margin: const EdgeInsets.symmetric(vertical: 8),
-                      child: ListTile(
-                        leading: CircleAvatar(
-                          radius: 25,
-                          backgroundImage: pharmacy['image'] != null
-                              ? NetworkImage(
-                                  'http://cloudev.org/api/storage/${pharmacy['image']}')
-                              : AssetImage('assets/images/default_pharmacy.png')
-                                  as ImageProvider,
+                _isLoading
+                    ? const Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(20.0),
+                          child: CircularProgressIndicator(color: Colors.green),
                         ),
-                        title: Text(
-                          pharmacy['name']!,
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        subtitle: Text('Proprietário: ${pharmacy['userName']!}'),
-                        trailing: const Icon(Icons.chevron_right),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (_) =>
-                                    PharmacyDetails(pharmacy: pharmacy)),
-                          );
-                        },
-                      ),
-                    );
-                  },
-                ),
+                      )
+                    : pharmacies.isEmpty
+                        ? const Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(20.0),
+                              child: Text(
+                                'Nenhuma farmácia encontrada',
+                                style: TextStyle(fontSize: 16),
+                              ),
+                            ),
+                          )
+                        : ListView.builder(
+                            shrinkWrap: true,
+                            physics: NeverScrollableScrollPhysics(),
+                            itemCount: pharmacies.length,
+                            itemBuilder: (context, index) {
+                              final pharmacy = pharmacies[index];
+                              return Card(
+                                margin: const EdgeInsets.symmetric(vertical: 8),
+                                child: ListTile(
+                                  leading: CircleAvatar(
+                                    radius: 25,
+                                    backgroundImage: pharmacy['image'] != null
+                                        ? NetworkImage(
+                                            'http://cloudev.org/storage/${pharmacy['image']}')
+                                        : AssetImage(
+                                                'assets/images/default_pharmacy.png')
+                                            as ImageProvider,
+                                  ),
+                                  title: Text(
+                                    pharmacy['name']!,
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  subtitle: Text(
+                                      'Proprietário: ${pharmacy['userName']!}'),
+                                  trailing: const Icon(Icons.chevron_right),
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (_) => PharmacyDetails(
+                                              pharmacy: pharmacy)),
+                                    );
+                                  },
+                                ),
+                              );
+                            },
+                          ),
               ],
             ),
           ),

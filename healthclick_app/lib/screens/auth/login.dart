@@ -52,7 +52,7 @@ class _LoginState extends State<Login> {
 
     // Enviar para o backend
     final response = await http.post(
-      Uri.parse('http://cloudev.org/api/sync-firebase-uid'), // Ajusta essa URL
+      Uri.parse('https://cloudev.org/api/sync-firebase-uid'), // Ajusta essa URL
       body: {
         'firebase_uid': user.uid,
         'email': user.email ?? '',
@@ -120,7 +120,7 @@ class _LoginState extends State<Login> {
 
         // 🔁 Envia o UID e o e-mail para o backend Laravel
         final response = await http.post(
-          Uri.parse('http://cloudev.org/api/sync-firebase-uid'),
+          Uri.parse('https://cloudev.org/api/sync-firebase-uid'),
           headers: {'Content-Type': 'application/json'},
           body: jsonEncode({
             'firebase_uid': uid,

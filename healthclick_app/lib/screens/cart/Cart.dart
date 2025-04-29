@@ -11,7 +11,7 @@ class Cart extends StatelessWidget {
 
   Future<int?> buscarUserId(String firebaseUid) async {
     print("Buscando user_id para Firebase UID: $firebaseUid"); // Log para depuração
-    final url = Uri.parse('http://192.168.100.139:8000/api/user-by-firebase/$firebaseUid');
+    final url = Uri.parse('https://cloudev.org/api/user-by-firebase/$firebaseUid');
     final response = await http.get(url);
 
     if (response.statusCode == 200) {
@@ -26,7 +26,7 @@ class Cart extends StatelessWidget {
 
   Future<bool> _realizarPagamento(BuildContext context, String numero,
     String valor, CartProvider cart) async {
-    final url = Uri.parse('http://192.168.100.139:8000/api/payment');
+    final url = Uri.parse('https://cloudev.org/api/payment');
     final user = FirebaseAuth.instance.currentUser;
     final userId = user?.uid;
 
@@ -138,7 +138,7 @@ class Cart extends StatelessWidget {
     }
     
     // Buscar o histórico de vendas
-    final url = Uri.parse('http://192.168.100.139:8000/api/sales/$userId');
+    final url = Uri.parse('https://cloudev.org/api/sales/$userId');
     final response = await http.get(url);
 
     if (response.statusCode == 200) {
@@ -147,7 +147,7 @@ class Cart extends StatelessWidget {
       
       // Para cada venda, buscar informações de entrega
       for (var sale in salesData) {
-        final deliveryUrl = Uri.parse('http://192.168.100.139:8000/api/delivery/${sale['id']}');
+        final deliveryUrl = Uri.parse('https://cloudev.org/api/delivery/${sale['id']}');
         final deliveryResponse = await http.get(deliveryUrl);
         
         if (deliveryResponse.statusCode == 200) {
@@ -321,7 +321,7 @@ class Cart extends StatelessWidget {
 
               // Aqui envia para o backend
               final response = await http.post(
-                Uri.parse("http://192.168.100.139:8000/api/deliveries"),
+                Uri.parse("https://cloudev.org/api/deliveries"),
                 headers: {"Content-Type": "application/json"},
                 body: jsonEncode({
                   "sale_id": saleId,
