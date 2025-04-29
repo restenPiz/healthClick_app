@@ -26,7 +26,7 @@ class _PharmacyState extends State<Pharmacy> {
 
   Future<void> getPharmacies() async {
     try {
-      var url = Uri.parse('http://192.168.100.139:8000/api/pharmacies');
+      var url = Uri.parse('http://cloudev.org/api/api/pharmacies');
       var response = await http.get(url);
 
       if (response.statusCode == 200) {
@@ -127,7 +127,7 @@ class _PharmacyState extends State<Pharmacy> {
                           radius: 25,
                           backgroundImage: pharmacy['image'] != null
                               ? NetworkImage(
-                                  'http://192.168.100.139:8000/storage/${pharmacy['image']}')
+                                  'http://cloudev.org/api/storage/${pharmacy['image']}')
                               : AssetImage('assets/images/default_pharmacy.png')
                                   as ImageProvider,
                         ),

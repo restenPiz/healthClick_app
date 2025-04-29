@@ -8,7 +8,7 @@ class ProductService {
 
   // Função para buscar os produtos
   Future<List<Map<String, dynamic>>> getProducts() async {
-    final response = await http.get(Uri.parse('http://healthclick_system.test/api/products'));
+    final response = await http.get(Uri.parse('http://cloudev.org/api/products'));
 
     if (response.statusCode == 200) {
       // Se a resposta for bem-sucedida, parse o JSON

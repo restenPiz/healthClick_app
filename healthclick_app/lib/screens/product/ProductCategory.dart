@@ -32,7 +32,7 @@ class _ProductCategoryState extends State<ProductCategory> {
   @override
   void initState() {
     super.initState();
-    baseUrl = 'http://192.168.100.139:8000/api/products/category/${widget.categoryId}';
+    baseUrl = 'http://cloudev.org/api/products/category/${widget.categoryId}';
     getProducts();
     print("URL: $baseUrl");
 
@@ -65,7 +65,7 @@ class _ProductCategoryState extends State<ProductCategory> {
               "price": product['product_price'],
               "description": product['product_description'],
               "image":
-                  'http://192.168.100.139:8000/storage/${product['product_file']}',
+                  'http://cloudev.org/storage/${product['product_file']}',
               "quantity": product['quantity'],
               "category": product['category'] != null
                   ? product['category']['category_name']

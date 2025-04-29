@@ -43,7 +43,7 @@ class _CreateAccountState extends State<CreateAccount> {
 
       // Enviar para o backend
       final response = await http.post(
-        Uri.parse('http://192.168.100.139:8000/api/sync-firebase-uid'), // Ajusta essa URL
+        Uri.parse('http://cloudev.org/api/sync-firebase-uid'), // Ajusta essa URL
         body: {
           'firebase_uid': user.uid,
           'email': user.email ?? '',
@@ -221,7 +221,7 @@ class _CreateAccountState extends State<CreateAccount> {
 
                               // 🔁 Envia o UID e o email para o backend Laravel
                               final response = await http.post(
-                                Uri.parse('http://192.168.100.139:8000/api/sync-firebase-uid'),
+                                Uri.parse('http://cloudev.org/api/sync-firebase-uid'),
                                 headers: {'Content-Type': 'application/json'},
                                 body: jsonEncode({
                                   'firebase_uid': user.uid,

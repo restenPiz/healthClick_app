@@ -34,7 +34,7 @@ class _HomePageState extends State<HomePage> {
   List<Map<String, dynamic>> categories = [];
   Future<void> getCategories() async {
     try {
-      var url = Uri.parse('http://192.168.100.139:8000/api/categories');
+      var url = Uri.parse('http://cloudev.org/api/categories');
       var response = await http.get(url);
 
       if (response.statusCode == 200) {
@@ -56,12 +56,12 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  final String baseUrl = 'http://192.168.100.139:8000/api/products';
+  final String baseUrl = 'http://cloudev.org/api/products';
   List<Map<String, dynamic>> products = [];
 
   Future<void> getProducts() async {
     try {
-      var url = Uri.parse('http://192.168.100.139:8000/api/products');
+      var url = Uri.parse('http://cloudev.org/api/products');
       var response = await http.get(url);
 
       if (response.statusCode == 200) {
@@ -72,14 +72,14 @@ class _HomePageState extends State<HomePage> {
           products = data.take(2).map((product) {
             // Imprima o caminho para debug
             print(
-                'Caminho da imagem: http://192.168.100.139:8000/storage/${product['product_file']}');
+                'Caminho da imagem: http://cloudev.org/storage/${product['product_file']}');
 
             return {
               "name": product['product_name'],
               "price": product['product_price'],
               "description": product['product_description'],
               "image":
-                  'http://192.168.100.139:8000/storage/${product['product_file']}',
+                  'http://cloudev.org/storage/${product['product_file']}',
               "quantity": product['quantity'],
               "category": product['category'] != null
                   ? product['category']['category_name']

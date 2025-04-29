@@ -79,7 +79,7 @@ class _PharmacyDetailsState extends State<PharmacyDetails> {
                     borderRadius: BorderRadius.circular(20),
                     child: pharmacy['image'] != null
                         ? Image.network(
-                            'http://192.168.100.139:8000/storage/${pharmacy['image']}',
+                            'http://cloudev.org/storage/${pharmacy['image']}',
                             fit: BoxFit.cover,
                           )
                         : Image.asset(
@@ -118,7 +118,7 @@ class _PharmacyDetailsState extends State<PharmacyDetails> {
             avatar: GFAvatar(
               backgroundImage: pharmacy['image'] != null
                   ? NetworkImage(
-                      'http://192.168.100.139:8000/storage/${pharmacy['image']}')
+                      'http://cloudev.org/storage/${pharmacy['image']}')
                   : const AssetImage('assets/images/default_pharmacy.png')
                       as ImageProvider,
             ),
