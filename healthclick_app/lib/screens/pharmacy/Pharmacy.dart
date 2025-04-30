@@ -128,7 +128,7 @@ class _PharmacyState extends State<Pharmacy> {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(height: 15),
+                SizedBox(height: 25),
                 ListTile(
                   leading: CircleAvatar(
                     radius: 25,

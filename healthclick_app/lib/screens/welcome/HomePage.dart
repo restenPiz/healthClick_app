@@ -11,7 +11,7 @@ import 'package:healthclick_app/screens/product/ProductDetails.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:healthclick_app/screens/product/ProductCategory.dart';
-
+import 'package:healthclick_app/utils/app_size.dart'; 
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -188,7 +188,7 @@ class _HomePageState extends State<HomePage> {
                   opacity: controller.value > 0.0 ? 1.0 : 0.0,
                   duration: const Duration(milliseconds: 200),
                   child: Container(
-                    height: 80,
+                    height: AppSize.hp(10),
                     alignment: Alignment.center,
                     child: controller.state == IndicatorState.loading
                         ? const CircularProgressIndicator(color: Colors.green)
@@ -206,7 +206,7 @@ class _HomePageState extends State<HomePage> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 10),
+                const SizedBox(height: 15),
                 // User Greeting Section
                 ListTile(
                   leading: CircleAvatar(
@@ -264,78 +264,78 @@ class _HomePageState extends State<HomePage> {
                 const SizedBox(height: 20),
 
                 // Category Cards Section
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: categories.asMap().entries.map((entry) {
-                      int index = entry.key;
-                      Map<String, dynamic> category = entry.value;
-                      // Calculando o tamanho aproximado do texto
-                      String categoryName = category['name'] ?? 'Sem nome';
-                      
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 10),
-                        child: GestureDetector(
-                          onTap: () {
-                            int categoryId = category['id'] ?? 0;
-                            String categoryName = category['name'];
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: categories.asMap().entries.map((entry) {
+                    int index = entry.key;
+                    Map<String, dynamic> category = entry.value;
+                    // Calculando o tamanho aproximado do texto
+                    String categoryName = category['name'] ?? 'Sem nome';
+                    
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 10),
+                      child: GestureDetector(
+                        onTap: () {
+                          int categoryId = category['id'] ?? 0;
+                          String categoryName = category['name'];
 
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => ProductCategory(
-                                  categoryId: categoryId,
-                                  categoryName: categoryName,
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => ProductCategory(
+                                categoryId: categoryId,
+                                categoryName: categoryName,
+                              ),
+                            ),
+                          );
+                        },
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(20),
+                          child: Container(
+                            // Usando IntrinsicWidth para que o container se ajuste ao conteúdo
+                            width: null, // Remove a largura fixa
+                            constraints: const BoxConstraints(
+                              minWidth: 100, // Largura mínima para categorias com nomes curtos
+                              maxWidth: 220, // Largura máxima para evitar cartões muito largos
+                            ),
+                            height: 55,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFEFF5F6),
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow: const [
+                                BoxShadow(
+                                  blurRadius: 10,
+                                  spreadRadius: 1,
+                                  offset: Offset(0, 4),
                                 ),
-                              ),
-                            );
-                          },
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(20),
-                            child: Container(
-                              // Usando IntrinsicWidth para que o container se ajuste ao conteúdo
-                              width: null, // Remove a largura fixa
-                              constraints: const BoxConstraints(
-                                minWidth: 100, // Largura mínima para categorias com nomes curtos
-                                maxWidth: 220, // Largura máxima para evitar cartões muito largos
-                              ),
-                              height: 55,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFEFF5F6),
-                                borderRadius: BorderRadius.circular(20),
-                                boxShadow: const [
-                                  BoxShadow(
-                                    blurRadius: 10,
-                                    spreadRadius: 1,
-                                    offset: Offset(0, 4),
-                                  ),
-                                ],
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min, // Importante para o tamanho se ajustar
-                                  children: [
-                                    const Icon(Icons.category, color: Colors.black),
-                                    const SizedBox(width: 8), // Espaçamento entre o ícone e o texto
-                                    Flexible(
-                                      child: Text(
-                                        categoryName,
-                                        style: const TextStyle(color: Colors.black),
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
+                              ],
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min, // Importante para o tamanho se ajustar
+                                children: [
+                                  const Icon(Icons.category, color: Colors.black),
+                                  const SizedBox(width: 8), // Espaçamento entre o ícone e o texto
+                                  Flexible(
+                                    child: Text(
+                                      categoryName,
+                                      style: const TextStyle(color: Colors.black),
+                                      overflow: TextOverflow.ellipsis,
                                     ),
-                                    const SizedBox(width: 8), // Espaçamento após o texto
-                                  ],
-                                ),
+                                  ),
+                                  const SizedBox(width: 8), // Espaçamento após o texto
+                                ],
                               ),
                             ),
                           ),
                         ),
-                      );
-                    }).toList(),
-                  ),
+                      ),
+                    );
+                  }).toList(),
                 ),
+              ),
                 const SizedBox(height: 20),
 
                 // Products Section

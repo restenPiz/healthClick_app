@@ -112,27 +112,37 @@ void _addToCart(Map<String, dynamic> product, BuildContext context) {
                 ),
               ),
               const SizedBox(height: 20),
-              ListTile(
-                leading: Text(
-                  product['name'],
-                  style: const TextStyle(
-                      fontWeight: FontWeight.bold, fontSize: 19),
-                ),
-                trailing: ClipRRect(
-                  borderRadius: BorderRadius.circular(20),
-                  child: Container(
-                    width: 150,
-                    height: 24,
-                    color: Colors.blue,
-                    child: Center(
-                      child: Text(
-                        product['category'],
-                        style:
-                            const TextStyle(color: Colors.white, fontSize: 15),
+              Row(
+                children: [
+                  // Nome do Produto
+                  Expanded(
+                    child: Text(
+                      product['name'],
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 19,
+                      ),
+                      overflow: TextOverflow.ellipsis, // Truncar o texto se necessário
+                      maxLines: 1, // Limitar a 1 linha
+                    ),
+                  ),
+                  
+                  // Categoria do Produto
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: Container(
+                      width: 150,
+                      height: 24,
+                      color: Colors.blue,
+                      child: Center(
+                        child: Text(
+                          product['category'],
+                          style: const TextStyle(color: Colors.white, fontSize: 15),
+                        ),
                       ),
                     ),
                   ),
-                ),
+                ],
               ),
               const SizedBox(height: 10),
               Text(
