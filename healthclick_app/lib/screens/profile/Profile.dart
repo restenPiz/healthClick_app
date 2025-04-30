@@ -1,7 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:healthclick_app/ThemeProvider.dart';
-import 'package:healthclick_app/screens/auth/Login.dart';
 import 'package:healthclick_app/screens/layouts/AppBottom.dart';
 import 'package:healthclick_app/screens/profile/ProfileEdit.dart';
 import 'package:healthclick_app/screens/welcome/SplashLogin.dart';
@@ -52,7 +51,7 @@ class _ProfileState extends State<Profile> {
               const SizedBox(height:20),
               Center(
                 child: Text("${currentUser?.displayName ?? currentUser?.email?.split('@')[0] ?? 'Visitante'}",
-                  style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+                  style: const TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
                 ),
               ),
               const SizedBox(height: 10),
