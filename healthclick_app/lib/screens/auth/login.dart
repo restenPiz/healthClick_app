@@ -1,3 +1,4 @@
+
 // ignore_for_file: prefer_const_constructors
 
 import 'package:flutter/material.dart';
@@ -10,6 +11,44 @@ import 'package:healthclick_app/screens/welcome/SplashScreen.dart';
 import 'dart:convert'; // para jsonEncode
 import 'package:http/http.dart' as http; // para http.post
 
+// Classe utilitária para gerenciar dimensões responsivas
+class AppSize {
+  static late MediaQueryData _mediaQueryData;
+  static late double screenWidth;
+  static late double screenHeight;
+  static late double blockSizeHorizontal;
+  static late double blockSizeVertical;
+  static late double _safeAreaHorizontal;
+  static late double _safeAreaVertical;
+  static late double safeBlockHorizontal;
+  static late double safeBlockVertical;
+  static late double textScaleFactor;
+
+  static void init(BuildContext context) {
+    _mediaQueryData = MediaQuery.of(context);
+    screenWidth = _mediaQueryData.size.width;
+    screenHeight = _mediaQueryData.size.height;
+    textScaleFactor = _mediaQueryData.textScaleFactor;
+
+    blockSizeHorizontal = screenWidth / 100;
+    blockSizeVertical = screenHeight / 100;
+
+    _safeAreaHorizontal =
+        _mediaQueryData.padding.left + _mediaQueryData.padding.right;
+    _safeAreaVertical =
+        _mediaQueryData.padding.top + _mediaQueryData.padding.bottom;
+    safeBlockHorizontal = (screenWidth - _safeAreaHorizontal) / 100;
+    safeBlockVertical = (screenHeight - _safeAreaVertical) / 100;
+  }
+
+  // Para elementos que devem ser proporcionais ao tamanho da tela
+  static double hp(double percentage) => blockSizeVertical * percentage;
+  static double wp(double percentage) => blockSizeHorizontal * percentage;
+
+  // Para textos responsivos
+  static double sp(double size) => size * textScaleFactor;
+}
+
 class Login extends StatefulWidget {
   const Login({super.key});
 
@@ -18,70 +57,73 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
-
   //*Defining the attributes for make the google authentication
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
 
-  //*Defining the input names 
+  //*Defining the input names
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   bool isChecked = false;
   final GoogleSignIn googleSignIn = GoogleSignIn(
-    clientId: '50654751468-08ooqne2n1fm05dn4l5199equ0ssgu0g.apps.googleusercontent.com',
+    clientId:
+        '50654751468-08ooqne2n1fm05dn4l5199equ0ssgu0g.apps.googleusercontent.com',
   );
 
   //*Start with the signGoogle method
   Future<User?> _signInWithGoogle() async {
-  try {
-    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-    if (googleUser == null) return null; // Login cancelado
+    try {
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      if (googleUser == null) return null; // Login cancelado
 
-    final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
 
-    final credential = GoogleAuthProvider.credential(
-      accessToken: googleAuth.accessToken,
-      idToken: googleAuth.idToken,
-    );
-
-    // Autenticar com Firebase
-    final userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
-    final user = userCredential.user;
-
-    if (user == null) throw Exception('Erro ao autenticar com Firebase');
-
-    // Enviar para o backend
-    final response = await http.post(
-      Uri.parse('https://cloudev.org/api/sync-firebase-uid'), // Ajusta essa URL
-      body: {
-        'firebase_uid': user.uid,
-        'email': user.email ?? '',
-        'name': user.displayName ?? 'Google User',
-      },
-    );
-
-    if (response.statusCode == 200) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('✅ Login com Google e sincronização feita')),
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
       );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('❌ Erro ao sincronizar UID: ${response.body}')),
+
+      // Autenticar com Firebase
+      final userCredential =
+          await FirebaseAuth.instance.signInWithCredential(credential);
+      final user = userCredential.user;
+
+      if (user == null) throw Exception('Erro ao autenticar com Firebase');
+
+      // Enviar para o backend
+      final response = await http.post(
+        Uri.parse(
+            'https://cloudev.org/api/sync-firebase-uid'), // Ajusta essa URL
+        body: {
+          'firebase_uid': user.uid,
+          'email': user.email ?? '',
+          'name': user.displayName ?? 'Google User',
+        },
       );
+
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('✅ Login com Google e sincronização feita')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text('❌ Erro ao sincronizar UID: ${response.body}')),
+        );
+      }
+
+      return user;
+    } catch (e, stackTrace) {
+      debugPrint('Erro ao fazer login com Google: $e');
+      debugPrint('StackTrace: $stackTrace');
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Google login falhou: ${e.toString()}')),
+      );
+      return null;
     }
-
-    return user;
-  } catch (e, stackTrace) {
-    debugPrint('Erro ao fazer login com Google: $e');
-    debugPrint('StackTrace: $stackTrace');
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Google login falhou: ${e.toString()}')),
-    );
-    return null;
   }
-}
-
 
   Future<User?> _signInAnonymously() async {
     try {
@@ -157,196 +199,238 @@ class _LoginState extends State<Login> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
-    bool isChecked = false; // Checkbox state
+    // Inicializa a classe de tamanhos responsivos
+    AppSize.init(context);
+
     return Scaffold(
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start, // Align text properly
-            children: [
-              //? Image Section
-              Center(
-                child: Image.asset(
-                  "assets/Saude.png",
-                  width: 300,
-                  fit: BoxFit.cover,
-                ),
-              ),
-              // const SizedBox(height: 5),
-
-              //? Title and Input
-              const Text(
-                'Sign in to your Account',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 10),
-
-              //? Input Field
-              TextField(
-                controller: emailController,
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(
-                    borderRadius:
-                        BorderRadius.circular(30), // Aumenta o arredondamento
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(30),
-                    borderSide: BorderSide(
-                        color:
-                            Colors.grey), // Cor da borda quando não está focado
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(30),
-                    borderSide:
-                        BorderSide(color: Colors.blue), // Cor da borda ao focar
-                  ),
-                  hintText: 'Enter your email',
-                  prefixIcon: Icon(Icons.email),
-                ),
-              ),
-              const SizedBox(height: 10),
-
-              //? Password Field
-              TextField(
-                controller: passwordController,
-                obscureText: true, // Esconde o texto (ideal para senhas)
-                decoration: InputDecoration(
-                  hintText: 'Enter your password',
-                  prefixIcon: Icon(Icons.lock),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(30), // Aumenta o arredondamento
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(30),
-                    borderSide: BorderSide(color: Colors.grey), // Cor da borda quando não está focado
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(30),
-                    borderSide: BorderSide(color: Colors.blue), // Cor da borda ao focar
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.all(AppSize.wp(4.0)), // Padding responsivo
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                //? Image Section - Tamanho com base em porcentagem da largura da tela
+                Center(
+                  child: Image.asset(
+                    "assets/Saude.png",
+                    width: AppSize.wp(60), // 60% da largura da tela
+                    fit: BoxFit.contain,
                   ),
                 ),
-              ),
-              const SizedBox(height: 10),
-              //?Creating account section
-              GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) =>
-                            CreateAccount()), 
-                  );
-                },
-                child: Text(
-                  "Create an account",
+                SizedBox(height: AppSize.hp(2)), // Espaçamento responsivo
+
+                //? Title and Input - Tamanho de texto responsivo
+                Text(
+                  'Sign in to your Account',
                   style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.red),
+                      fontSize: AppSize.sp(20), fontWeight: FontWeight.bold),
                 ),
-              ),
-              const SizedBox(height: 10),
-              //?Remember me and Forget password section
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      Checkbox(
-                        value: isChecked,
-                        onChanged: (bool? newValue) {
-                          setState(() {
-                            isChecked = newValue!;
-                          });
-                        },
+                SizedBox(height: AppSize.hp(1.5)),
+
+                //? Input Field - Altura responsiva
+                SizedBox(
+                  height: AppSize.hp(7), // Altura do campo em % da tela
+                  child: TextField(
+                    controller: emailController,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppSize.wp(8)),
                       ),
-                      Text("Remember Me"),
-                    ],
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppSize.wp(8)),
+                        borderSide: BorderSide(color: Colors.grey),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppSize.wp(8)),
+                        borderSide: BorderSide(color: Colors.blue),
+                      ),
+                      hintText: 'Enter your email',
+                      prefixIcon: Icon(Icons.email),
+                      contentPadding: EdgeInsets.symmetric(
+                        vertical: AppSize.hp(1.5),
+                        horizontal: AppSize.wp(4),
+                      ),
+                    ),
                   ),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => ForgotPassword()),
-                      );
-                    },
-                    child: Text(
-                      "Forgot Password?",
-                      style: TextStyle(
-                        color: Colors.blue, // Makes it look like a link
+                ),
+                SizedBox(height: AppSize.hp(1.5)),
+
+                //? Password Field - Altura responsiva
+                SizedBox(
+                  height: AppSize.hp(7), // Altura do campo em % da tela
+                  child: TextField(
+                    controller: passwordController,
+                    obscureText: true,
+                    decoration: InputDecoration(
+                      hintText: 'Enter your password',
+                      prefixIcon: Icon(Icons.lock),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppSize.wp(8)),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppSize.wp(8)),
+                        borderSide: BorderSide(color: Colors.grey),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppSize.wp(8)),
+                        borderSide: BorderSide(color: Colors.blue),
+                      ),
+                      contentPadding: EdgeInsets.symmetric(
+                        vertical: AppSize.hp(1.5),
+                        horizontal: AppSize.wp(4),
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(height: AppSize.hp(1.5)),
+
+                //?Creating account section
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => CreateAccount()),
+                    );
+                  },
+                  child: Text(
+                    "Create an account",
+                    style: TextStyle(
+                        fontSize: AppSize.sp(15),
                         fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                        color: Colors.red),
                   ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              //?Login button section
-              Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                ),
+                SizedBox(height: AppSize.hp(1.5)),
+
+                //?Remember me and Forget password section
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    SizedBox(
-                      width: double.infinity, // ✅ Makes button full width
-                      child: ElevatedButton(
-                        onPressed: _login,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green,
-                          foregroundColor: Colors.white,
-                          padding: EdgeInsets.symmetric(vertical: 15),
+                    Row(
+                      children: [
+                        SizedBox(
+                          height: AppSize.hp(4),
+                          width: AppSize.wp(6),
+                          child: Checkbox(
+                            value: isChecked,
+                            onChanged: (bool? newValue) {
+                              setState(() {
+                                isChecked = newValue!;
+                              });
+                            },
+                          ),
                         ),
-                        child: const Text('Login',style: TextStyle(fontSize: 17),),
-                      ),
+                        Text(
+                          "Remember Me",
+                          style: TextStyle(fontSize: AppSize.sp(14)),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 10),
-                    Text("Or Sign Up With"),
-                    const SizedBox(height: 10),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () async {
-                          User? user = await _signInWithGoogle();
-                          if (user != null) {
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (_) => const OnBoarding()),
-                            );
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: Colors.black,
-                          padding: EdgeInsets.symmetric(vertical: 15),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Image.asset(
-                              "assets/google.png",
-                              width: 24, 
-                              height: 24,
-                            ),
-                            SizedBox(width: 10),
-                            Text(
-                              'Continue with Google',
-                              style: TextStyle(
-                                  fontSize: 17, fontWeight: FontWeight.bold),
-                            ),
-                          ],
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => ForgotPassword()),
+                        );
+                      },
+                      child: Text(
+                        "Forgot Password?",
+                        style: TextStyle(
+                          color: Colors.blue,
+                          fontWeight: FontWeight.bold,
+                          fontSize: AppSize.sp(14),
                         ),
                       ),
                     ),
                   ],
                 ),
-              ),
-            ],
+                SizedBox(height: AppSize.hp(2)),
+
+                //?Login button section
+                Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        width: double.infinity,
+                        height: AppSize.hp(6.5), // Altura do botão responsiva
+                        child: ElevatedButton(
+                          onPressed: _login,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green,
+                            foregroundColor: Colors.white,
+                            padding:
+                                EdgeInsets.symmetric(vertical: AppSize.hp(1.5)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.circular(AppSize.wp(8)),
+                            ),
+                          ),
+                          child: Text(
+                            'Login',
+                            style: TextStyle(fontSize: AppSize.sp(17)),
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: AppSize.hp(2)),
+                      Text(
+                        "Or Sign Up With",
+                        style: TextStyle(fontSize: AppSize.sp(14)),
+                      ),
+                      SizedBox(height: AppSize.hp(2)),
+                      SizedBox(
+                        width: double.infinity,
+                        height: AppSize.hp(6.5), // Altura do botão responsiva
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            User? user = await _signInWithGoogle();
+                            if (user != null) {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (_) => const OnBoarding()),
+                              );
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            foregroundColor: Colors.black,
+                            padding:
+                                EdgeInsets.symmetric(vertical: AppSize.hp(1.5)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.circular(AppSize.wp(8)),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Image.asset(
+                                "assets/google.png",
+                                width: AppSize.wp(6),
+                                height: AppSize.wp(6),
+                              ),
+                              SizedBox(width: AppSize.wp(2)),
+                              Text(
+                                'Continue with Google',
+                                style: TextStyle(
+                                    fontSize: AppSize.sp(17),
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

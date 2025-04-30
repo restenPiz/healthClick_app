@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:healthclick_app/screens/welcome/HomePage.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:healthclick_app/utils/app_size.dart'; // Importando a classe AppSize
 
 class OnBoarding extends StatefulWidget {
   const OnBoarding({super.key});
@@ -62,26 +63,30 @@ class _OnBoardingState extends State<OnBoarding> {
 
   @override
   Widget build(BuildContext context) {
+    // Inicializando a classe AppSize para tornar a interface responsiva
+    AppSize.init(context);
+
     return Scaffold(
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: EdgeInsets.all(AppSize.wp(4)), // Utilizando AppSize para margens responsivas
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Center(
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(AppSize.wp(5)), // Responsividade nos arredondamentos
                   child: Image.asset(
                     "assets/back.png",
-                    width: 500,
-                    height: 400,
+                    width: AppSize.wp(80), // Responsividade na largura
+                    height: AppSize.hp(40), // Responsividade na altura
                     fit: BoxFit.cover,
                   ),
                 ),
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: AppSize.hp(3)), // Ajustando o espaçamento
+
               const Text(
                 'Bem Vindo ao Aplicativo SaúdeClick',
                 style: TextStyle(
@@ -89,13 +94,15 @@ class _OnBoardingState extends State<OnBoarding> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: AppSize.hp(2)),
+
               const Text(
                 'Este é um aplicativo criado para atender à demanda por medicamentos em Moçambique e outros países. O aplicativo visa automatizar os processos de compra e entrega de medicamentos a pacientes ou beneficiários.',
                 style: TextStyle(fontSize: 15),
                 textAlign: TextAlign.justify,
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: AppSize.hp(3)),
+
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -108,11 +115,11 @@ class _OnBoardingState extends State<OnBoarding> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green,
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 15),
+                    padding: EdgeInsets.symmetric(vertical: AppSize.hp(2)), // Ajustando a altura do botão
                   ),
-                  child: const Text(
+                  child: Text(
                     'Próximo',
-                    style: TextStyle(fontSize: 20),
+                    style: TextStyle(fontSize: AppSize.sp(20)), // Responsividade no texto
                   ),
                 ),
               ),

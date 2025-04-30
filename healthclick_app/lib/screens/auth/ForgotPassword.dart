@@ -1,6 +1,44 @@
 import 'package:flutter/material.dart';
 import 'package:healthclick_app/screens/auth/Login.dart';
 
+// Classe utilitária para gerenciar dimensões responsivas
+class AppSize {
+  static late MediaQueryData _mediaQueryData;
+  static late double screenWidth;
+  static late double screenHeight;
+  static late double blockSizeHorizontal;
+  static late double blockSizeVertical;
+  static late double _safeAreaHorizontal;
+  static late double _safeAreaVertical;
+  static late double safeBlockHorizontal;
+  static late double safeBlockVertical;
+  static late double textScaleFactor;
+
+  static void init(BuildContext context) {
+    _mediaQueryData = MediaQuery.of(context);
+    screenWidth = _mediaQueryData.size.width;
+    screenHeight = _mediaQueryData.size.height;
+    textScaleFactor = _mediaQueryData.textScaleFactor;
+
+    blockSizeHorizontal = screenWidth / 100;
+    blockSizeVertical = screenHeight / 100;
+
+    _safeAreaHorizontal =
+        _mediaQueryData.padding.left + _mediaQueryData.padding.right;
+    _safeAreaVertical =
+        _mediaQueryData.padding.top + _mediaQueryData.padding.bottom;
+    safeBlockHorizontal = (screenWidth - _safeAreaHorizontal) / 100;
+    safeBlockVertical = (screenHeight - _safeAreaVertical) / 100;
+  }
+
+  // Para elementos que devem ser proporcionais ao tamanho da tela
+  static double hp(double percentage) => blockSizeVertical * percentage;
+  static double wp(double percentage) => blockSizeHorizontal * percentage;
+
+  // Para textos responsivos
+  static double sp(double size) => size * textScaleFactor;
+}
+
 class ForgotPassword extends StatefulWidget {
   const ForgotPassword({super.key});
 
@@ -11,50 +49,62 @@ class ForgotPassword extends StatefulWidget {
 class _ForgotPasswordState extends State<ForgotPassword> {
   @override
   Widget build(BuildContext context) {
+    // Inicializando a classe AppSize para tornar a interface responsiva
+    AppSize.init(context);
+
     return Scaffold(
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: EdgeInsets.all(AppSize.wp(4)),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start, // Align text properly
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Center(
                 child: Image.asset(
                   "assets/Saude.png",
-                  width: 300,
+                  width: AppSize.wp(60),
                   fit: BoxFit.cover,
                 ),
               ),
-              const SizedBox(height: 15,),
-              const Center(child: Text('Enter your email address to reset your password.'),),
-              const SizedBox(height: 20,),
-              TextField(
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(
-                    borderRadius:
-                        BorderRadius.circular(30), // Aumenta o arredondamento
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(30),
-                    borderSide: BorderSide(
-                        color:
-                            Colors.grey), // Cor da borda quando não está focado
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(30),
-                    borderSide:
-                        BorderSide(color: Colors.blue), // Cor da borda ao focar
-                  ),
-                  hintText: 'Enter your email',
-                  prefixIcon: Icon(Icons.email),
+              SizedBox(height: AppSize.hp(2)),
+
+              const Center(
+                child: Text(
+                  'Enter your email address to reset your password.',
+                  textAlign: TextAlign.center,
                 ),
               ),
-               const SizedBox(
-                height: 20
-              ),
+              SizedBox(height: AppSize.hp(3)),
+
+              // Campo de texto para email
               SizedBox(
-                width: double.infinity, // ✅ Makes button full width
+                height: AppSize.hp(7),
+                child: TextField(
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AppSize.wp(8)),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AppSize.wp(8)),
+                      borderSide: const BorderSide(
+                        color: Colors.grey,
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AppSize.wp(8)),
+                      borderSide: const BorderSide(color: Colors.blue),
+                    ),
+                    hintText: 'Enter your email',
+                    prefixIcon: const Icon(Icons.email),
+                  ),
+                ),
+              ),
+              SizedBox(height: AppSize.hp(3)),
+
+              // Botão de reset de senha
+              SizedBox(
+                width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
                     Navigator.pop(context);
@@ -62,15 +112,20 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green,
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 20),
+                    padding: EdgeInsets.symmetric(vertical: AppSize.hp(2)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppSize.wp(8)),
+                    ),
                   ),
-                  child: const Text(
+                  child: Text(
                     'Reset Password',
-                    style: TextStyle(fontSize: 20),
+                    style: TextStyle(fontSize: AppSize.sp(20)),
                   ),
                 ),
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: AppSize.hp(3)),
+
+              // Link para redirecionar ao login
               GestureDetector(
                 onTap: () {
                   Navigator.push(
@@ -79,10 +134,11 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                   );
                 },
                 child: const Center(
-                  child: const Text('Remember Your Password? Sign In', style: TextStyle(
-                    color: Colors.blue
-                  ),),
-                )
+                  child: Text(
+                    'Remember Your Password? Sign In',
+                    style: TextStyle(color: Colors.blue),
+                  ),
+                ),
               ),
             ],
           ),

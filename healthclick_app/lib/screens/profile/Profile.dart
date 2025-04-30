@@ -60,7 +60,7 @@ class _ProfileState extends State<Profile> {
               ),
               const SizedBox(height: 30),
               const Divider(
-                thickness: 2,
+                thickness: 1,
                 indent: 20,
                 endIndent: 20,
               ),
@@ -78,7 +78,7 @@ class _ProfileState extends State<Profile> {
                 ),
               ),
               const Divider(
-                thickness: 2,
+                thickness: 1,
                 indent: 20,
                 endIndent: 20,
               ),
@@ -88,7 +88,7 @@ class _ProfileState extends State<Profile> {
               ),
               // const SizedBox(height: 2),
               const Divider(
-                thickness: 2,
+                thickness: 1,
                 indent: 20,
                 endIndent: 20,
               ),
@@ -107,7 +107,7 @@ class _ProfileState extends State<Profile> {
               ),
               // const SizedBox(height: 10),
                const Divider(
-                thickness: 2,
+                thickness: 1,
                 indent: 20,
                 endIndent: 20,
               ),

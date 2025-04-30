@@ -8,6 +8,44 @@ import 'package:healthclick_app/screens/welcome/OnBoarding.dart';
 import 'dart:convert'; // para jsonEncode
 import 'package:http/http.dart' as http; // para http.post
 
+// Classe utilitária para gerenciar dimensões responsivas
+class AppSize {
+  static late MediaQueryData _mediaQueryData;
+  static late double screenWidth;
+  static late double screenHeight;
+  static late double blockSizeHorizontal;
+  static late double blockSizeVertical;
+  static late double _safeAreaHorizontal;
+  static late double _safeAreaVertical;
+  static late double safeBlockHorizontal;
+  static late double safeBlockVertical;
+  static late double textScaleFactor;
+
+  static void init(BuildContext context) {
+    _mediaQueryData = MediaQuery.of(context);
+    screenWidth = _mediaQueryData.size.width;
+    screenHeight = _mediaQueryData.size.height;
+    textScaleFactor = _mediaQueryData.textScaleFactor;
+
+    blockSizeHorizontal = screenWidth / 100;
+    blockSizeVertical = screenHeight / 100;
+
+    _safeAreaHorizontal =
+        _mediaQueryData.padding.left + _mediaQueryData.padding.right;
+    _safeAreaVertical =
+        _mediaQueryData.padding.top + _mediaQueryData.padding.bottom;
+    safeBlockHorizontal = (screenWidth - _safeAreaHorizontal) / 100;
+    safeBlockVertical = (screenHeight - _safeAreaVertical) / 100;
+  }
+
+  // Para elementos que devem ser proporcionais ao tamanho da tela
+  static double hp(double percentage) => blockSizeVertical * percentage;
+  static double wp(double percentage) => blockSizeHorizontal * percentage;
+
+  // Para textos responsivos
+  static double sp(double size) => size * textScaleFactor;
+}
+
 class CreateAccount extends StatefulWidget {
   const CreateAccount({super.key});
 
@@ -16,34 +54,32 @@ class CreateAccount extends StatefulWidget {
 }
 
 class _CreateAccountState extends State<CreateAccount> {
-  
-  //*Creating a attributes
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmPasswordController = TextEditingController();
+  final TextEditingController confirmPasswordController =
+      TextEditingController();
 
-  //*Metodo to allow the user to signInWithGoogle account
   Future<User?> _signInWithGoogle() async {
     try {
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-      if (googleUser == null) return null; // Login cancelado
+      if (googleUser == null) return null;
 
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
 
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 
-      // Autenticar com Firebase
-      final userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+      final userCredential =
+          await FirebaseAuth.instance.signInWithCredential(credential);
       final user = userCredential.user;
 
       if (user == null) throw Exception('Erro ao autenticar com Firebase');
 
-      // Enviar para o backend
       final response = await http.post(
-        Uri.parse('https://cloudev.org/api/sync-firebase-uid'), // Ajusta essa URL
+        Uri.parse('https://cloudev.org/api/sync-firebase-uid'),
         body: {
           'firebase_uid': user.uid,
           'email': user.email ?? '',
@@ -53,11 +89,13 @@ class _CreateAccountState extends State<CreateAccount> {
 
       if (response.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('✅ Login com Google e sincronização feita')),
+          const SnackBar(
+              content: Text('✅ Login com Google e sincronização feita')),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('❌ Erro ao sincronizar UID: ${response.body}')),
+          SnackBar(
+              content: Text('❌ Erro ao sincronizar UID: ${response.body}')),
         );
       }
 
@@ -70,138 +108,109 @@ class _CreateAccountState extends State<CreateAccount> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
-    bool isChecked = false;
+    AppSize.init(context);
+
     return Scaffold(
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: EdgeInsets.all(AppSize.wp(4)),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start, // Align text properly
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              //? Image Section
               Center(
                 child: Image.asset(
                   "assets/Saude.png",
-                  width: 300,
+                  width: AppSize.wp(60),
                   fit: BoxFit.cover,
                 ),
               ),
-              // const SizedBox(height: 20),
-
-              //? Title and Input
-              const Text(
+              SizedBox(height: AppSize.hp(2)),
+              Text(
                 'Create An Account',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 10),
-
-              //? Input Field
-              TextField(
-                controller: emailController,
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(
-                    borderRadius:
-                        BorderRadius.circular(30), // Aumenta o arredondamento
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(30),
-                    borderSide: const BorderSide(
-                        color:
-                            Colors.grey), // Cor da borda quando não está focado
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(30),
-                    borderSide:
-                        const BorderSide(color: Colors.blue), // Cor da borda ao focar
-                  ),
-                  hintText: 'Your Email Address',
-                  prefixIcon: const Icon(Icons.email),
+                style: TextStyle(
+                  fontSize: AppSize.sp(20),
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 10),
-              //? Password Field
-              TextField(
-                controller: passwordController,
-                obscureText: true, // Hide password input
-                decoration: InputDecoration(
-                 border: OutlineInputBorder(
-                    borderRadius:
-                        BorderRadius.circular(30), // Aumenta o arredondamento
+              SizedBox(height: AppSize.hp(1.5)),
+              SizedBox(
+                height: AppSize.hp(7),
+                child: TextField(
+                  controller: emailController,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AppSize.wp(8)),
+                    ),
+                    hintText: 'Your Email Address',
+                    prefixIcon: const Icon(Icons.email),
                   ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(30),
-                    borderSide: const BorderSide(
-                        color:
-                            Colors.grey), // Cor da borda quando não está focado
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(30),
-                    borderSide:
-                        const BorderSide(color: Colors.blue), // Cor da borda ao focar
-                  ),
-                  hintText: 'Your Password',
-                  prefixIcon: const Icon(Icons.lock),
                 ),
               ),
-              const SizedBox(height: 10),
-              //? Password Field
-              TextField(
-                controller: confirmPasswordController,
-                obscureText: true, // Hide password input
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(
-                    borderRadius:
-                        BorderRadius.circular(30), // Aumenta o arredondamento
+              SizedBox(height: AppSize.hp(1.5)),
+              SizedBox(
+                height: AppSize.hp(7),
+                child: TextField(
+                  controller: passwordController,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AppSize.wp(8)),
+                    ),
+                    hintText: 'Your Password',
+                    prefixIcon: const Icon(Icons.lock),
                   ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(30),
-                    borderSide: const BorderSide(
-                        color:
-                            Colors.grey), // Cor da borda quando não está focado
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(30),
-                    borderSide:
-                        const BorderSide(color: Colors.blue), // Cor da borda ao focar
-                  ),
-                  hintText: 'Your Password Confirmation',
-                  prefixIcon: const Icon(Icons.lock),
                 ),
               ),
-              const SizedBox(height: 15),
-              //?Creating account section
-              Center(child: GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const Login()),
-                  );
-                },
-                child: const Text(
-                  "Already An Have An Account? Login",
-                  style: TextStyle(
-                      fontSize: 15,
+              SizedBox(height: AppSize.hp(1.5)),
+              SizedBox(
+                height: AppSize.hp(7),
+                child: TextField(
+                  controller: confirmPasswordController,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AppSize.wp(8)),
+                    ),
+                    hintText: 'Your Password Confirmation',
+                    prefixIcon: const Icon(Icons.lock),
+                  ),
+                ),
+              ),
+              SizedBox(height: AppSize.hp(2)),
+              Center(
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const Login()),
+                    );
+                  },
+                  child: Text(
+                    "Already Have An Account? Login",
+                    style: TextStyle(
+                      fontSize: AppSize.sp(15),
                       fontWeight: FontWeight.bold,
-                      color: Colors.red),
+                      color: Colors.red,
+                    ),
+                  ),
                 ),
-              ),),
-              const SizedBox(height: 15),
-              //?Login button section
+              ),
+              SizedBox(height: AppSize.hp(2)),
               Center(
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     SizedBox(
-                      width: double.infinity, // ✅ Makes button full width
+                      width: double.infinity,
+                      height: AppSize.hp(6.5),
                       child: ElevatedButton(
                         onPressed: () async {
-                          if (passwordController.text != confirmPasswordController.text) {
+                          if (passwordController.text !=
+                              confirmPasswordController.text) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Passwords do not match')),
+                              const SnackBar(
+                                  content: Text('Passwords do not match')),
                             );
                             return;
                           }
@@ -210,42 +219,44 @@ class _CreateAccountState extends State<CreateAccount> {
                             final email = emailController.text.trim();
                             final password = passwordController.text.trim();
 
-                            // Cria o usuário no Firebase
                             final credential = await FirebaseAuth.instance
-                                .createUserWithEmailAndPassword(email: email, password: password);
+                                .createUserWithEmailAndPassword(
+                                    email: email, password: password);
 
-                            final user = FirebaseAuth.instance.currentUser;
+                            final user = credential.user;
 
                             if (user != null) {
-                              final uid = user.uid;
-
-                              // 🔁 Envia o UID e o email para o backend Laravel
                               final response = await http.post(
-                                Uri.parse('https://cloudev.org/api/sync-firebase-uid'),
+                                Uri.parse(
+                                    'https://cloudev.org/api/sync-firebase-uid'),
                                 headers: {'Content-Type': 'application/json'},
                                 body: jsonEncode({
                                   'firebase_uid': user.uid,
                                   'email': user.email ?? '',
-                                  'name': user.displayName ?? 'Usuário Firebase',
+                                  'name':
+                                      user.displayName ?? 'Usuário Firebase',
                                 }),
                               );
 
                               if (response.statusCode == 200) {
                                 print('✅ UID sincronizado com sucesso.');
                               } else {
-                                print('❌ Erro ao sincronizar UID: ${response.body}');
+                                print(
+                                    '❌ Erro ao sincronizar UID: ${response.body}');
                               }
+
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                    content:
+                                        Text('Account created successfully')),
+                              );
+
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (_) => const OnBoarding()),
+                              );
                             }
-
-                            // Mostra sucesso e navega para a próxima tela
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Account created successfully')),
-                            );
-
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(builder: (context) => const OnBoarding()),
-                            );
                           } catch (e) {
                             String errorMessage = 'An error occurred';
                             if (e is FirebaseAuthException) {
@@ -274,39 +285,50 @@ class _CreateAccountState extends State<CreateAccount> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.green,
                           foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 15),
+                          padding:
+                              EdgeInsets.symmetric(vertical: AppSize.hp(1.5)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(AppSize.wp(8)),
+                          ),
                         ),
-                        child: const Text(
+                        child: Text(
                           'Sign Up',
-                          style: TextStyle(fontSize: 17),
+                          style: TextStyle(fontSize: AppSize.sp(17)),
                         ),
                       ),
                     ),
-                    const SizedBox(height: 5),
+                    SizedBox(height: AppSize.hp(1)),
                     const Text("Or Sign Up With"),
-                    const SizedBox(height: 5),
+                    SizedBox(height: AppSize.hp(1)),
                     SizedBox(
                       width: double.infinity,
+                      height: AppSize.hp(6.5),
                       child: ElevatedButton(
                         onPressed: _signInWithGoogle,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.white,
                           foregroundColor: Colors.black,
-                          padding: const EdgeInsets.symmetric(vertical: 15),
+                          padding:
+                              EdgeInsets.symmetric(vertical: AppSize.hp(1.5)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(AppSize.wp(8)),
+                          ),
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Image.asset(
                               "assets/google.png",
-                              width: 24,
-                              height: 24,
+                              width: AppSize.wp(6),
+                              height: AppSize.wp(6),
                             ),
-                            const SizedBox(width: 10),
-                            const Text(
+                            SizedBox(width: AppSize.wp(3)),
+                            Text(
                               'Continue with Google',
                               style: TextStyle(
-                                  fontSize: 17, fontWeight: FontWeight.bold),
+                                fontSize: AppSize.sp(17),
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ],
                         ),
