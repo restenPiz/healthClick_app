@@ -270,6 +270,9 @@ class _HomePageState extends State<HomePage> {
                     children: categories.asMap().entries.map((entry) {
                       int index = entry.key;
                       Map<String, dynamic> category = entry.value;
+                      // Calculando o tamanho aproximado do texto
+                      String categoryName = category['name'] ?? 'Sem nome';
+                      
                       return Padding(
                         padding: const EdgeInsets.only(right: 10),
                         child: GestureDetector(
@@ -290,7 +293,12 @@ class _HomePageState extends State<HomePage> {
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(20),
                             child: Container(
-                              width: 140,
+                              // Usando IntrinsicWidth para que o container se ajuste ao conteúdo
+                              width: null, // Remove a largura fixa
+                              constraints: const BoxConstraints(
+                                minWidth: 100, // Largura mínima para categorias com nomes curtos
+                                maxWidth: 220, // Largura máxima para evitar cartões muito largos
+                              ),
                               height: 55,
                               decoration: BoxDecoration(
                                 color: const Color(0xFFEFF5F6),
@@ -303,13 +311,22 @@ class _HomePageState extends State<HomePage> {
                                   ),
                                 ],
                               ),
-                              child: ListTile(
-                                leading: const Icon(Icons.category,
-                                    color: Colors.black),
-                                title: Text(
-                                  category['name'] ?? 'Sem nome',
-                                  style: const TextStyle(color: Colors.black),
-                                  overflow: TextOverflow.ellipsis,
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min, // Importante para o tamanho se ajustar
+                                  children: [
+                                    const Icon(Icons.category, color: Colors.black),
+                                    const SizedBox(width: 8), // Espaçamento entre o ícone e o texto
+                                    Flexible(
+                                      child: Text(
+                                        categoryName,
+                                        style: const TextStyle(color: Colors.black),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8), // Espaçamento após o texto
+                                  ],
                                 ),
                               ),
                             ),
@@ -319,7 +336,6 @@ class _HomePageState extends State<HomePage> {
                     }).toList(),
                   ),
                 ),
-
                 const SizedBox(height: 20),
 
                 // Products Section
