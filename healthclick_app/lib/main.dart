@@ -38,7 +38,17 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         brightness: Brightness.light,
         primarySwatch: Colors.blue,
+        scaffoldBackgroundColor: Colors.white, // Define o fundo como branco
+        colorScheme: const ColorScheme.light(
+          background: Colors.white,
+          surface: Colors.white,
+          // Outras propriedades de cor conforme necessário
+        ),
       ),
+      // theme: ThemeData(
+      //   brightness: Brightness.light,
+      //   primarySwatch: Colors.blue,
+      // ),
       darkTheme: ThemeData(
         brightness: Brightness.dark,
         primarySwatch: Colors.blue,
