@@ -87,6 +87,21 @@ class _ProfileEditState extends State<ProfileEdit> {
   @override
   Widget build(BuildContext context) {
     User? currentUser = FirebaseAuth.instance.currentUser;
+    final screenSize = MediaQuery.of(context).size;
+    final isSmallScreen = screenSize.width < 600;
+    final isMediumScreen = screenSize.width >= 600 && screenSize.width < 900;
+    final isLargeScreen = screenSize.width >= 900;
+
+    // Responsive values
+    final double avatarRadius = isSmallScreen ? 50 : (isMediumScreen ? 60 : 70);
+    final double horizontalPadding =
+        isSmallScreen ? 16 : (isMediumScreen ? 24 : 32);
+    final double nameFontSize = isSmallScreen ? 20 : (isMediumScreen ? 22 : 25);
+    final double emailFontSize = isSmallScreen ? 16 : 18;
+    final double buttonHeight = isSmallScreen ? 45 : 50;
+    final double contentWidth = isLargeScreen
+        ? screenSize.width * 0.6
+        : (isMediumScreen ? screenSize.width * 0.8 : screenSize.width);
 
     return Scaffold(
       body: SingleChildScrollView(
@@ -161,6 +176,10 @@ class _ProfileEditState extends State<ProfileEdit> {
                   hintText: currentUser?.displayName ??
                       currentUser?.email?.split('@')[0] ?? 'Escreva o seu nome',
                   prefixIcon: const Icon(Icons.person_2),
+                  contentPadding: EdgeInsets.symmetric(
+                    vertical: isSmallScreen ? 12 : 16,
+                    horizontal: 16,
+                  ),
                 ),
               ),
               const SizedBox(
@@ -182,6 +201,10 @@ class _ProfileEditState extends State<ProfileEdit> {
                   ),
                   hintText: currentUser?.email ?? 'Escreva o seu email',
                   prefixIcon: const Icon(Icons.email),
+                  contentPadding: EdgeInsets.symmetric(
+                    vertical: isSmallScreen ? 12 : 16,
+                    horizontal: 16,
+                  ),
                 ),
               ),
               const SizedBox(
@@ -200,7 +223,7 @@ class _ProfileEditState extends State<ProfileEdit> {
                       ? const CircularProgressIndicator(color: Colors.white)
                       : const Text(
                           'Actualizar Dados',
-                          style: TextStyle(fontSize: 17),
+                          style: TextStyle(fontSize: 15),
                         ),
                 ),
               ),

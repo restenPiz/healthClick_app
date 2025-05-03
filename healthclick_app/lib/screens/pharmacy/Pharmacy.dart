@@ -86,9 +86,14 @@ class _PharmacyState extends State<Pharmacy> {
     User? currentUser = FirebaseAuth.instance.currentUser;
     final cart = Provider.of<CartProvider>(context);
 
+    // Get screen dimensions
+    final Size screenSize = MediaQuery.of(context).size;
+    final bool isSmallScreen = screenSize.width < 600;
+    final bool isMediumScreen =
+        screenSize.width >= 600 && screenSize.width < 900;
+
     return Scaffold(
       body: CustomRefreshIndicator(
-        // Configurando opções similares à página de produtos
         onRefresh: () async {
           return getPharmacies();
         },
@@ -109,7 +114,7 @@ class _PharmacyState extends State<Pharmacy> {
                   opacity: controller.value > 0.0 ? 1.0 : 0.0,
                   duration: const Duration(milliseconds: 200),
                   child: Container(
-                    height: 80,
+                    height: screenSize.height * 0.08,
                     alignment: Alignment.center,
                     child: controller.state == IndicatorState.loading
                         ? const CircularProgressIndicator(color: Colors.green)
@@ -120,89 +125,94 @@ class _PharmacyState extends State<Pharmacy> {
             ],
           );
         },
-        child: SingleChildScrollView(
-          physics: AlwaysScrollableScrollPhysics(),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(height: 25),
-                ListTile(
-                  leading: CircleAvatar(
-                    radius: 25,
-                    backgroundImage: currentUser?.photoURL != null
-                        ? NetworkImage(currentUser!.photoURL!)
-                        : const AssetImage("assets/dif.jpg") as ImageProvider,
+        child: SafeArea(
+          child: SingleChildScrollView(
+            physics: AlwaysScrollableScrollPhysics(),
+            child: Padding(
+              padding:
+                  EdgeInsets.all(screenSize.width * 0.04), // Responsive padding
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(height: screenSize.height * 0.01),
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: CircleAvatar(
+                      radius: isSmallScreen ? 20 : 25,
+                      backgroundImage: currentUser?.photoURL != null
+                          ? NetworkImage(currentUser!.photoURL!)
+                          : const AssetImage("assets/dif.jpg") as ImageProvider,
+                    ),
+                    title: Text(
+                      "Olá ${currentUser?.displayName ?? currentUser?.email?.split('@')[0] ?? 'Visitante'}",
+                      style: TextStyle(
+                          fontSize: isSmallScreen ? 15 : 17,
+                          fontWeight: FontWeight.bold),
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
-                  title: Text(
-                    "Olá ${currentUser?.displayName ?? currentUser?.email?.split('@')[0] ?? 'Visitante'}",
-                    style: const TextStyle(
-                        fontSize: 17, fontWeight: FontWeight.bold),
+                  SizedBox(height: screenSize.height * 0.02),
+                  Text(
+                    "Farmácias Próximas",
+                    style: TextStyle(
+                        fontSize: isSmallScreen ? 16 : 18,
+                        fontWeight: FontWeight.bold),
                   ),
-                ),
-                const SizedBox(height: 20),
-                const Text(
-                  "Farmácias Próximas",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                _isLoading
-                    ? const Center(
-                        child: Padding(
-                          padding: EdgeInsets.all(20.0),
-                          child: CircularProgressIndicator(color: Colors.green),
-                        ),
-                      )
-                    : pharmacies.isEmpty
-                        ? const Center(
-                            child: Padding(
-                              padding: EdgeInsets.all(20.0),
-                              child: Text(
-                                'Nenhuma farmácia encontrada',
-                                style: TextStyle(fontSize: 16),
+                  _isLoading
+                      ? Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(screenSize.width * 0.05),
+                            child:
+                                CircularProgressIndicator(color: Colors.green),
+                          ),
+                        )
+                      : pharmacies.isEmpty
+                          ? Center(
+                              child: Padding(
+                                padding:
+                                    EdgeInsets.all(screenSize.width * 0.05),
+                                child: Text(
+                                  'Nenhuma farmácia encontrada',
+                                  style: TextStyle(
+                                      fontSize: isSmallScreen ? 14 : 16),
+                                ),
                               ),
-                            ),
-                          )
-                        : ListView.builder(
-                            shrinkWrap: true,
-                            physics: NeverScrollableScrollPhysics(),
-                            itemCount: pharmacies.length,
-                            itemBuilder: (context, index) {
-                              final pharmacy = pharmacies[index];
-                              return Card(
-                                margin: const EdgeInsets.symmetric(vertical: 8),
-                                child: ListTile(
-                                  leading: CircleAvatar(
-                                    radius: 25,
-                                    backgroundImage: pharmacy['image'] != null
-                                        ? NetworkImage(
-                                            'http://cloudev.org/storage/${pharmacy['image']}')
-                                        : AssetImage(
-                                                'assets/images/default_pharmacy.png')
-                                            as ImageProvider,
+                            )
+                          : isMediumScreen || !isSmallScreen
+                              // Grid view for medium and large screens
+                              ? GridView.builder(
+                                  shrinkWrap: true,
+                                  physics: NeverScrollableScrollPhysics(),
+                                  gridDelegate:
+                                      SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: isMediumScreen ? 2 : 3,
+                                    childAspectRatio: 3.5,
+                                    crossAxisSpacing: 8,
+                                    mainAxisSpacing: 8,
                                   ),
-                                  title: Text(
-                                    pharmacy['name']!,
-                                    style: const TextStyle(
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                  subtitle: Text(
-                                      'Proprietário: ${pharmacy['userName']!}'),
-                                  trailing: const Icon(Icons.chevron_right),
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (_) => PharmacyDetails(
-                                              pharmacy: pharmacy)),
+                                  itemCount: pharmacies.length,
+                                  itemBuilder: (context, index) {
+                                    return PharmacyCard(
+                                      pharmacy: pharmacies[index],
+                                      isSmallScreen: isSmallScreen,
+                                    );
+                                  },
+                                )
+                              // List view for small screens (original layout)
+                              : ListView.builder(
+                                  shrinkWrap: true,
+                                  physics: NeverScrollableScrollPhysics(),
+                                  itemCount: pharmacies.length,
+                                  itemBuilder: (context, index) {
+                                    return PharmacyCard(
+                                      pharmacy: pharmacies[index],
+                                      isSmallScreen: isSmallScreen,
                                     );
                                   },
                                 ),
-                              );
-                            },
-                          ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -216,7 +226,11 @@ class _PharmacyState extends State<Pharmacy> {
         children: [
           FloatingActionButton(
             backgroundColor: Colors.green,
-            child: const Icon(Icons.shopping_cart, color: Colors.white),
+            child: Icon(
+              Icons.shopping_cart,
+              color: Colors.white,
+              size: isSmallScreen ? 22 : 24,
+            ),
             onPressed: () {
               Navigator.push(
                 context,
@@ -228,26 +242,89 @@ class _PharmacyState extends State<Pharmacy> {
             Positioned(
               right: 0,
               child: Container(
-                padding: const EdgeInsets.all(2),
+                padding: EdgeInsets.all(screenSize.width * 0.005),
                 decoration: BoxDecoration(
                   color: Colors.red,
                   borderRadius: BorderRadius.circular(10),
                 ),
-                constraints: const BoxConstraints(
-                  minWidth: 18,
-                  minHeight: 18,
+                constraints: BoxConstraints(
+                  minWidth: isSmallScreen ? 16 : 18,
+                  minHeight: isSmallScreen ? 16 : 18,
                 ),
                 child: Text(
                   '${cart.itemCount}',
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: Colors.white,
-                    fontSize: 12,
+                    fontSize: isSmallScreen ? 10 : 12,
                   ),
                   textAlign: TextAlign.center,
                 ),
               ),
             ),
         ],
+      ),
+    );
+  }
+}
+
+class PharmacyCard extends StatelessWidget {
+  final Map<String, dynamic> pharmacy;
+  final bool isSmallScreen;
+
+  const PharmacyCard({
+    super.key,
+    required this.pharmacy,
+    required this.isSmallScreen,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final Size screenSize = MediaQuery.of(context).size;
+
+    return Card(
+      margin: EdgeInsets.symmetric(vertical: screenSize.height * 0.01),
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(isSmallScreen ? 8 : 12),
+      ),
+      child: ListTile(
+        contentPadding: EdgeInsets.symmetric(
+          horizontal: screenSize.width * 0.03,
+          vertical: screenSize.height * 0.005,
+        ),
+        leading: CircleAvatar(
+          radius: isSmallScreen ? 20 : 25,
+          backgroundImage: pharmacy['image'] != null
+              ? NetworkImage('http://cloudev.org/storage/${pharmacy['image']}')
+              : AssetImage('assets/images/default_pharmacy.png')
+                  as ImageProvider,
+        ),
+        title: Text(
+          pharmacy['name']!,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: isSmallScreen ? 14 : 16,
+          ),
+          overflow: TextOverflow.ellipsis,
+        ),
+        subtitle: Text(
+          'Proprietário: ${pharmacy['userName']!}',
+          style: TextStyle(
+            fontSize: isSmallScreen ? 12 : 14,
+          ),
+          overflow: TextOverflow.ellipsis,
+        ),
+        trailing: Icon(
+          Icons.chevron_right,
+          size: isSmallScreen ? 22 : 24,
+        ),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (_) => PharmacyDetails(pharmacy: pharmacy)),
+          );
+        },
       ),
     );
   }
