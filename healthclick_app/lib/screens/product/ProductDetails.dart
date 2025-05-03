@@ -70,7 +70,7 @@ void _addToCart(Map<String, dynamic> product, BuildContext context) {
   
   @override
   Widget build(BuildContext context) {
-    final product = widget.product; // ✅ Correto: dentro do build()
+    final product = widget.product; 
     User? currentUser = FirebaseAuth.instance.currentUser;
     final cart = Provider.of<CartProvider>(context);
     return Scaffold(
