@@ -21,7 +21,7 @@ class _ProductDetailsState extends State<ProductDetails> {
     });
   }
 
-void _addToCart(Map<String, dynamic> product, BuildContext context) {
+  void _addToCart(Map<String, dynamic> product, BuildContext context) {
     try {
       // Imprimir dados para depuração
       print('Dados do produto: $product');
@@ -73,112 +73,162 @@ void _addToCart(Map<String, dynamic> product, BuildContext context) {
     final product = widget.product; 
     User? currentUser = FirebaseAuth.instance.currentUser;
     final cart = Provider.of<CartProvider>(context);
+    
+    // Get screen dimensions
+    final Size screenSize = MediaQuery.of(context).size;
+    final bool isSmallScreen = screenSize.width < 600;
+    
     return Scaffold(
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 10,),
-              ListTile(
-                leading: IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                ),
-                title: const Text(
-                  "Detalhes do Produto",
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              Container(
-                width: double.infinity,
-                height: 400,
-                margin: const EdgeInsets.all(8.0),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(20),
-                  child: Image.network(
-                    product['image'],
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return const Icon(Icons.error);
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.all(screenSize.width * 0.04), // Responsive padding
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 10),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: IconButton(
+                    icon: const Icon(Icons.arrow_back),
+                    onPressed: () {
+                      Navigator.pop(context);
                     },
                   ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  // Nome do Produto
-                  Expanded(
-                    child: Text(
-                      product['name'],
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 19,
-                      ),
-                      overflow: TextOverflow.ellipsis, // Truncar o texto se necessário
-                      maxLines: 1, // Limitar a 1 linha
+                  title: const Text(
+                    "Detalhes do Produto",
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                  
-                  // Categoria do Produto
-                  ClipRRect(
+                ),
+                Container(
+                  width: double.infinity,
+                  height: screenSize.height * 0.4, // Responsive height
+                  margin: EdgeInsets.symmetric(
+                    vertical: screenSize.height * 0.01,
+                    horizontal: screenSize.width * 0.02,
+                  ),
+                  child: ClipRRect(
                     borderRadius: BorderRadius.circular(20),
-                    child: Container(
-                      width: 150,
-                      height: 24,
+                    child: Image.network(
+                      product['image'],
+                      fit: BoxFit.contain, // Changed to contain for better responsiveness
+                      errorBuilder: (context, error, stackTrace) {
+                        return const Icon(Icons.error, size: 60);
+                      },
+                    ),
+                  ),
+                ),
+                SizedBox(height: screenSize.height * 0.02),
+                // Product name and category in flexible layout
+                isSmallScreen
+                    ? Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            product['name'],
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 19,
+                            ),
+                          ),
+                          SizedBox(height: screenSize.height * 0.01),
+                          CategoryWidget(category: product['category']),
+                        ],
+                      )
+                    : Row(
+                        children: [
+                          // Nome do Produto
+                          Expanded(
+                            child: Text(
+                              product['name'],
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 19,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                            ),
+                          ),
+                          // Categoria do Produto
+                          CategoryWidget(category: product['category']),
+                        ],
+                      ),
+                SizedBox(height: screenSize.height * 0.01),
+                Text(
+                  product['description'],
+                  textAlign: TextAlign.justify,
+                  style: TextStyle(
+                    fontSize: isSmallScreen ? 14 : 16,
+                  ),
+                ),
+                SizedBox(height: screenSize.height * 0.01),
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                    vertical: screenSize.height * 0.01,
+                  ),
+                  child: Text(
+                    '${product['price']} MZN',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: isSmallScreen ? 18 : 20,
                       color: Colors.blue,
-                      child: Center(
-                        child: Text(
-                          product['category'],
-                          style: const TextStyle(color: Colors.white, fontSize: 15),
+                    ),
+                  ),
+                ),
+                SizedBox(height: screenSize.height * 0.01),
+                Center(
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () => _addToCart(product, context),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        foregroundColor: Colors.white,
+                        padding: EdgeInsets.symmetric(
+                          vertical: screenSize.height * 0.02,
                         ),
                       ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Text(
-                product['description'],
-                textAlign: TextAlign.justify,
-              ),
-              const SizedBox(height: 10),
-              ListTile(
-                leading: Text(
-                  '${product['price']} MZN',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,
-                    color: Colors.blue,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 10),
-              Center(
-                child: SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () => _addToCart(product, context),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 15),
-                    ),
-                    child: const Text(
-                      'Add to Cart',
-                      style: TextStyle(fontSize: 17),
+                      child: Text(
+                        'Add to Cart',
+                        style: TextStyle(fontSize: isSmallScreen ? 15 : 17),
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// Extracted category widget for reusability
+class CategoryWidget extends StatelessWidget {
+  final String category;
+
+  const CategoryWidget({super.key, required this.category});
+
+  @override
+  Widget build(BuildContext context) {
+    final Size screenSize = MediaQuery.of(context).size;
+    final bool isSmallScreen = screenSize.width < 600;
+    
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        width: isSmallScreen ? screenSize.width * 0.4 : 150,
+        height: 24,
+        color: Colors.blue,
+        child: Center(
+          child: Text(
+            category,
+            style: const TextStyle(color: Colors.white, fontSize: 15),
+            overflow: TextOverflow.ellipsis,
           ),
         ),
       ),
