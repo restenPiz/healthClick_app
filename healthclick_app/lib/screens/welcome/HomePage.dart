@@ -11,7 +11,7 @@ import 'package:healthclick_app/screens/product/ProductDetails.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:healthclick_app/screens/product/ProductCategory.dart';
-import 'package:healthclick_app/utils/app_size.dart'; 
+import 'package:healthclick_app/utils/app_size.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -24,7 +24,6 @@ class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
 
   final List<String> imageList = [
-    // "assets/background.jpg",
     "assets/back2.jpg",
     "assets/back3.jpg",
     "assets/back2.jpg",
@@ -32,9 +31,11 @@ class _HomePageState extends State<HomePage> {
   ];
 
   List<Map<String, dynamic>> categories = [];
+  List<Map<String, dynamic>> products = [];
+
   Future<void> getCategories() async {
     try {
-      var url = Uri.parse('http://cloudev.org/api/categories');
+      var url = Uri.parse('https://cloudev.org/api/categories');
       var response = await http.get(url);
 
       if (response.statusCode == 200) {
@@ -45,23 +46,20 @@ class _HomePageState extends State<HomePage> {
           categories = data.map((category) {
             return {
               "name": category['category_name'],
-               "id": category['id']
+              "id": category['id']
             };
           }).toList();
         });
       }
-    }catch (e) {
+    } catch (e) {
       print('Erro: $e');
       throw Exception('Falha ao carregar categorias');
     }
   }
 
-  final String baseUrl = 'http://cloudev.org/api/products';
-  List<Map<String, dynamic>> products = [];
-
   Future<void> getProducts() async {
     try {
-      var url = Uri.parse('http://cloudev.org/api/products');
+      var url = Uri.parse('https://cloudev.org/api/products');
       var response = await http.get(url);
 
       if (response.statusCode == 200) {
@@ -70,23 +68,17 @@ class _HomePageState extends State<HomePage> {
 
         setState(() {
           products = data.take(2).map((product) {
-            // Imprima o caminho para debug
-            print(
-                'Caminho da imagem: http://cloudev.org/storage/${product['product_file']}');
-
             return {
               "name": product['product_name'],
               "price": product['product_price'],
               "description": product['product_description'],
-              "image":
-                  'http://cloudev.org/storage/${product['product_file']}',
+              "image": 'http://cloudev.org/storage/${product['product_file']}',
               "quantity": product['quantity'],
               "category": product['category'] != null
                   ? product['category']['category_name']
                   : 'Sem categoria',
             };
           }).toList();
-          // filteredProducts = List.from(products); 
         });
       } else {
         throw Exception('Falha ao carregar produtos: ${response.statusCode}');
@@ -99,10 +91,6 @@ class _HomePageState extends State<HomePage> {
 
   void _addToCart(Map<String, dynamic> product, BuildContext context) {
     try {
-      // Imprimir dados para depuração
-      print('Dados do produto: $product');
-
-      // Verificar e obter valores com segurança
       final String productId = product['id']?.toString() ??
           DateTime.now().millisecondsSinceEpoch.toString();
       final String name = product['name']?.toString() ?? 'Produto';
@@ -110,13 +98,6 @@ class _HomePageState extends State<HomePage> {
           product['price'] is num ? (product['price'] as num).toDouble() : 0.0;
       final String image = product['image']?.toString() ?? '';
 
-      // Registrar valores para depuração
-      print('ID usado: $productId');
-      print('Nome usado: $name');
-      print('Preço usado: $price');
-      print('Imagem usada: $image');
-
-      // Adicionar ao carrinho
       final cart = Provider.of<CartProvider>(context, listen: false);
       cart.addItem(productId, name, price, image);
 
@@ -147,8 +128,8 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    getProducts(); 
-    getCategories(); 
+    getProducts();
+    getCategories();
   }
 
   void _onTap(int index) {
@@ -159,14 +140,24 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-      User? currentUser = FirebaseAuth.instance.currentUser;
+    // Get screen dimensions
+    final screenSize = MediaQuery.of(context).size;
+    final isSmallScreen = screenSize.width < 360;
+    final isMediumScreen = screenSize.width >= 360 && screenSize.width < 600;
+    final isLargeScreen = screenSize.width >= 600;
+    
+    // Calculate responsive values
+    final double horizontalPadding = isSmallScreen ? 8.0 : 16.0;
+    final double carouselHeight = isSmallScreen ? 150.0 : (isMediumScreen ? 200.0 : 250.0);
+    final int gridCrossAxisCount = isLargeScreen ? 3 : 2;
+    final double childAspectRatio = isSmallScreen ? 0.50 : 0.55;
+    
+    User? currentUser = FirebaseAuth.instance.currentUser;
     final cart = Provider.of<CartProvider>(context);
+    
     return Scaffold(
-      
       body: CustomRefreshIndicator(
         onRefresh: () async {
-          // Aqui você deve chamar todos os métodos de atualização necessários
-          // Por exemplo, se você tiver métodos para carregar categorias e produtos:
           await getCategories();
           await getProducts();
           return;
@@ -201,39 +192,46 @@ class _HomePageState extends State<HomePage> {
         },
         child: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: EdgeInsets.all(horizontalPadding),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 15),
-                // User Greeting Section
+                SizedBox(height: screenSize.height * 0.02),
+                
+                // User Greeting Section - Responsive
                 ListTile(
                   leading: CircleAvatar(
-                    radius: 25,
+                    radius: isSmallScreen ? 18 : 25,
                     backgroundImage: currentUser?.photoURL != null
                         ? NetworkImage(currentUser!.photoURL!)
                         : const AssetImage("assets/dif.jpg") as ImageProvider,
                   ),
                   title: Text(
                     "Olá ${currentUser?.displayName ?? currentUser?.email?.split('@')[0] ?? 'Visitante'}",
-                    style: const TextStyle(fontSize: 15),
+                    style: TextStyle(fontSize: isSmallScreen ? 13 : 15),
                   ),
-                  subtitle: const Text(
+                  subtitle: Text(
                     "O que você deseja?",
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: isSmallScreen ? 15 : 17
+                    ),
                   ),
                 ),
-                const SizedBox(height: 15),
+                
+                SizedBox(height: screenSize.height * 0.02),
+                
+                // Carousel - Responsive
                 GFCarousel(
                   autoPlay: true,
                   autoPlayInterval: const Duration(seconds: 3),
                   items: imageList.map(
                     (url) {
                       return Container(
-                        width: 500,
-                        height: 250,
-                        margin: const EdgeInsets.all(8.0),
+                        width: screenSize.width,
+                        height: carouselHeight,
+                        margin: EdgeInsets.all(isSmallScreen ? 4.0 : 8.0),
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(20),
                           child: Image.asset(
@@ -250,137 +248,153 @@ class _HomePageState extends State<HomePage> {
                     });
                   },
                 ),
-                const SizedBox(height: 20),
+                
+                SizedBox(height: screenSize.height * 0.025),
 
-                // Categories Section
-                const Row(
+                // Categories Header - Responsive
+                Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('Categorias',
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 17)),
+                    Text(
+                      'Categorias',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: isSmallScreen ? 15 : 17
+                      ),
+                    ),
                   ],
                 ),
-                const SizedBox(height: 20),
+                
+                SizedBox(height: screenSize.height * 0.015),
 
-                // Category Cards Section
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: categories.asMap().entries.map((entry) {
-                    int index = entry.key;
-                    Map<String, dynamic> category = entry.value;
-                    // Calculando o tamanho aproximado do texto
-                    String categoryName = category['name'] ?? 'Sem nome';
-                    
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 10),
-                      child: GestureDetector(
-                        onTap: () {
-                          int categoryId = category['id'] ?? 0;
-                          String categoryName = category['name'];
+                // Category Cards Section - Responsive
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: categories.asMap().entries.map((entry) {
+                      int index = entry.key;
+                      Map<String, dynamic> category = entry.value;
+                      String categoryName = category['name'] ?? 'Sem nome';
+                      
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 10),
+                        child: GestureDetector(
+                          onTap: () {
+                            int categoryId = category['id'] ?? 0;
+                            String categoryName = category['name'];
 
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => ProductCategory(
-                                categoryId: categoryId,
-                                categoryName: categoryName,
-                              ),
-                            ),
-                          );
-                        },
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(20),
-                          child: Container(
-                            // Usando IntrinsicWidth para que o container se ajuste ao conteúdo
-                            width: null, // Remove a largura fixa
-                            constraints: const BoxConstraints(
-                              minWidth: 100, // Largura mínima para categorias com nomes curtos
-                              maxWidth: 220, // Largura máxima para evitar cartões muito largos
-                            ),
-                            height: 55,
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFEFF5F6),
-                              borderRadius: BorderRadius.circular(20),
-                              boxShadow: const [
-                                BoxShadow(
-                                  blurRadius: 10,
-                                  spreadRadius: 1,
-                                  offset: Offset(0, 4),
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => ProductCategory(
+                                  categoryId: categoryId,
+                                  categoryName: categoryName,
                                 ),
-                              ],
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min, // Importante para o tamanho se ajustar
-                                children: [
-                                  const Icon(Icons.category, color: Colors.black),
-                                  const SizedBox(width: 8), // Espaçamento entre o ícone e o texto
-                                  Flexible(
-                                    child: Text(
-                                      categoryName,
-                                      style: const TextStyle(color: Colors.black),
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
+                              ),
+                            );
+                          },
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(20),
+                            child: Container(
+                              constraints: BoxConstraints(
+                                minWidth: isSmallScreen ? 80 : 100,
+                                maxWidth: isSmallScreen ? 180 : 220,
+                              ),
+                              height: isSmallScreen ? 45 : 55,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFEFF5F6),
+                                borderRadius: BorderRadius.circular(20),
+                                boxShadow: const [
+                                  BoxShadow(
+                                    blurRadius: 10,
+                                    spreadRadius: 1,
+                                    offset: Offset(0, 4),
                                   ),
-                                  const SizedBox(width: 8), // Espaçamento após o texto
                                 ],
+                              ),
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(horizontal: isSmallScreen ? 6.0 : 8.0),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.category,
+                                      color: Colors.black,
+                                      size: isSmallScreen ? 16 : 24,
+                                    ),
+                                    SizedBox(width: isSmallScreen ? 4 : 8),
+                                    Flexible(
+                                      child: Text(
+                                        categoryName,
+                                        style: TextStyle(
+                                          color: Colors.black,
+                                          fontSize: isSmallScreen ? 12 : 14,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                    SizedBox(width: isSmallScreen ? 4 : 8),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
                         ),
-                      ),
-                    );
-                  }).toList(),
+                      );
+                    }).toList(),
+                  ),
                 ),
-              ),
-                const SizedBox(height: 20),
+                
+                SizedBox(height: screenSize.height * 0.025),
 
-                // Products Section
+                // Products Section Header - Responsive
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('Produtos',
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 17)),
+                    Text(
+                      'Produtos',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: isSmallScreen ? 15 : 17
+                      ),
+                    ),
                     GestureDetector(
                       onTap: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => const Product()),
+                            builder: (context) => const Product()
+                          ),
                         );
                       },
-                      child: const Text(
+                      child: Text(
                         'Ver Todos',
                         style: TextStyle(
-                            color: Colors.blue,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 17),
+                          color: Colors.blue,
+                          fontWeight: FontWeight.bold,
+                          fontSize: isSmallScreen ? 15 : 17
+                        ),
                       ),
                     ),
                   ],
                 ),
 
-                // Product section
+                // Product Grid - Responsive
                 products.isEmpty
-                    ? const Center(
+                    ? Center(
                         child: Padding(
-                          padding: EdgeInsets.all(20.0),
-                          child: CircularProgressIndicator(color: Colors.green),
+                          padding: EdgeInsets.all(screenSize.height * 0.025),
+                          child: const CircularProgressIndicator(color: Colors.green),
                         ),
                       )
                     : GridView.builder(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: gridCrossAxisCount,
                           crossAxisSpacing: 8,
                           mainAxisSpacing: 8,
-                          childAspectRatio: 0.55,
+                          childAspectRatio: childAspectRatio,
                         ),
                         itemCount: products.length,
                         itemBuilder: (context, index) {
@@ -391,21 +405,23 @@ class _HomePageState extends State<HomePage> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (_) =>
-                                        ProductDetails(product: product)),
+                                  builder: (_) => ProductDetails(product: product)
+                                ),
                               );
                             },
                             child: Card(
                               elevation: 2,
                               shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12)),
+                                borderRadius: BorderRadius.circular(12)
+                              ),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   ListTile(
+                                    dense: isSmallScreen,
                                     leading: Text(
                                       product['category'] ?? 'Categoria',
-                                      style: const TextStyle(fontSize: 13),
+                                      style: TextStyle(fontSize: isSmallScreen ? 11 : 13),
                                     ),
                                   ),
                                   ClipRRect(
@@ -413,51 +429,59 @@ class _HomePageState extends State<HomePage> {
                                     child: Image.network(
                                       product['image'],
                                       width: double.infinity,
-                                      height: 150,
+                                      height: isSmallScreen ? 120 : 150,
                                       fit: BoxFit.cover,
-                                      errorBuilder:
-                                          (context, error, stackTrace) {
-                                        return const Icon(Icons.broken_image,
-                                            size: 120);
+                                      errorBuilder: (context, error, stackTrace) {
+                                        return Icon(
+                                          Icons.broken_image,
+                                          size: isSmallScreen ? 100 : 120
+                                        );
                                       },
                                     ),
                                   ),
                                   Padding(
-                                    padding: const EdgeInsets.all(8.0),
+                                    padding: EdgeInsets.all(isSmallScreen ? 6.0 : 8.0),
                                     child: Text(
                                       product['name'],
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontWeight: FontWeight.bold,
-                                        fontSize: 15,
+                                        fontSize: isSmallScreen ? 13 : 15,
                                       ),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
-                                  const Divider(
-                                      thickness: 1, indent: 10, endIndent: 10),
+                                  Divider(
+                                    thickness: 1,
+                                    indent: isSmallScreen ? 8 : 10,
+                                    endIndent: isSmallScreen ? 8 : 10
+                                  ),
                                   Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 8.0),
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: isSmallScreen ? 6.0 : 8.0
+                                    ),
                                     child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
                                         Text(
                                           "${product['price']} MZN",
-                                          style: const TextStyle(
-                                              fontSize: 14, color: Colors.blue),
+                                          style: TextStyle(
+                                            fontSize: isSmallScreen ? 12 : 14,
+                                            color: Colors.blue
+                                          ),
                                         ),
                                         ElevatedButton(
-                                          onPressed: () =>
-                                              _addToCart(product, context),
+                                          onPressed: () => _addToCart(product, context),
                                           style: ElevatedButton.styleFrom(
                                             backgroundColor: Colors.green,
                                             shape: const CircleBorder(),
-                                            padding: const EdgeInsets.all(8),
+                                            padding: EdgeInsets.all(isSmallScreen ? 6 : 8),
                                           ),
-                                          child: const Icon(Icons.add,
-                                              color: Colors.white),
+                                          child: Icon(
+                                            Icons.add,
+                                            color: Colors.white,
+                                            size: isSmallScreen ? 18 : 24,
+                                          ),
                                         ),
                                       ],
                                     ),
@@ -482,7 +506,11 @@ class _HomePageState extends State<HomePage> {
         children: [
           FloatingActionButton(
             backgroundColor: Colors.green,
-            child: const Icon(Icons.shopping_cart, color: Colors.white),
+            child: Icon(
+              Icons.shopping_cart,
+              color: Colors.white,
+              size: isSmallScreen ? 20 : 24,
+            ),
             onPressed: () {
               Navigator.push(
                 context,
@@ -499,15 +527,15 @@ class _HomePageState extends State<HomePage> {
                   color: Colors.red,
                   borderRadius: BorderRadius.circular(10),
                 ),
-                constraints: const BoxConstraints(
-                  minWidth: 18,
-                  minHeight: 18,
+                constraints: BoxConstraints(
+                  minWidth: isSmallScreen ? 16 : 18,
+                  minHeight: isSmallScreen ? 16 : 18,
                 ),
                 child: Text(
                   '${cart.itemCount}',
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: Colors.white,
-                    fontSize: 12,
+                    fontSize: isSmallScreen ? 10 : 12,
                   ),
                   textAlign: TextAlign.center,
                 ),

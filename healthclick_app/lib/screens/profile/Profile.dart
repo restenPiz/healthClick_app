@@ -106,7 +106,7 @@ class _ProfileState extends State<Profile> {
                 ),
               ),
               // const SizedBox(height: 10),
-               const Divider(
+              const Divider(
                 thickness: 1,
                 indent: 20,
                 endIndent: 20,

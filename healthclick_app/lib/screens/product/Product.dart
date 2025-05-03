@@ -7,7 +7,7 @@ import 'package:healthclick_app/screens/layouts/AppBottom.dart';
 import 'package:healthclick_app/screens/product/ProductDetails.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
-import 'package:custom_refresh_indicator/custom_refresh_indicator.dart'; // Import the custom_refresh_indicator package
+import 'package:custom_refresh_indicator/custom_refresh_indicator.dart';
 
 class Product extends StatefulWidget {
   const Product({super.key});
@@ -19,12 +19,10 @@ class Product extends StatefulWidget {
 class _ProductState extends State<Product> {
   final String baseUrl = 'http://cloudev.org/api/products';
   List<Map<String, dynamic>> products = [];
-  List<Map<String, dynamic>> filteredProducts =
-      []; // Lista para produtos filtrados
+  List<Map<String, dynamic>> filteredProducts = [];
   int _currentIndex = 1;
-  TextEditingController searchController =
-      TextEditingController(); // Controlador para o input de pesquisa
-  bool _isLoading = false; // Track loading state
+  TextEditingController searchController = TextEditingController();
+  bool _isLoading = false;
 
   Future<void> getProducts() async {
     setState(() {
@@ -42,20 +40,18 @@ class _ProductState extends State<Product> {
         setState(() {
           products = data.map((product) {
             return {
-              "id": product['id'], // Adicionando o ID para uso no carrinho
+              "id": product['id'],
               "name": product['product_name'],
               "price": product['product_price'],
               "description": product['product_description'],
-              "image":
-                  'http://cloudev.org/storage/${product['product_file']}',
+              "image": 'http://cloudev.org/storage/${product['product_file']}',
               "quantity": product['quantity'],
               "category": product['category'] != null
                   ? product['category']['category_name']
                   : 'Sem categoria',
             };
           }).toList();
-          filteredProducts = List.from(
-              products); // Inicializa a lista filtrada com todos os produtos
+          filteredProducts = List.from(products);
           _isLoading = false;
         });
       } else {
@@ -73,20 +69,16 @@ class _ProductState extends State<Product> {
     }
   }
 
-  // Método para filtrar os produtos com base no texto de pesquisa
   void _filterProducts(String searchText) {
     setState(() {
       if (searchText.isEmpty) {
-        // Se a pesquisa estiver vazia, mostre todos os produtos
         filteredProducts = List.from(products);
       } else {
-        // Filtra os produtos pelo nome, ignorando maiúsculas/minúsculas
         filteredProducts = products.where((product) {
           final productName = product['name'].toString().toLowerCase();
           final categoryName = product['category'].toString().toLowerCase();
           final searchLower = searchText.toLowerCase();
 
-          // Pesquisa por nome ou categoria
           return productName.contains(searchLower) ||
               categoryName.contains(searchLower);
         }).toList();
@@ -99,7 +91,6 @@ class _ProductState extends State<Product> {
     super.initState();
     getProducts();
 
-    // Adiciona um listener ao controlador de pesquisa
     searchController.addListener(() {
       _filterProducts(searchController.text);
     });
@@ -107,7 +98,6 @@ class _ProductState extends State<Product> {
 
   @override
   void dispose() {
-    // Limpa o controlador quando o widget for descartado
     searchController.dispose();
     super.dispose();
   }
@@ -120,10 +110,6 @@ class _ProductState extends State<Product> {
 
   void _addToCart(Map<String, dynamic> product, BuildContext context) {
     try {
-      // Imprimir dados para depuração
-      print('Dados do produto: $product');
-
-      // Verificar e obter valores com segurança
       final String productId = product['id']?.toString() ??
           DateTime.now().millisecondsSinceEpoch.toString();
       final String name = product['name']?.toString() ?? 'Produto';
@@ -131,13 +117,6 @@ class _ProductState extends State<Product> {
           product['price'] is num ? (product['price'] as num).toDouble() : 0.0;
       final String image = product['image']?.toString() ?? '';
 
-      // Registrar valores para depuração
-      print('ID usado: $productId');
-      print('Nome usado: $name');
-      print('Preço usado: $price');
-      print('Imagem usada: $image');
-
-      // Adicionar ao carrinho
       final cart = Provider.of<CartProvider>(context, listen: false);
       cart.addItem(productId, name, price, image);
 
@@ -167,12 +146,25 @@ class _ProductState extends State<Product> {
 
   @override
   Widget build(BuildContext context) {
+    // Get screen dimensions for responsive layout
+    final screenSize = MediaQuery.of(context).size;
+    final isSmallScreen = screenSize.width < 360;
+    final isMediumScreen = screenSize.width >= 360 && screenSize.width < 600;
+    final isLargeScreen = screenSize.width >= 600;
+
+    // Calculate responsive values
+    final double horizontalPadding = isSmallScreen ? 8.0 : 16.0;
+    final int gridCrossAxisCount = isLargeScreen ? 3 : 2;
+    final double childAspectRatio =
+        isSmallScreen ? 0.50 : (isLargeScreen ? 0.65 : 0.55);
+    final double verticalSpacing = isSmallScreen ? 10.0 : 20.0;
+    final double titleFontSize = isSmallScreen ? 15.0 : 17.0;
+
     User? currentUser = FirebaseAuth.instance.currentUser;
     final cart = Provider.of<CartProvider>(context);
 
     return Scaffold(
       body: CustomRefreshIndicator(
-        // Configuration options
         onRefresh: () async {
           return getProducts();
         },
@@ -193,7 +185,7 @@ class _ProductState extends State<Product> {
                   opacity: controller.value > 0.0 ? 1.0 : 0.0,
                   duration: const Duration(milliseconds: 200),
                   child: Container(
-                    height: 80,
+                    height: isSmallScreen ? 60 : 80,
                     alignment: Alignment.center,
                     child: controller.state == IndicatorState.loading
                         ? const CircularProgressIndicator(color: Colors.green)
@@ -206,32 +198,42 @@ class _ProductState extends State<Product> {
         },
         child: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: EdgeInsets.all(horizontalPadding),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 20),
+                SizedBox(height: screenSize.height * 0.02),
+
+                // User greeting - Responsive
                 ListTile(
                   leading: CircleAvatar(
-                    radius: 25,
+                    radius: isSmallScreen ? 20 : 25,
                     backgroundImage: currentUser?.photoURL != null
                         ? NetworkImage(currentUser!.photoURL!)
                         : const AssetImage("assets/dif.jpg") as ImageProvider,
                   ),
                   title: Text(
                     "Olá ${currentUser?.displayName ?? currentUser?.email?.split('@')[0] ?? 'Visitante'}",
-                    style: const TextStyle(
-                        fontSize: 17, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                        fontSize: isSmallScreen ? 15 : 17,
+                        fontWeight: FontWeight.bold),
                   ),
                 ),
-                const SizedBox(height: 30),
-                const Text(
+
+                SizedBox(height: screenSize.height * 0.025),
+
+                // Title - Responsive
+                Text(
                   'Todos Produtos',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: titleFontSize),
                 ),
-                const SizedBox(height: 20),
+
+                SizedBox(height: verticalSpacing),
+
+                // Search field - Responsive
                 TextField(
-                  controller: searchController, // Usando o controlador
+                  controller: searchController,
                   decoration: InputDecoration(
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(30)),
@@ -244,36 +246,53 @@ class _ProductState extends State<Product> {
                       borderSide: const BorderSide(color: Colors.blue),
                     ),
                     hintText: 'Pesquisar o Produto',
-                    prefixIcon: const Icon(Icons.search),
-                    // Adiciona um botão para limpar a pesquisa
+                    hintStyle: TextStyle(fontSize: isSmallScreen ? 13 : 14),
+                    prefixIcon: Icon(
+                      Icons.search,
+                      size: isSmallScreen ? 20 : 24,
+                    ),
                     suffixIcon: searchController.text.isNotEmpty
                         ? IconButton(
-                            icon: const Icon(Icons.clear),
+                            icon: Icon(
+                              Icons.clear,
+                              size: isSmallScreen ? 20 : 24,
+                            ),
                             onPressed: () {
                               searchController.clear();
                               _filterProducts('');
                             },
                           )
                         : null,
+                    contentPadding: EdgeInsets.symmetric(
+                      vertical: isSmallScreen ? 8.0 : 16.0,
+                      horizontal: isSmallScreen ? 12.0 : 16.0,
+                    ),
                   ),
-                  onChanged:
-                      _filterProducts, // Chama _filterProducts quando o texto muda
+                  style: TextStyle(
+                    fontSize: isSmallScreen ? 14 : 16,
+                  ),
+                  onChanged: _filterProducts,
                 ),
-                const SizedBox(height: 20),
+
+                SizedBox(height: verticalSpacing),
+
+                // Product grid or loading/empty indicator - Responsive
                 _isLoading
-                    ? const Center(
+                    ? Center(
                         child: Padding(
-                          padding: EdgeInsets.all(20.0),
-                          child: CircularProgressIndicator(color: Colors.green),
+                          padding: EdgeInsets.all(screenSize.height * 0.02),
+                          child: const CircularProgressIndicator(
+                              color: Colors.green),
                         ),
                       )
                     : filteredProducts.isEmpty
-                        ? const Center(
+                        ? Center(
                             child: Padding(
-                              padding: EdgeInsets.all(20.0),
+                              padding: EdgeInsets.all(screenSize.height * 0.02),
                               child: Text(
                                 'Nenhum produto encontrado',
-                                style: TextStyle(fontSize: 16),
+                                style: TextStyle(
+                                    fontSize: isSmallScreen ? 14 : 16),
                               ),
                             ),
                           )
@@ -281,17 +300,15 @@ class _ProductState extends State<Product> {
                             shrinkWrap: true,
                             physics: const NeverScrollableScrollPhysics(),
                             gridDelegate:
-                                const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: gridCrossAxisCount,
                               crossAxisSpacing: 8,
                               mainAxisSpacing: 8,
-                              childAspectRatio: 0.55,
+                              childAspectRatio: childAspectRatio,
                             ),
-                            itemCount:
-                                filteredProducts.length, // Usa a lista filtrada
+                            itemCount: filteredProducts.length,
                             itemBuilder: (context, index) {
-                              final product = filteredProducts[
-                                  index]; // Usa a lista filtrada
+                              final product = filteredProducts[index];
 
                               return GestureDetector(
                                 onTap: () {
@@ -310,54 +327,71 @@ class _ProductState extends State<Product> {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
+                                      // Category tile - Responsive
                                       ListTile(
+                                        dense: isSmallScreen,
                                         leading: Text(
                                           product['category'] ?? 'Categoria',
-                                          style: const TextStyle(fontSize: 13),
+                                          style: TextStyle(
+                                              fontSize:
+                                                  isSmallScreen ? 11 : 13),
                                         ),
                                       ),
+
+                                      // Product image - Responsive
                                       ClipRRect(
                                         borderRadius: BorderRadius.circular(12),
                                         child: Image.network(
                                           product['image'],
                                           width: double.infinity,
-                                          height: 150,
+                                          height: isSmallScreen
+                                              ? 120
+                                              : (isLargeScreen ? 180 : 150),
                                           fit: BoxFit.cover,
                                           errorBuilder:
                                               (context, error, stackTrace) {
-                                            return const Icon(
-                                                Icons.broken_image,
-                                                size: 120);
+                                            return Icon(Icons.broken_image,
+                                                size:
+                                                    isSmallScreen ? 100 : 120);
                                           },
                                         ),
                                       ),
+
+                                      // Product name - Responsive
                                       Padding(
-                                        padding: const EdgeInsets.all(8.0),
+                                        padding: EdgeInsets.all(
+                                            isSmallScreen ? 6.0 : 8.0),
                                         child: Text(
                                           product['name'],
-                                          style: const TextStyle(
+                                          style: TextStyle(
                                             fontWeight: FontWeight.bold,
-                                            fontSize: 15,
+                                            fontSize: isSmallScreen ? 13 : 15,
                                           ),
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
                                         ),
                                       ),
-                                      const Divider(
+
+                                      // Divider - Responsive
+                                      Divider(
                                           thickness: 1,
-                                          indent: 10,
-                                          endIndent: 10),
+                                          indent: isSmallScreen ? 8 : 10,
+                                          endIndent: isSmallScreen ? 8 : 10),
+
+                                      // Price and add button - Responsive
                                       Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 8.0),
+                                        padding: EdgeInsets.symmetric(
+                                            horizontal:
+                                                isSmallScreen ? 6.0 : 8.0),
                                         child: Row(
                                           mainAxisAlignment:
                                               MainAxisAlignment.spaceBetween,
                                           children: [
                                             Text(
                                               "${product['price']} MZN",
-                                              style: const TextStyle(
-                                                  fontSize: 14,
+                                              style: TextStyle(
+                                                  fontSize:
+                                                      isSmallScreen ? 12 : 14,
                                                   color: Colors.blue),
                                             ),
                                             ElevatedButton(
@@ -366,11 +400,14 @@ class _ProductState extends State<Product> {
                                               style: ElevatedButton.styleFrom(
                                                 backgroundColor: Colors.green,
                                                 shape: const CircleBorder(),
-                                                padding:
-                                                    const EdgeInsets.all(8),
+                                                padding: EdgeInsets.all(
+                                                    isSmallScreen ? 6 : 8),
                                               ),
-                                              child: const Icon(Icons.add,
-                                                  color: Colors.white),
+                                              child: Icon(
+                                                Icons.add,
+                                                color: Colors.white,
+                                                size: isSmallScreen ? 18 : 24,
+                                              ),
                                             ),
                                           ],
                                         ),
@@ -386,16 +423,24 @@ class _ProductState extends State<Product> {
           ),
         ),
       ),
+
+      // Bottom navigation - Kept as is since AppBottomNav should handle responsiveness internally
       bottomNavigationBar: AppBottomNav(
         currentIndex: _currentIndex,
         onTap: _onTap,
       ),
+
+      // Shopping cart fab - Responsive
       floatingActionButton: Stack(
         alignment: Alignment.topRight,
         children: [
           FloatingActionButton(
             backgroundColor: Colors.green,
-            child: const Icon(Icons.shopping_cart, color: Colors.white),
+            child: Icon(
+              Icons.shopping_cart,
+              color: Colors.white,
+              size: isSmallScreen ? 20 : 24,
+            ),
             onPressed: () {
               Navigator.push(
                 context,
@@ -412,15 +457,15 @@ class _ProductState extends State<Product> {
                   color: Colors.red,
                   borderRadius: BorderRadius.circular(10),
                 ),
-                constraints: const BoxConstraints(
-                  minWidth: 18,
-                  minHeight: 18,
+                constraints: BoxConstraints(
+                  minWidth: isSmallScreen ? 16 : 18,
+                  minHeight: isSmallScreen ? 16 : 18,
                 ),
                 child: Text(
                   '${cart.itemCount}',
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: Colors.white,
-                    fontSize: 12,
+                    fontSize: isSmallScreen ? 10 : 12,
                   ),
                   textAlign: TextAlign.center,
                 ),
