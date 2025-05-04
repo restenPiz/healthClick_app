@@ -308,7 +308,7 @@ class PharmacyCard extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
         ),
         subtitle: Text(
-          'Proprietário: ${pharmacy['userName']!}',
+          'Proprietário/a: ${pharmacy['userName']!}',
           style: TextStyle(
             fontSize: isSmallScreen ? 12 : 14,
           ),

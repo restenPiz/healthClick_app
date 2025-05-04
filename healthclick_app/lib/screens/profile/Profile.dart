@@ -353,7 +353,7 @@ class _ProfileState extends State<Profile> {
                           vertical: isSmallScreen ? 12 : 15,
                         ),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(25),
                         ),
                       ),
                       child: Text(
