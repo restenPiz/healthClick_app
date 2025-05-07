@@ -1,0 +1,2 @@
+C:/repos/healthClick_app/healthclick_app/android/app/.cxx/RelWithDebInfo/4f5g3fy3/x86/CMakeFiles/edit_cache.dir
+C:/repos/healthClick_app/healthclick_app/android/app/.cxx/RelWithDebInfo/4f5g3fy3/x86/CMakeFiles/rebuild_cache.dir
