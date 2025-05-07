@@ -1,24 +1,139 @@
+// import 'package:flutter/material.dart';
+// import 'package:firebase_core/firebase_core.dart';
+// import 'package:healthclick_app/ThemeProvider.dart';
+// import 'package:healthclick_app/screens/welcome/HomePage.dart';
+// import 'package:healthclick_app/screens/welcome/SplashLogin.dart';
+// import 'firebase_options.dart'; 
+// import 'package:healthclick_app/models/CartProvider.dart';
+// import 'package:healthclick_app/screens/auth/Login.dart';
+// import 'package:provider/provider.dart';
+
+// void main() async {
+//   WidgetsFlutterBinding.ensureInitialized();
+//   await Firebase.initializeApp(
+//     options:
+//         DefaultFirebaseOptions.currentPlatform, 
+//   );
+//   runApp(
+//      MultiProvider(
+//       providers: [
+//         ChangeNotifierProvider(create: (_) => ThemeProvider()),
+//         ChangeNotifierProvider(create: (_) => CartProvider()),
+//       ],
+//       child: const MyApp(),
+//     ),
+//   );
+// }
+
+// class MyApp extends StatelessWidget {
+//   const MyApp({super.key});
+
+//   @override
+//   Widget build(BuildContext context) {
+//     final themeProvider = Provider.of<ThemeProvider>(context);
+
+//     return MaterialApp(
+//       debugShowCheckedModeBanner: false,
+//       themeMode: themeProvider.themeMode,
+//       theme: ThemeData(
+//         brightness: Brightness.light,
+//         primarySwatch: Colors.blue,
+//         scaffoldBackgroundColor: Colors.white, // Define o fundo como branco
+//         colorScheme: const ColorScheme.light(
+//           background: Colors.white,
+//           surface: Colors.white,
+//           // Outras propriedades de cor conforme necessário
+//         ),
+//       ),
+//       // theme: ThemeData(
+//       //   brightness: Brightness.light,
+//       //   primarySwatch: Colors.blue,
+//       // ),
+//       darkTheme: ThemeData(
+//         brightness: Brightness.dark,
+//         primarySwatch: Colors.blue,
+//       ),
+//       home: const SplashLogin(),
+//     );
+//   }
+// }
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:healthclick_app/ThemeProvider.dart';
 import 'package:healthclick_app/screens/welcome/HomePage.dart';
 import 'package:healthclick_app/screens/welcome/SplashLogin.dart';
-import 'firebase_options.dart'; 
+import 'firebase_options.dart';
+
 import 'package:healthclick_app/models/CartProvider.dart';
 import 'package:healthclick_app/screens/auth/Login.dart';
 import 'package:provider/provider.dart';
 
+// Adicionar o provedor de autenticação
+class AuthProvider with ChangeNotifier {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  bool _isLoading = true;
+  User? _user;
+
+  AuthProvider() {
+    // Verificando se já existe um usuário autenticado ao iniciar o app
+    _checkCurrentUser();
+
+    // Ouvindo mudanças no estado de autenticação
+    _auth.authStateChanges().listen((User? user) {
+      _user = user;
+      _isLoading = false;
+      notifyListeners();
+    });
+  }
+
+  bool get isLoading => _isLoading;
+  bool get isAuthenticated => _user != null;
+  User? get user => _user;
+
+  Future<void> _checkCurrentUser() async {
+    _user = _auth.currentUser;
+    _isLoading = false;
+    notifyListeners();
+  }
+
+  Future<User?> signIn(String email, String password) async {
+    try {
+      _isLoading = true;
+      notifyListeners();
+
+      // Fazer login com email e senha
+      UserCredential credential = await _auth.signInWithEmailAndPassword(
+          email: email, password: password);
+
+      return credential.user;
+    } catch (e) {
+      _isLoading = false;
+      notifyListeners();
+      rethrow;
+    }
+  }
+
+  Future<void> signOut() async {
+    await _auth.signOut();
+  }
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
-    options:
-        DefaultFirebaseOptions.currentPlatform, 
+    options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  // Firebase Auth para Flutter já usa persistência LOCAL por padrão
+  // Não é necessário chamar setPersistence como no JavaScript
+
   runApp(
-     MultiProvider(
+    MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => CartProvider()),
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
       ],
       child: const MyApp(),
     ),
@@ -38,22 +153,38 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         brightness: Brightness.light,
         primarySwatch: Colors.blue,
-        scaffoldBackgroundColor: Colors.white, // Define o fundo como branco
+        scaffoldBackgroundColor: Colors.white,
         colorScheme: const ColorScheme.light(
           background: Colors.white,
           surface: Colors.white,
-          // Outras propriedades de cor conforme necessário
         ),
       ),
-      // theme: ThemeData(
-      //   brightness: Brightness.light,
-      //   primarySwatch: Colors.blue,
-      // ),
       darkTheme: ThemeData(
         brightness: Brightness.dark,
         primarySwatch: Colors.blue,
       ),
-      home: const SplashLogin(),
+      // Substituir o home pelo AuthWrapper
+      home: AuthWrapper(),
     );
+  }
+}
+
+// Adicionar o AuthWrapper para verificar o estado de autenticação
+class AuthWrapper extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final authProvider = Provider.of<AuthProvider>(context);
+
+    // Enquanto verifica o estado de autenticação, mostra a tela de splash
+    if (authProvider.isLoading) {
+      return const SplashLogin();
+    }
+
+    // Redireciona com base no estado de autenticação
+    if (authProvider.isAuthenticated) {
+      return const HomePage();
+    } else {
+      return const SplashLogin();
+    }
   }
 }

@@ -343,7 +343,7 @@ class _ProfileState extends State<Profile> {
                           context,
                           MaterialPageRoute(
                               builder: (context) => const SplashLogin()),
-                          (route) => false, // Remove todas as rotas anteriores
+                          (route) => false, 
                         );
                       },
                       style: ElevatedButton.styleFrom(
