@@ -1,62 +1,4 @@
-// import 'package:flutter/material.dart';
-// import 'package:firebase_core/firebase_core.dart';
-// import 'package:healthclick_app/ThemeProvider.dart';
-// import 'package:healthclick_app/screens/welcome/HomePage.dart';
-// import 'package:healthclick_app/screens/welcome/SplashLogin.dart';
-// import 'firebase_options.dart'; 
-// import 'package:healthclick_app/models/CartProvider.dart';
-// import 'package:healthclick_app/screens/auth/Login.dart';
-// import 'package:provider/provider.dart';
 
-// void main() async {
-//   WidgetsFlutterBinding.ensureInitialized();
-//   await Firebase.initializeApp(
-//     options:
-//         DefaultFirebaseOptions.currentPlatform, 
-//   );
-//   runApp(
-//      MultiProvider(
-//       providers: [
-//         ChangeNotifierProvider(create: (_) => ThemeProvider()),
-//         ChangeNotifierProvider(create: (_) => CartProvider()),
-//       ],
-//       child: const MyApp(),
-//     ),
-//   );
-// }
-
-// class MyApp extends StatelessWidget {
-//   const MyApp({super.key});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     final themeProvider = Provider.of<ThemeProvider>(context);
-
-//     return MaterialApp(
-//       debugShowCheckedModeBanner: false,
-//       themeMode: themeProvider.themeMode,
-//       theme: ThemeData(
-//         brightness: Brightness.light,
-//         primarySwatch: Colors.blue,
-//         scaffoldBackgroundColor: Colors.white, // Define o fundo como branco
-//         colorScheme: const ColorScheme.light(
-//           background: Colors.white,
-//           surface: Colors.white,
-//           // Outras propriedades de cor conforme necessário
-//         ),
-//       ),
-//       // theme: ThemeData(
-//       //   brightness: Brightness.light,
-//       //   primarySwatch: Colors.blue,
-//       // ),
-//       darkTheme: ThemeData(
-//         brightness: Brightness.dark,
-//         primarySwatch: Colors.blue,
-//       ),
-//       home: const SplashLogin(),
-//     );
-//   }
-// }
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -68,6 +10,7 @@ import 'firebase_options.dart';
 import 'package:healthclick_app/models/CartProvider.dart';
 import 'package:healthclick_app/screens/auth/Login.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 
 // Adicionar o provedor de autenticação
 class AuthProvider with ChangeNotifier {
@@ -121,13 +64,17 @@ class AuthProvider with ChangeNotifier {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Inicialização do Firebase
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  // Firebase Auth para Flutter já usa persistência LOCAL por padrão
-  // Não é necessário chamar setPersistence como no JavaScript
+  // Inicialização do Stripe com a chave publicável
+  Stripe.publishableKey =
+      'pk_test_51RMC3iQqtk7VgypaekoLTk2YDZaaFHifeaugbkKAeGvb3TXctB7Ovex9ZnnsTIYJuW2wmfIZa51OekpVnm6VEtnO00EsaxesXv'; 
 
+  // Executar o app com os providers
   runApp(
     MultiProvider(
       providers: [
