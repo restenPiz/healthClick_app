@@ -3,10 +3,19 @@ import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-class StripeCheckoutWidget extends StatefulWidget {
-  final double amount;
+import 'package:provider/provider.dart';
 
-  const StripeCheckoutWidget({super.key, required this.amount, required String currency});
+class StripeCheckoutWidget extends StatefulWidget {
+final double amount;
+  final String currency;
+  final List<Map<String, dynamic>> items;
+
+  const StripeCheckoutWidget({
+    Key? key,
+    required this.amount,
+    required this.currency,
+    required this.items,
+  }) : super(key: key);
 
   @override
   State<StripeCheckoutWidget> createState() => _StripeCheckoutWidgetState();

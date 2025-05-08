@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:firebase_auth/firebase_auth.dart';
 
+import 'package:provider/provider.dart';
 class BankTransferWidget extends StatefulWidget {
   final CartProvider cart;
 

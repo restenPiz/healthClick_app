@@ -8,6 +8,7 @@ import 'package:healthclick_app/screens/cart/BankTransferWidget.dart';
 import 'package:healthclick_app/screens/cart/StripePaymentSection.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 
 class PaymentMethodsScreen extends StatefulWidget {
   final CartProvider cart;
@@ -302,25 +303,25 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
         onPressed: () async {
           if (_formKey.currentState!.validate()) {
             if (_isStripePayment) {
-              // Navigator.of(context).pop();
-              // // Show Stripe checkout widget
-              // await Navigator.of(context).push(
-              //   MaterialPageRoute(
-              //     builder: (context) => StripeCheckoutWidget(
-              //       amount: (widget.cart.totalAmount * 100)
-              //           .toInt(), // Convert to cents
-              //       currency: 'mzn',
-              //       items: widget.cart.items.entries.map((entry) {
-              //         return {
-              //           "name": entry.value.name,
-              //           "price": entry.value.price,
-              //           "quantity": entry.value.quantity,
-              //         };
-              //       }).toList(),
-              //     ),
-              //   ),
-              // );
-              widget.cart.clear();
+              Navigator.of(context).pop();
+              // Show Stripe checkout widget
+              await Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => StripeCheckoutWidget(
+                    amount: (widget.cart.totalAmount * 100)
+                        .toDouble(), // Convert to cents
+                    currency: 'mzn',
+                    items: widget.cart.items.entries.map((entry) {
+                      return {
+                        "name": entry.value.name,
+                        "price": entry.value.price,
+                        "quantity": entry.value.quantity,
+                      };
+                    }).toList(),
+                  ),
+                ),
+              );
+              // widget.cart.clear();
             } else {
               // Bank transfer is handled in BankTransferWidget
               final bankTransferState = BankTransferWidget.of(context);
