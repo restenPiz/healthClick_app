@@ -6,8 +6,8 @@ import 'package:healthclick_app/models/CartProvider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:firebase_auth/firebase_auth.dart';
-
 import 'package:provider/provider.dart';
+
 class BankTransferWidget extends StatefulWidget {
   final CartProvider cart;
 
@@ -63,10 +63,7 @@ class BankTransferWidgetState extends State<BankTransferWidget> {
     final user = FirebaseAuth.instance.currentUser;
     final userId = user?.uid;
 
-    // Criar um request multipart
     var request = http.MultipartRequest('POST', url);
-
-    // Adicionar campos de texto
     request.fields['conta_bancaria'] = _contaController.text;
     request.fields['valor'] = _valorController.text;
     request.fields['firebase_uid'] = userId ?? '';
@@ -79,29 +76,23 @@ class BankTransferWidgetState extends State<BankTransferWidget> {
             })
         .toList());
 
-    // Adicionar o arquivo comprovativo
     request.files.add(await http.MultipartFile.fromPath(
-        'comprovativo', _comprovativoImage!.path,
-        filename: 'comprovativo_${DateTime.now().millisecondsSinceEpoch}.jpg'));
+      'comprovativo',
+      _comprovativoImage!.path,
+      filename: 'comprovativo_${DateTime.now().millisecondsSinceEpoch}.jpg',
+    ));
 
     try {
-      // Mostrar indicador de carregamento
       showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (ctx) => const Center(
-          child: CircularProgressIndicator(),
-        ),
+        builder: (ctx) => const Center(child: CircularProgressIndicator()),
       );
 
       final streamedResponse = await request.send();
       final response = await http.Response.fromStream(streamedResponse);
 
-      // Fechar o indicador de carregamento
       Navigator.of(context).pop();
-
-      print('Status code: ${response.statusCode}');
-      print('Resposta completa: ${response.body}');
 
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
@@ -109,8 +100,7 @@ class BankTransferWidgetState extends State<BankTransferWidget> {
         if (responseData['status'] == 'success') {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text(
-                  'Pagamento bancário registrado com sucesso! Aguardando confirmação.'),
+              content: Text('Pagamento registrado com sucesso!'),
               backgroundColor: Colors.green,
             ),
           );
@@ -130,9 +120,7 @@ class BankTransferWidgetState extends State<BankTransferWidget> {
         Map<String, dynamic> errorData = {};
         try {
           errorData = json.decode(response.body);
-        } catch (e) {
-          // Se não for um JSON válido, usa o corpo como está
-        }
+        } catch (_) {}
 
         String errorMessage = errorData['message'] ?? response.body;
 
@@ -145,10 +133,8 @@ class BankTransferWidgetState extends State<BankTransferWidget> {
         return false;
       }
     } catch (e) {
-      // Fechar o indicador de carregamento se ainda estiver aberto
       Navigator.of(context, rootNavigator: true).pop();
 
-      print('Exceção: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Erro de conexão: $e'),
@@ -179,17 +165,22 @@ class BankTransferWidgetState extends State<BankTransferWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Form(
       key: _formKey,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Informações Bancárias',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(height: 10),
-          _buildBankInfoCard(),
+          _buildBankInfoCard(isDark),
           const SizedBox(height: 20),
           _buildBankAccountField(),
           const SizedBox(height: 15),
@@ -202,26 +193,28 @@ class BankTransferWidgetState extends State<BankTransferWidget> {
     );
   }
 
-  Widget _buildBankInfoCard() {
+  Widget _buildBankInfoCard(bool isDark) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey.shade50,
+        color: isDark ? Colors.grey[850] : Colors.grey.shade50,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade300),
+        border: Border.all(
+          color: isDark ? Colors.grey[700]! : Colors.grey.shade300,
+        ),
       ),
-      child: Column(
+      child: const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Dados da Conta para Transferência:',
             style: TextStyle(fontWeight: FontWeight.w500),
           ),
-          const SizedBox(height: 10),
-          const Text('Banco: BCI'),
-          const Text('Titular: HealthClick Inc.'),
-          const Text('NIB: 0008 0000 1234 5678 9012 3'),
-          const Text('IBAN: MZ59 0008 0000 1234 5678 9012 3'),
+          SizedBox(height: 10),
+          Text('Banco: BCI'),
+          Text('Titular: HealthClick Inc.'),
+          Text('NIB: 0008 0000 1234 5678 9012 3'),
+          Text('IBAN: MZ59 0008 0000 1234 5678 9012 3'),
         ],
       ),
     );
@@ -230,46 +223,23 @@ class BankTransferWidgetState extends State<BankTransferWidget> {
   Widget _buildBankAccountField() {
     return TextFormField(
       controller: _contaController,
-      decoration: InputDecoration(
-        labelText: 'Conta Bancária (Sua)',
-        hintText: 'Ex: BCI / BIM / Standard Bank',
-        prefixIcon: const Icon(Icons.account_balance),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        filled: true,
-        fillColor: Colors.grey.shade50,
+      decoration: const InputDecoration(
+        labelText: 'Sua Conta Bancária',
+        border: OutlineInputBorder(),
       ),
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Por favor, informe sua conta bancária';
-        }
-        return null;
-      },
+      validator: (value) =>
+          value == null || value.isEmpty ? 'Campo obrigatório' : null,
     );
   }
 
   Widget _buildAmountField() {
     return TextFormField(
       controller: _valorController,
-      keyboardType: TextInputType.number,
-      decoration: InputDecoration(
-        labelText: 'Valor',
-        hintText: 'Valor da transferência',
-        prefixIcon: const Icon(Icons.monetization_on),
-        suffixText: 'MZN',
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        filled: true,
-        fillColor: Colors.grey.shade50,
+      readOnly: true,
+      decoration: const InputDecoration(
+        labelText: 'Valor (MZN)',
+        border: OutlineInputBorder(),
       ),
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Por favor, informe o valor';
-        }
-        return null;
-      },
     );
   }
 
@@ -277,39 +247,16 @@ class BankTransferWidgetState extends State<BankTransferWidget> {
     return ElevatedButton.icon(
       onPressed: _selecionarComprovativo,
       icon: const Icon(Icons.upload_file),
-      label: Text(
-        _comprovativoImage == null
-            ? 'Anexar Comprovativo de Pagamento'
-            : 'Comprovativo Selecionado',
-        style: const TextStyle(fontSize: 16),
-      ),
-      style: ElevatedButton.styleFrom(
-        foregroundColor: Colors.green,
-        backgroundColor: Colors.green.withOpacity(0.1),
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-          side: const BorderSide(color: Colors.green),
-        ),
-      ),
+      label: const Text('Anexar Comprovativo'),
     );
   }
 
   Widget _buildSelectedFileIndicator() {
     return Padding(
       padding: const EdgeInsets.only(top: 10),
-      child: Row(
-        children: [
-          const Icon(Icons.check_circle, color: Colors.green, size: 20),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              'Arquivo: ${_comprovativoImage!.path.split('/').last}',
-              style: const TextStyle(color: Colors.green),
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ],
+      child: Text(
+        'Comprovativo selecionado: ${_comprovativoImage?.path.split('/').last}',
+        style: const TextStyle(fontSize: 14, fontStyle: FontStyle.italic),
       ),
     );
   }
