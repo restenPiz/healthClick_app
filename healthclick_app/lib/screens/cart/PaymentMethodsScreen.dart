@@ -25,21 +25,34 @@ class PaymentMethodsScreen extends StatefulWidget {
 class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
   bool _isStripePayment = true;
   final _formKey = GlobalKey<FormState>();
+  bool _isProcessing = false;
 
   @override
   Widget build(BuildContext context) {
+    // Obtém as cores do tema atual
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final surfaceColor = Theme.of(context).colorScheme.surface;
+    final cardColor = isDarkMode ? Theme.of(context).cardColor : Colors.white;
+    final dividerColor =
+        isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300;
+    final subtitleColor =
+        isDarkMode ? Colors.grey.shade300 : Colors.grey.shade600;
+    final shadowColor = isDarkMode ? Colors.black54 : Colors.black26;
+    final summaryBackgroundColor =
+        isDarkMode ? Colors.grey.shade800 : Colors.grey.shade100;
+
     return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.only(
+      decoration: BoxDecoration(
+        color: cardColor,
+        borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(25),
           topRight: Radius.circular(25),
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black26,
+            color: shadowColor,
             blurRadius: 10,
-            offset: Offset(0, -5),
+            offset: const Offset(0, -5),
           ),
         ],
       ),
@@ -59,10 +72,10 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
               // Header
               _buildHeader(),
 
-              const Divider(height: 30),
+              Divider(height: 30, color: dividerColor),
 
               // Payment Method Selection
-              _buildPaymentMethodSelector(),
+              _buildPaymentMethodSelector(isDarkMode, dividerColor),
 
               const SizedBox(height: 25),
 
@@ -75,7 +88,7 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
               const SizedBox(height: 30),
 
               // Order Summary
-              _buildOrderSummary(),
+              _buildOrderSummary(summaryBackgroundColor, subtitleColor),
 
               const SizedBox(height: 20),
 
@@ -107,11 +120,14 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
     );
   }
 
-  Widget _buildPaymentMethodSelector() {
+  Widget _buildPaymentMethodSelector(bool isDarkMode, Color dividerColor) {
+    final borderColor =
+        isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300;
+
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade300),
+        border: Border.all(color: borderColor),
       ),
       child: Column(
         children: [
@@ -128,9 +144,10 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
               });
             },
             isTopOption: true,
+            isDarkMode: isDarkMode,
           ),
 
-          Divider(height: 1, thickness: 1, color: Colors.grey.shade300),
+          Divider(height: 1, thickness: 1, color: dividerColor),
 
           // Bank Transfer Option
           _buildPaymentOption(
@@ -145,6 +162,7 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
               });
             },
             isTopOption: false,
+            isDarkMode: isDarkMode,
           ),
         ],
       ),
@@ -159,14 +177,20 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
     required bool isSelected,
     required VoidCallback onTap,
     required bool isTopOption,
+    required bool isDarkMode,
   }) {
+    final selectedBackgroundColor = isDarkMode
+        ? Colors.green.withOpacity(0.2)
+        : Colors.green.withOpacity(0.1);
+
+    final transparentColor = Colors.transparent;
+
     return InkWell(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color:
-              isSelected ? Colors.green.withOpacity(0.1) : Colors.transparent,
+          color: isSelected ? selectedBackgroundColor : transparentColor,
           borderRadius: BorderRadius.only(
             topLeft: isTopOption ? const Radius.circular(12) : Radius.zero,
             topRight: isTopOption ? const Radius.circular(12) : Radius.zero,
@@ -199,7 +223,9 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
                   Text(
                     subtitle,
                     style: TextStyle(
-                      color: Colors.grey.shade600,
+                      color: isDarkMode
+                          ? Colors.grey.shade300
+                          : Colors.grey.shade600,
                       fontSize: 14,
                     ),
                   ),
@@ -222,11 +248,11 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
     );
   }
 
-  Widget _buildOrderSummary() {
+  Widget _buildOrderSummary(Color backgroundColor, Color subtitleColor) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey.shade100,
+        color: backgroundColor,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -246,7 +272,7 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
               Text(
                 'Subtotal',
                 style: TextStyle(
-                  color: Colors.grey.shade700,
+                  color: subtitleColor,
                 ),
               ),
               Text(
@@ -256,20 +282,20 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
             ],
           ),
           const SizedBox(height: 5),
-          const Row(
+          Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
                 'Taxa de entrega',
-                style: TextStyle(color: Colors.grey),
+                style: TextStyle(color: subtitleColor),
               ),
-              Text(
+              const Text(
                 'Grátis',
                 style: TextStyle(fontWeight: FontWeight.w500),
               ),
             ],
           ),
-          const Divider(height: 20),
+          Divider(height: 20, color: subtitleColor.withOpacity(0.5)),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -300,39 +326,53 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
       width: double.infinity,
       height: 55,
       child: ElevatedButton(
-        onPressed: () async {
-          if (_formKey.currentState!.validate()) {
-            if (_isStripePayment) {
-              Navigator.of(context).pop();
-              // Show Stripe checkout widget
-              await Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => StripeCheckoutWidget(
-                    amount: (widget.cart.totalAmount * 100)
-                        .toDouble(), // Convert to cents
-                    currency: 'mzn',
-                    items: widget.cart.items.entries.map((entry) {
-                      return {
-                        "name": entry.value.name,
-                        "price": entry.value.price,
-                        "quantity": entry.value.quantity,
-                      };
-                    }).toList(),
-                  ),
-                ),
-              );
-              // widget.cart.clear();
-            } else {
-              // Bank transfer is handled in BankTransferWidget
-              final bankTransferState = BankTransferWidget.of(context);
-              if (bankTransferState != null) {
-                if (bankTransferState.validateAndSubmit()) {
-                  Navigator.of(context).pop();
+        onPressed: _isProcessing
+            ? null
+            : () async {
+                if (_formKey.currentState!.validate()) {
+                  setState(() {
+                    _isProcessing = true;
+                  });
+
+                  try {
+                    if (_isStripePayment) {
+                      Navigator.of(context).pop();
+                      // Show Stripe checkout widget
+                      await Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => StripeCheckoutWidget(
+                            amount: (widget.cart.totalAmount * 100)
+                                .toDouble(), // Convert to cents
+                            currency: 'mzn',
+                            items: widget.cart.items.entries.map((entry) {
+                              return {
+                                "name": entry.value.name,
+                                "price": entry.value.price,
+                                "quantity": entry.value.quantity,
+                              };
+                            }).toList(),
+                          ),
+                        ),
+                      );
+                      // widget.cart.clear();
+                    } else {
+                      // Bank transfer is handled in BankTransferWidget
+                      final bankTransferState = BankTransferWidget.of(context);
+                      if (bankTransferState != null) {
+                        if (bankTransferState.validateAndSubmit()) {
+                          Navigator.of(context).pop();
+                        }
+                      }
+                    }
+                  } finally {
+                    if (mounted) {
+                      setState(() {
+                        _isProcessing = false;
+                      });
+                    }
+                  }
                 }
-              }
-            }
-          }
-        },
+              },
         style: ElevatedButton.styleFrom(
           backgroundColor: Theme.of(context).primaryColor,
           foregroundColor: Colors.white,
@@ -340,14 +380,38 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
             borderRadius: BorderRadius.circular(12),
           ),
           elevation: 2,
+          disabledBackgroundColor:
+              Theme.of(context).primaryColor.withOpacity(0.5),
         ),
-        child: Text(
-          _isStripePayment ? 'Pagar com Cartão' : 'Enviar Pagamento',
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+        child: _isProcessing
+            ? Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2.0,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    _isStripePayment ? 'Processando...' : 'Enviando...',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              )
+            : Text(
+                _isStripePayment ? 'Pagar com Cartão' : 'Enviar Pagamento',
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
       ),
     );
   }
