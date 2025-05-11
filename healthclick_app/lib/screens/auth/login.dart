@@ -1,4 +1,3 @@
-
 // ignore_for_file: prefer_const_constructors
 
 import 'package:flutter/material.dart';
@@ -70,11 +69,26 @@ class _LoginState extends State<Login> {
         '50654751468-08ooqne2n1fm05dn4l5199equ0ssgu0g.apps.googleusercontent.com',
   );
 
+  // Variáveis para controlar o estado de loading dos botões
+  bool _isLoggingIn = false;
+  bool _isGoogleSigningIn = false;
+
   //*Start with the signGoogle method
   Future<User?> _signInWithGoogle() async {
+    // Ativa o indicador de loading
+    setState(() {
+      _isGoogleSigningIn = true;
+    });
+
     try {
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-      if (googleUser == null) return null; // Login cancelado
+      if (googleUser == null) {
+        // Login cancelado, desativa o indicador
+        setState(() {
+          _isGoogleSigningIn = false;
+        });
+        return null;
+      }
 
       final GoogleSignInAuthentication googleAuth =
           await googleUser.authentication;
@@ -122,6 +136,11 @@ class _LoginState extends State<Login> {
         SnackBar(content: Text('Google login falhou: ${e.toString()}')),
       );
       return null;
+    } finally {
+      // Sempre desativa o indicador de loading quando terminar (sucesso ou erro)
+      setState(() {
+        _isGoogleSigningIn = false;
+      });
     }
   }
 
@@ -137,6 +156,11 @@ class _LoginState extends State<Login> {
 
   //*Start with the methods to manage the responses and redirects of login
   Future<void> _login() async {
+    // Ativar o indicador de loading
+    setState(() {
+      _isLoggingIn = true;
+    });
+
     try {
       final email = emailController.text.trim();
       final password = passwordController.text.trim();
@@ -145,6 +169,10 @@ class _LoginState extends State<Login> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Please enter both email and password.")),
         );
+        // Desativa o indicador de loading em caso de erro de validação
+        setState(() {
+          _isLoggingIn = false;
+        });
         return;
       }
 
@@ -194,8 +222,17 @@ class _LoginState extends State<Login> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(message)),
       );
+
+      // Desativa o indicador de loading em caso de erro
+      setState(() {
+        _isLoggingIn = false;
+      });
     } catch (e) {
       print('Erro inesperado: $e');
+      // Desativa o indicador de loading em caso de erro
+      setState(() {
+        _isLoggingIn = false;
+      });
     }
   }
 
@@ -360,7 +397,9 @@ class _LoginState extends State<Login> {
                         width: double.infinity,
                         height: AppSize.hp(6.5), // Altura do botão responsiva
                         child: ElevatedButton(
-                          onPressed: _login,
+                          onPressed: _isLoggingIn
+                              ? null
+                              : _login, // Desativar durante loading
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.green,
                             foregroundColor: Colors.white,
@@ -370,11 +409,35 @@ class _LoginState extends State<Login> {
                               borderRadius:
                                   BorderRadius.circular(AppSize.wp(8)),
                             ),
+                            // Quando o botão estiver desativado, ainda terá um visual semelhante
+                            disabledBackgroundColor:
+                                Colors.green.withOpacity(0.7),
+                            disabledForegroundColor: Colors.white70,
                           ),
-                          child: Text(
-                            'Login',
-                            style: TextStyle(fontSize: AppSize.sp(17)),
-                          ),
+                          child: _isLoggingIn
+                              ? Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    SizedBox(
+                                      width: AppSize.wp(5),
+                                      height: AppSize.wp(5),
+                                      child: CircularProgressIndicator(
+                                        color: Colors.white,
+                                        strokeWidth: 2.0,
+                                      ),
+                                    ),
+                                    SizedBox(width: AppSize.wp(3)),
+                                    Text(
+                                      'Signing in...',
+                                      style:
+                                          TextStyle(fontSize: AppSize.sp(16)),
+                                    ),
+                                  ],
+                                )
+                              : Text(
+                                  'Login',
+                                  style: TextStyle(fontSize: AppSize.sp(17)),
+                                ),
                         ),
                       ),
                       SizedBox(height: AppSize.hp(2)),
@@ -387,16 +450,18 @@ class _LoginState extends State<Login> {
                         width: double.infinity,
                         height: AppSize.hp(6.5), // Altura do botão responsiva
                         child: ElevatedButton(
-                          onPressed: () async {
-                            User? user = await _signInWithGoogle();
-                            if (user != null) {
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (_) => const OnBoarding()),
-                              );
-                            }
-                          },
+                          onPressed: _isGoogleSigningIn
+                              ? null
+                              : () async {
+                                  User? user = await _signInWithGoogle();
+                                  if (user != null) {
+                                    Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (_) => const OnBoarding()),
+                                    );
+                                  }
+                                },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.white,
                             foregroundColor: Colors.black,
@@ -406,24 +471,49 @@ class _LoginState extends State<Login> {
                               borderRadius:
                                   BorderRadius.circular(AppSize.wp(8)),
                             ),
+                            // Quando o botão estiver desativado, ainda terá um visual semelhante
+                            disabledBackgroundColor:
+                                Colors.white.withOpacity(0.9),
+                            disabledForegroundColor: Colors.black38,
                           ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Image.asset(
-                                "assets/google.png",
-                                width: AppSize.wp(6),
-                                height: AppSize.wp(6),
-                              ),
-                              SizedBox(width: AppSize.wp(2)),
-                              Text(
-                                'Continue with Google',
-                                style: TextStyle(
-                                    fontSize: AppSize.sp(17),
-                                    fontWeight: FontWeight.bold),
-                              ),
-                            ],
-                          ),
+                          child: _isGoogleSigningIn
+                              ? Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    SizedBox(
+                                      width: AppSize.wp(5),
+                                      height: AppSize.wp(5),
+                                      child: CircularProgressIndicator(
+                                        color: Colors.blue,
+                                        strokeWidth: 2.0,
+                                      ),
+                                    ),
+                                    SizedBox(width: AppSize.wp(3)),
+                                    Text(
+                                      'Signing in with Google...',
+                                      style: TextStyle(
+                                          fontSize: AppSize.sp(16),
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ],
+                                )
+                              : Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Image.asset(
+                                      "assets/google.png",
+                                      width: AppSize.wp(6),
+                                      height: AppSize.wp(6),
+                                    ),
+                                    SizedBox(width: AppSize.wp(2)),
+                                    Text(
+                                      'Continue with Google',
+                                      style: TextStyle(
+                                          fontSize: AppSize.sp(17),
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ],
+                                ),
                         ),
                       ),
                     ],
