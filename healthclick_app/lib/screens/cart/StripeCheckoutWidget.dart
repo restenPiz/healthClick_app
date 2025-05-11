@@ -3,18 +3,18 @@ import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-import 'package:provider/provider.dart';
-
 class StripeCheckoutWidget extends StatefulWidget {
-final double amount;
+  final double amount;
   final String currency;
   final List<Map<String, dynamic>> items;
+  final ScrollController scrollController;
 
   const StripeCheckoutWidget({
     Key? key,
     required this.amount,
     required this.currency,
     required this.items,
+    required this.scrollController,
   }) : super(key: key);
 
   @override
@@ -29,7 +29,8 @@ class _StripeCheckoutWidgetState extends State<StripeCheckoutWidget> {
     if (_card == null || !_card!.complete) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-            content: Text('Por favor, preencha os dados do cartão.')),
+          content: Text('Por favor, preencha os dados do cartão.'),
+        ),
       );
       return;
     }
@@ -37,33 +38,29 @@ class _StripeCheckoutWidgetState extends State<StripeCheckoutWidget> {
     setState(() => _isProcessing = true);
 
     try {
-      // 1. Criar PaymentIntent no backend
       final response = await http.post(
         Uri.parse('https://SEU_BACKEND_URL/api/create-payment-intent'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
-          'amount': (widget.amount * 100).toInt(), // centavos
-          'currency': 'mzn', // ou 'usd', conforme necessário
+          'amount': (widget.amount * 100).toInt(),
+          'currency': widget.currency,
         }),
       );
 
       final jsonResponse = jsonDecode(response.body);
       final clientSecret = jsonResponse['clientSecret'];
 
-      // 2. Confirmação de pagamento
       await Stripe.instance.confirmPayment(
         paymentIntentClientSecret: clientSecret,
         data: PaymentMethodParams.card(
           paymentMethodData: PaymentMethodData(
-            billingDetails: BillingDetails(
-              email: 'cliente@exemplo.com',
-            ),
+            billingDetails: BillingDetails(email: 'cliente@exemplo.com'),
           ),
         ),
       );
 
       if (mounted) {
-        Navigator.of(context).pop(); // fecha modal
+        Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('✅ Pagamento realizado com sucesso!')),
         );
@@ -81,80 +78,107 @@ class _StripeCheckoutWidgetState extends State<StripeCheckoutWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Container(
-        width: MediaQuery.of(context).size.width * 0.9,
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black12,
-              blurRadius: 10,
-              offset: Offset(0, 4),
-            ),
-          ],
-        ),
-        child: _isProcessing
-            ? const Center(child: CircularProgressIndicator())
-            : Column(
-                mainAxisSize: MainAxisSize.min,
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: isDark ? Colors.grey[900] : Colors.white,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      child: _isProcessing
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              controller: widget.scrollController,
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Add a card',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 20),
-                  const Text('Card information'),
-                  const SizedBox(height: 8),
-                  CardField(
-                    onCardChanged: (card) {
-                      setState(() => _card = card);
-                    },
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      margin: const EdgeInsets.only(bottom: 20),
+                      decoration: BoxDecoration(
+                        color: isDark ? Colors.grey[700] : Colors.grey[400],
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                      contentPadding: const EdgeInsets.all(10),
                     ),
-                    style: const TextStyle(fontSize: 16),
+                  ),
+                  Text(
+                    'Adicionar Cartão',
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 16),
-                  const Text('Country or region'),
+                  Text('Informações do Cartão', style: theme.textTheme.bodyMedium),
+                  const SizedBox(height: 8),
+                  CardField(
+                    onCardChanged: (card) => setState(() => _card = card),
+                    decoration: InputDecoration(
+                      border: const OutlineInputBorder(),
+                      contentPadding: const EdgeInsets.all(10),
+                      filled: true,
+                      fillColor: isDark ? Colors.grey[800] : Colors.white,
+                    ),
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: isDark ? Colors.white : Colors.black,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text('País ou Região', style: theme.textTheme.bodyMedium),
                   const SizedBox(height: 8),
                   DropdownButtonFormField<String>(
                     value: 'Mozambique',
                     items: const [
                       DropdownMenuItem(
-                          value: 'Mozambique', child: Text('Mozambique')),
+                        value: 'Mozambique',
+                        child: Text('Moçambique'),
+                      ),
                       DropdownMenuItem(
-                          value: 'United States', child: Text('United States')),
+                        value: 'United States',
+                        child: Text('Estados Unidos'),
+                      ),
                     ],
-                    onChanged: (value) {},
+                    onChanged: (_) {},
                     decoration: InputDecoration(
-                      contentPadding:
-                          const EdgeInsets.symmetric(horizontal: 12),
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10)),
+                      border: const OutlineInputBorder(),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+                      filled: true,
+                      fillColor: isDark ? Colors.grey[800] : Colors.white,
                     ),
+                    dropdownColor: isDark ? Colors.grey[900] : null,
+                    style: TextStyle(color: isDark ? Colors.white : Colors.black),
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
                     decoration: InputDecoration(
-                      labelText: 'ZIP',
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10)), 
+                      labelText: 'Código Postal (ZIP)',
+                      border: const OutlineInputBorder(),
+                      filled: true,
+                      fillColor: isDark ? Colors.grey[800] : Colors.white,
+                      labelStyle: TextStyle(color: isDark ? Colors.white70 : null),
                     ),
+                    style: TextStyle(color: isDark ? Colors.white : Colors.black),
                   ),
                   const SizedBox(height: 16),
                   Row(
                     children: [
-                      Checkbox(value: true, onChanged: (_) {}),
-                      const Expanded(
-                        child:
-                            Text('Save card for future HealthClick payments'),
+                      Checkbox(
+                        value: true,
+                        onChanged: (_) {},
+                        checkColor: Colors.white,
+                        fillColor: MaterialStateProperty.all(
+                          isDark ? Colors.blue : Colors.blue,
+                        ),
+                      ),
+                      Expanded(
+                        child: Text(
+                          'Salvar cartão para futuras compras',
+                          style: theme.textTheme.bodyMedium,
+                        ),
                       ),
                     ],
                   ),
@@ -164,18 +188,21 @@ class _StripeCheckoutWidgetState extends State<StripeCheckoutWidget> {
                     child: ElevatedButton(
                       onPressed: _payWithCard,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF5469D4),
+                        backgroundColor: Colors.green,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
                         padding: const EdgeInsets.symmetric(vertical: 14),
                       ),
-                      child: const Text('Add', style: TextStyle(fontSize: 16)),
+                      child: const Text(
+                        'Pagar',
+                        style: TextStyle(fontSize: 16, color: Colors.white),
+                      ),
                     ),
                   ),
                 ],
               ),
-      ),
+            ),
     );
   }
 }
