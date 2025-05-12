@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -23,23 +22,23 @@ class StripeCheckoutWidget extends StatefulWidget {
 
 class _StripeCheckoutWidgetState extends State<StripeCheckoutWidget> {
   bool _isProcessing = false;
-  CardFieldInputDetails? _cardDetails;
 
   final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _cardNumberController = TextEditingController();
+  final TextEditingController _expiryController =
+      TextEditingController(); // MM/YY
+  final TextEditingController _cvcController = TextEditingController();
   final TextEditingController _postalCodeController = TextEditingController();
+
   String _selectedCountry = 'Mozambique';
 
   Future<void> _payWithCard() async {
-    if (_cardDetails == null || !_cardDetails!.complete) {
+    if (_emailController.text.isEmpty ||
+        _cardNumberController.text.isEmpty ||
+        _expiryController.text.isEmpty ||
+        _cvcController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Por favor, preencha os dados do cartão')),
-      );
-      return;
-    }
-
-    if (_emailController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Por favor, insira o e-mail')),
+        const SnackBar(content: Text('Por favor, preencha todos os campos')),
       );
       return;
     }
@@ -48,40 +47,25 @@ class _StripeCheckoutWidgetState extends State<StripeCheckoutWidget> {
 
     try {
       final response = await http.post(
-        Uri.parse(
-            'http://192.168.100.139:8000/api/stripe/create-checkout-session'),
+        Uri.parse('http://192.168.100.139:8000/api/stripe/pay-direct'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'amount': widget.amount.toInt(),
           'currency': widget.currency,
+          'email': _emailController.text,
+          'card_number': _cardNumberController.text,
+          'exp': _expiryController.text,
+          'cvc': _cvcController.text,
+          'postal_code': _postalCodeController.text,
+          'country': _selectedCountry,
         }),
       );
 
-      if (response.statusCode != 200) {
-        throw Exception('Erro ao criar sessão de pagamento: ${response.body}');
-      }
-
       final jsonResponse = jsonDecode(response.body);
-      final clientSecret = jsonResponse['clientSecret'];
 
-      await Stripe.instance.confirmPayment(
-        paymentIntentClientSecret: clientSecret,
-        data: const PaymentMethodParams.card(
-          paymentMethodData: PaymentMethodData(
-            billingDetails: BillingDetails(
-              email: 'cliente@exemplo.com',
-              address: Address(
-                city: 'Beira',
-                country: 'MZ', // Código ISO do país
-                line1: 'Rua de exemplo',
-                line2: 'Bairro Central',
-                state: 'Sofala',
-                postalCode: '2100',
-              ),
-            ),
-          ),
-        ),
-      );
+      if (response.statusCode != 200 || jsonResponse['success'] != true) {
+        throw Exception(jsonResponse['message'] ?? 'Erro no pagamento');
+      }
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -117,52 +101,48 @@ class _StripeCheckoutWidgetState extends State<StripeCheckoutWidget> {
         ),
         const SizedBox(height: 16),
 
-        // Campo do cartão
-        Container(
-          margin: const EdgeInsets.only(bottom: 16),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: isDark ? Colors.grey.shade700 : Colors.grey.shade300,
-            ),
-          ),
-          child: CardField(
-            onCardChanged: (details) {
-              setState(() => _cardDetails = details);
-            },
-            decoration: InputDecoration(
-              border: InputBorder.none,
-              filled: true,
-              fillColor: isDark ? Colors.grey.shade800 : Colors.white,
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-              hintStyle: TextStyle(
-                color: isDark ? Colors.grey.shade500 : Colors.grey.shade600,
-              ),
-            ),
-          ),
-        ),
-
-        // Campo de email
+        // Número do cartão
         TextFormField(
-          controller: _emailController,
+          controller: _cardNumberController,
           decoration: InputDecoration(
-            labelText: 'E-mail',
+            labelText: 'Número do Cartão',
+            hintText: '4242 4242 4242 4242',
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
             filled: true,
             fillColor: isDark ? Colors.grey.shade800 : Colors.white,
-            labelStyle: TextStyle(color: isDark ? Colors.white70 : null),
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
           ),
-          keyboardType: TextInputType.emailAddress,
-          style: TextStyle(color: isDark ? Colors.white : Colors.black),
+          keyboardType: TextInputType.number,
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
 
+        // Validade
+        TextFormField(
+          controller: _expiryController,
+          decoration: InputDecoration(
+            labelText: 'Validade (MM/AA)',
+            hintText: '12/34',
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+            filled: true,
+            fillColor: isDark ? Colors.grey.shade800 : Colors.white,
+          ),
+          keyboardType: TextInputType.datetime,
+        ),
+        const SizedBox(height: 12),
+
+        // CVC
+        TextFormField(
+          controller: _cvcController,
+          decoration: InputDecoration(
+            labelText: 'CVC',
+            hintText: '123',
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+            filled: true,
+            fillColor: isDark ? Colors.grey.shade800 : Colors.white,
+          ),
+          keyboardType: TextInputType.number,
+        ),
+        const SizedBox(height: 12),
         // País
-        Text('País ou Região', style: theme.textTheme.bodyMedium),
-        const SizedBox(height: 8),
         DropdownButtonFormField<String>(
           value: _selectedCountry,
           items: const [
@@ -174,13 +154,11 @@ class _StripeCheckoutWidgetState extends State<StripeCheckoutWidget> {
           },
           decoration: InputDecoration(
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
             filled: true,
             fillColor: isDark ? Colors.grey.shade800 : Colors.white,
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
 
         // Código Postal
         TextFormField(
@@ -190,12 +168,8 @@ class _StripeCheckoutWidgetState extends State<StripeCheckoutWidget> {
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
             filled: true,
             fillColor: isDark ? Colors.grey.shade800 : Colors.white,
-            labelStyle: TextStyle(color: isDark ? Colors.white70 : null),
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
           ),
           keyboardType: TextInputType.number,
-          style: TextStyle(color: isDark ? Colors.white : Colors.black),
         ),
         const SizedBox(height: 24),
 

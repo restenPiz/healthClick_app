@@ -12,10 +12,6 @@ import 'package:flutter_stripe/flutter_stripe.dart';
 
 // Adicionar o provedor de autenticação
 class AuthProvider with ChangeNotifier {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  bool _isLoading = true;
-  User? _user;
-
   AuthProvider() {
     // Verificando se já existe um usuário autenticado ao iniciar o app
     _checkCurrentUser();
@@ -27,15 +23,15 @@ class AuthProvider with ChangeNotifier {
     });
   }
 
-  bool get isLoading => _isLoading;
-  bool get isAuthenticated => _user != null;
-  User? get user => _user;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  bool _isLoading = true;
+  User? _user;
 
-  Future<void> _checkCurrentUser() async {
-    _user = _auth.currentUser;
-    _isLoading = false;
-    notifyListeners();
-  }
+  bool get isLoading => _isLoading;
+
+  bool get isAuthenticated => _user != null;
+
+  User? get user => _user;
 
   Future<User?> signIn(String email, String password) async {
     try {
@@ -54,6 +50,12 @@ class AuthProvider with ChangeNotifier {
 
   Future<void> signOut() async {
     await _auth.signOut();
+  }
+
+  Future<void> _checkCurrentUser() async {
+    _user = _auth.currentUser;
+    _isLoading = false;
+    notifyListeners();
   }
 }
 
