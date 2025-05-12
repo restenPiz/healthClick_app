@@ -39,7 +39,7 @@ class _StripeCheckoutWidgetState extends State<StripeCheckoutWidget> {
 
     try {
       final response = await http.post(
-        Uri.parse('https://SEU_BACKEND_URL/api/create-payment-intent'),
+        Uri.parse('http://192.168.100.139:8000/api/stripe/create-checkout-session'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'amount': (widget.amount * 100).toInt(),
@@ -72,7 +72,9 @@ class _StripeCheckoutWidgetState extends State<StripeCheckoutWidget> {
         );
       }
     } finally {
-      setState(() => _isProcessing = false);
+      if (mounted) {
+        setState(() => _isProcessing = false);
+      }
     }
   }
 
@@ -93,6 +95,7 @@ class _StripeCheckoutWidgetState extends State<StripeCheckoutWidget> {
               controller: widget.scrollController,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Center(
                     child: Container(
@@ -112,19 +115,33 @@ class _StripeCheckoutWidgetState extends State<StripeCheckoutWidget> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  Text('Informações do Cartão', style: theme.textTheme.bodyMedium),
+                  Text('Informações do Cartão',
+                      style: theme.textTheme.bodyMedium),
                   const SizedBox(height: 8),
-                  CardField(
-                    onCardChanged: (card) => setState(() => _card = card),
-                    decoration: InputDecoration(
-                      border: const OutlineInputBorder(),
-                      contentPadding: const EdgeInsets.all(10),
-                      filled: true,
-                      fillColor: isDark ? Colors.grey[800] : Colors.white,
+                  Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(4),
+                      color: isDark ? Colors.grey[800] : Colors.white,
                     ),
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: isDark ? Colors.white : Colors.black,
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: CardField(
+                      onCardChanged: (card) {
+                        setState(() {
+                          _card = card;
+                        });
+                      },
+                      autofocus: true,
+                      enablePostalCode:
+                          false, // Desabilita o campo postal integrado
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: isDark ? Colors.white : Colors.black,
+                      ),
+                      decoration: const InputDecoration(
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.symmetric(horizontal: 10),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -145,12 +162,14 @@ class _StripeCheckoutWidgetState extends State<StripeCheckoutWidget> {
                     onChanged: (_) {},
                     decoration: InputDecoration(
                       border: const OutlineInputBorder(),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+                      contentPadding:
+                          const EdgeInsets.symmetric(horizontal: 12),
                       filled: true,
                       fillColor: isDark ? Colors.grey[800] : Colors.white,
                     ),
                     dropdownColor: isDark ? Colors.grey[900] : null,
-                    style: TextStyle(color: isDark ? Colors.white : Colors.black),
+                    style:
+                        TextStyle(color: isDark ? Colors.white : Colors.black),
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
@@ -159,9 +178,12 @@ class _StripeCheckoutWidgetState extends State<StripeCheckoutWidget> {
                       border: const OutlineInputBorder(),
                       filled: true,
                       fillColor: isDark ? Colors.grey[800] : Colors.white,
-                      labelStyle: TextStyle(color: isDark ? Colors.white70 : null),
+                      labelStyle:
+                          TextStyle(color: isDark ? Colors.white70 : null),
                     ),
-                    style: TextStyle(color: isDark ? Colors.white : Colors.black),
+                    style:
+                        TextStyle(color: isDark ? Colors.white : Colors.black),
+                    keyboardType: TextInputType.number,
                   ),
                   const SizedBox(height: 16),
                   Row(
@@ -189,6 +211,7 @@ class _StripeCheckoutWidgetState extends State<StripeCheckoutWidget> {
                       onPressed: _payWithCard,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.green,
+                        foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
@@ -196,7 +219,7 @@ class _StripeCheckoutWidgetState extends State<StripeCheckoutWidget> {
                       ),
                       child: const Text(
                         'Pagar',
-                        style: TextStyle(fontSize: 16, color: Colors.white),
+                        style: TextStyle(fontSize: 16),
                       ),
                     ),
                   ),

@@ -77,6 +77,7 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
                   }).toList(),
                   scrollController: ScrollController(),
                 )
+                // BankTransferWidget(cart: widget.cart)
               else
                 BankTransferWidget(cart: widget.cart),
 

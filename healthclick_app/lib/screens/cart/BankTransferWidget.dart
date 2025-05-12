@@ -59,7 +59,7 @@ class BankTransferWidgetState extends State<BankTransferWidget> {
 
   Future<bool> _realizarPagamentoBancario() async {
     final context = this.context;
-    final url = Uri.parse('https://cloudev.org/api/bank-payment');
+    final url = Uri.parse('http://192.168.100.139:8000/api/stripe/create-checkout-session');
     final user = FirebaseAuth.instance.currentUser;
     final userId = user?.uid;
 
