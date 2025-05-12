@@ -171,38 +171,38 @@ class _StripeCheckoutWidgetState extends State<StripeCheckoutWidget> {
           ),
           keyboardType: TextInputType.number,
         ),
-        const SizedBox(height: 24),
+        // const SizedBox(height: 24),
 
-        // Botão de pagamento
-        SizedBox(
-          width: double.infinity,
-          height: 50,
-          child: ElevatedButton(
-            onPressed: _isProcessing ? null : _payWithCard,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.green,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              disabledBackgroundColor: Colors.grey,
-            ),
-            child: _isProcessing
-                ? const SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.white,
-                    ),
-                  )
-                : const Text(
-                    'Pagar',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-          ),
-        ),
+        // // Botão de pagamento
+        // SizedBox(
+        //   width: double.infinity,
+        //   height: 50,
+        //   child: ElevatedButton(
+        //     onPressed: _isProcessing ? null : _payWithCard,
+        //     style: ElevatedButton.styleFrom(
+        //       backgroundColor: Colors.green,
+        //       foregroundColor: Colors.white,
+        //       shape: RoundedRectangleBorder(
+        //         borderRadius: BorderRadius.circular(10),
+        //       ),
+        //       padding: const EdgeInsets.symmetric(vertical: 14),
+        //       disabledBackgroundColor: Colors.grey,
+        //     ),
+        //     child: _isProcessing
+        //         ? const SizedBox(
+        //             height: 20,
+        //             width: 20,
+        //             child: CircularProgressIndicator(
+        //               strokeWidth: 2,
+        //               color: Colors.white,
+        //             ),
+        //           )
+        //         : const Text(
+        //             'Pagar',
+        //             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        //           ),
+        //   ),
+        // ),
       ],
     );
   }
