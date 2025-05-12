@@ -23,14 +23,23 @@ class StripeCheckoutWidget extends StatefulWidget {
 
 class _StripeCheckoutWidgetState extends State<StripeCheckoutWidget> {
   bool _isProcessing = false;
-  CardFieldInputDetails? _card;
+  CardFieldInputDetails? _cardDetails;
+
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _postalCodeController = TextEditingController();
+  String _selectedCountry = 'Mozambique';
 
   Future<void> _payWithCard() async {
-    if (_card == null || !_card!.complete) {
+    if (_cardDetails == null || !_cardDetails!.complete) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Por favor, preencha os dados do cartão.'),
-        ),
+        const SnackBar(content: Text('Por favor, preencha os dados do cartão')),
+      );
+      return;
+    }
+
+    if (_emailController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Por favor, insira o e-mail')),
       );
       return;
     }
@@ -39,31 +48,46 @@ class _StripeCheckoutWidgetState extends State<StripeCheckoutWidget> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://192.168.100.139:8000/api/stripe/create-checkout-session'),
+        Uri.parse(
+            'http://192.168.100.139:8000/api/stripe/create-checkout-session'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
-          'amount': (widget.amount * 100).toInt(),
+          'amount': widget.amount.toInt(),
           'currency': widget.currency,
         }),
       );
+
+      if (response.statusCode != 200) {
+        throw Exception('Erro ao criar sessão de pagamento: ${response.body}');
+      }
 
       final jsonResponse = jsonDecode(response.body);
       final clientSecret = jsonResponse['clientSecret'];
 
       await Stripe.instance.confirmPayment(
         paymentIntentClientSecret: clientSecret,
-        data: PaymentMethodParams.card(
+        data: const PaymentMethodParams.card(
           paymentMethodData: PaymentMethodData(
-            billingDetails: BillingDetails(email: 'cliente@exemplo.com'),
+            billingDetails: BillingDetails(
+              email: 'cliente@exemplo.com',
+              address: Address(
+                city: 'Beira',
+                country: 'MZ', // Código ISO do país
+                line1: 'Rua de exemplo',
+                line2: 'Bairro Central',
+                state: 'Sofala',
+                postalCode: '2100',
+              ),
+            ),
           ),
         ),
       );
 
       if (mounted) {
-        Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('✅ Pagamento realizado com sucesso!')),
         );
+        Navigator.of(context).pop();
       }
     } catch (e) {
       if (mounted) {
@@ -83,149 +107,129 @@ class _StripeCheckoutWidgetState extends State<StripeCheckoutWidget> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: isDark ? Colors.grey[900] : Colors.white,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      child: _isProcessing
-          ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              controller: widget.scrollController,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Center(
-                    child: Container(
-                      width: 40,
-                      height: 4,
-                      margin: const EdgeInsets.only(bottom: 20),
-                      decoration: BoxDecoration(
-                        color: isDark ? Colors.grey[700] : Colors.grey[400],
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                  ),
-                  Text(
-                    'Adicionar Cartão',
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Text('Informações do Cartão',
-                      style: theme.textTheme.bodyMedium),
-                  const SizedBox(height: 8),
-                  Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey),
-                      borderRadius: BorderRadius.circular(4),
-                      color: isDark ? Colors.grey[800] : Colors.white,
-                    ),
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    child: CardField(
-                      onCardChanged: (card) {
-                        setState(() {
-                          _card = card;
-                        });
-                      },
-                      autofocus: true,
-                      enablePostalCode:
-                          false, // Desabilita o campo postal integrado
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: isDark ? Colors.white : Colors.black,
-                      ),
-                      decoration: const InputDecoration(
-                        border: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(horizontal: 10),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Text('País ou Região', style: theme.textTheme.bodyMedium),
-                  const SizedBox(height: 8),
-                  DropdownButtonFormField<String>(
-                    value: 'Mozambique',
-                    items: const [
-                      DropdownMenuItem(
-                        value: 'Mozambique',
-                        child: Text('Moçambique'),
-                      ),
-                      DropdownMenuItem(
-                        value: 'United States',
-                        child: Text('Estados Unidos'),
-                      ),
-                    ],
-                    onChanged: (_) {},
-                    decoration: InputDecoration(
-                      border: const OutlineInputBorder(),
-                      contentPadding:
-                          const EdgeInsets.symmetric(horizontal: 12),
-                      filled: true,
-                      fillColor: isDark ? Colors.grey[800] : Colors.white,
-                    ),
-                    dropdownColor: isDark ? Colors.grey[900] : null,
-                    style:
-                        TextStyle(color: isDark ? Colors.white : Colors.black),
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    decoration: InputDecoration(
-                      labelText: 'Código Postal (ZIP)',
-                      border: const OutlineInputBorder(),
-                      filled: true,
-                      fillColor: isDark ? Colors.grey[800] : Colors.white,
-                      labelStyle:
-                          TextStyle(color: isDark ? Colors.white70 : null),
-                    ),
-                    style:
-                        TextStyle(color: isDark ? Colors.white : Colors.black),
-                    keyboardType: TextInputType.number,
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Checkbox(
-                        value: true,
-                        onChanged: (_) {},
-                        checkColor: Colors.white,
-                        fillColor: MaterialStateProperty.all(
-                          isDark ? Colors.blue : Colors.blue,
-                        ),
-                      ),
-                      Expanded(
-                        child: Text(
-                          'Salvar cartão para futuras compras',
-                          style: theme.textTheme.bodyMedium,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: _payWithCard,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                      ),
-                      child: const Text(
-                        'Pagar',
-                        style: TextStyle(fontSize: 16),
-                      ),
-                    ),
-                  ),
-                ],
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Informações do Cartão',
+          style: theme.textTheme.titleMedium
+              ?.copyWith(fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 16),
+
+        // Campo do cartão
+        Container(
+          margin: const EdgeInsets.only(bottom: 16),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: isDark ? Colors.grey.shade700 : Colors.grey.shade300,
+            ),
+          ),
+          child: CardField(
+            onCardChanged: (details) {
+              setState(() => _cardDetails = details);
+            },
+            decoration: InputDecoration(
+              border: InputBorder.none,
+              filled: true,
+              fillColor: isDark ? Colors.grey.shade800 : Colors.white,
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              hintStyle: TextStyle(
+                color: isDark ? Colors.grey.shade500 : Colors.grey.shade600,
               ),
             ),
+          ),
+        ),
+
+        // Campo de email
+        TextFormField(
+          controller: _emailController,
+          decoration: InputDecoration(
+            labelText: 'E-mail',
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+            filled: true,
+            fillColor: isDark ? Colors.grey.shade800 : Colors.white,
+            labelStyle: TextStyle(color: isDark ? Colors.white70 : null),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+          ),
+          keyboardType: TextInputType.emailAddress,
+          style: TextStyle(color: isDark ? Colors.white : Colors.black),
+        ),
+        const SizedBox(height: 16),
+
+        // País
+        Text('País ou Região', style: theme.textTheme.bodyMedium),
+        const SizedBox(height: 8),
+        DropdownButtonFormField<String>(
+          value: _selectedCountry,
+          items: const [
+            DropdownMenuItem(value: 'Mozambique', child: Text('Moçambique')),
+            DropdownMenuItem(value: 'US', child: Text('Estados Unidos')),
+          ],
+          onChanged: (value) {
+            setState(() => _selectedCountry = value!);
+          },
+          decoration: InputDecoration(
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+            filled: true,
+            fillColor: isDark ? Colors.grey.shade800 : Colors.white,
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        // Código Postal
+        TextFormField(
+          controller: _postalCodeController,
+          decoration: InputDecoration(
+            labelText: 'Código Postal (ZIP)',
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+            filled: true,
+            fillColor: isDark ? Colors.grey.shade800 : Colors.white,
+            labelStyle: TextStyle(color: isDark ? Colors.white70 : null),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+          ),
+          keyboardType: TextInputType.number,
+          style: TextStyle(color: isDark ? Colors.white : Colors.black),
+        ),
+        const SizedBox(height: 24),
+
+        // Botão de pagamento
+        SizedBox(
+          width: double.infinity,
+          height: 50,
+          child: ElevatedButton(
+            onPressed: _isProcessing ? null : _payWithCard,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.green,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              disabledBackgroundColor: Colors.grey,
+            ),
+            child: _isProcessing
+                ? const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                : const Text(
+                    'Pagar',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+          ),
+        ),
+      ],
     );
   }
 }

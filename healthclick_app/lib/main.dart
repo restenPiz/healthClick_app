@@ -59,18 +59,19 @@ class AuthProvider with ChangeNotifier {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Inicialização do Firebase
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  
+
   // Inicialização completa do Stripe
-  Stripe.publishableKey = 'pk_test_51RMC3iQqtk7VgypaekoLTk2YDZaaFHifeaugbkKAeGvb3TXctB7Ovex9ZnnsTIYJuW2wmfIZa51OekpVnm6VEtnO00EsaxesXv';
-  
+  Stripe.publishableKey =
+      'pk_test_51RMC3iQqtk7VgypaekoLTk2YDZaaFHifeaugbkKAeGvb3TXctB7Ovex9ZnnsTIYJuW2wmfIZa51OekpVnm6VEtnO00EsaxesXv';
+
   // Configurar aparência e opções do Stripe
-  await Stripe.instance.applySettings();
-  
+  // await Stripe.instance.applySettings();
+
   // Executar o app com os providers
   runApp(
     MultiProvider(
