@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:healthclick_app/models/CartProvider.dart';
 import 'package:healthclick_app/screens/cart/StripeCheckoutWidget.dart';
 import 'package:healthclick_app/screens/cart/BankTransferWidget.dart';
-import 'package:provider/provider.dart';
 
 class PaymentMethodsScreen extends StatefulWidget {
   final CartProvider cart;
@@ -19,16 +18,21 @@ class PaymentMethodsScreen extends StatefulWidget {
 class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
   bool _isStripePayment = true;
   final _formKey = GlobalKey<FormState>();
+  final GlobalKey<BankTransferWidgetState> _bankKey =
+      GlobalKey<BankTransferWidgetState>();
   bool _isProcessing = false;
 
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final cardColor = isDarkMode ? Theme.of(context).cardColor : Colors.white;
-    final dividerColor = isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300;
-    final subtitleColor = isDarkMode ? Colors.grey.shade300 : Colors.grey.shade600;
+    final dividerColor =
+        isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300;
+    final subtitleColor =
+        isDarkMode ? Colors.grey.shade300 : Colors.grey.shade600;
     final shadowColor = isDarkMode ? Colors.black54 : Colors.black26;
-    final summaryBackgroundColor = isDarkMode ? Colors.grey.shade800 : Colors.grey.shade100;
+    final summaryBackgroundColor =
+        isDarkMode ? Colors.grey.shade800 : Colors.grey.shade100;
 
     return Container(
       decoration: BoxDecoration(
@@ -63,7 +67,7 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
               _buildPaymentMethodSelector(isDarkMode, dividerColor),
               const SizedBox(height: 25),
 
-              // Render Stripe or Bank section inline
+              // Render Stripe ou Bank Transfer
               if (_isStripePayment)
                 StripeCheckoutWidget(
                   amount: (widget.cart.totalAmount * 100).toDouble(),
@@ -77,9 +81,11 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
                   }).toList(),
                   scrollController: ScrollController(),
                 )
-                // BankTransferWidget(cart: widget.cart)
               else
-                BankTransferWidget(cart: widget.cart),
+                BankTransferWidget(
+                  key: _bankKey,
+                  cart: widget.cart,
+                ),
 
               const SizedBox(height: 30),
               _buildOrderSummary(summaryBackgroundColor, subtitleColor),
@@ -109,7 +115,8 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
   }
 
   Widget _buildPaymentMethodSelector(bool isDarkMode, Color dividerColor) {
-    final borderColor = isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300;
+    final borderColor =
+        isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300;
 
     return Container(
       decoration: BoxDecoration(
@@ -186,15 +193,22 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
-                  Text(subtitle, style: TextStyle(color: isDarkMode ? Colors.grey.shade300 : Colors.grey.shade600)),
+                  Text(title,
+                      style: const TextStyle(
+                          fontWeight: FontWeight.w600, fontSize: 16)),
+                  Text(subtitle,
+                      style: TextStyle(
+                          color: isDarkMode
+                              ? Colors.grey.shade300
+                              : Colors.grey.shade600)),
                 ],
               ),
             ),
             Radio(
               value: isTopOption,
               groupValue: _isStripePayment,
-              onChanged: (value) => setState(() => _isStripePayment = value as bool),
+              onChanged: (value) =>
+                  setState(() => _isStripePayment = value as bool),
               activeColor: Colors.green,
             ),
           ],
@@ -206,17 +220,20 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
   Widget _buildOrderSummary(Color backgroundColor, Color subtitleColor) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(color: backgroundColor, borderRadius: BorderRadius.circular(12)),
+      decoration: BoxDecoration(
+          color: backgroundColor, borderRadius: BorderRadius.circular(12)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Resumo do Pedido', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+          const Text('Resumo do Pedido',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
           const SizedBox(height: 10),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text('Subtotal', style: TextStyle(color: subtitleColor)),
-              Text('${widget.cart.totalAmount.toStringAsFixed(2)} MZN', style: const TextStyle(fontWeight: FontWeight.w500)),
+              Text('${widget.cart.totalAmount.toStringAsFixed(2)} MZN',
+                  style: const TextStyle(fontWeight: FontWeight.w500)),
             ],
           ),
           const SizedBox(height: 5),
@@ -224,16 +241,21 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text('Taxa de entrega', style: TextStyle(color: subtitleColor)),
-              const Text('Grátis', style: TextStyle(fontWeight: FontWeight.w500)),
+              const Text('Grátis',
+                  style: TextStyle(fontWeight: FontWeight.w500)),
             ],
           ),
           Divider(height: 20, color: subtitleColor.withOpacity(0.5)),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('Total', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+              const Text('Total',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
               Text('${widget.cart.totalAmount.toStringAsFixed(2)} MZN',
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.green)),
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                      color: Colors.green)),
             ],
           ),
         ],
@@ -246,29 +268,32 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
       width: double.infinity,
       height: 55,
       child: ElevatedButton(
-        onPressed: _isProcessing ? null : () async {
-          if (_formKey.currentState!.validate()) {
-            setState(() => _isProcessing = true);
-            try {
-              if (!_isStripePayment) {
-                final bankTransferState = BankTransferWidget.of(context);
-                if (bankTransferState != null) {
-                  if (bankTransferState.validateAndSubmit()) {
-                    Navigator.of(context).pop();
+        onPressed: _isProcessing
+            ? null
+            : () async {
+                if (_formKey.currentState!.validate()) {
+                  setState(() => _isProcessing = true);
+                  try {
+                    if (_isStripePayment) {
+                      // Stripe já é processado diretamente no widget
+                      Navigator.of(context)
+                          .pop(); // Você pode mudar essa lógica se quiser feedback
+                    } else {
+                      final isValid =
+                          _bankKey.currentState?.validateAndSubmit() ?? false;
+                      if (isValid) {
+                        Navigator.of(context).pop();
+                      }
+                    }
+                  } finally {
+                    if (mounted) setState(() => _isProcessing = false);
                   }
                 }
-              } else {
-                // Stripe: tudo ocorre no próprio widget agora
-                // você pode fazer alguma lógica aqui se necessário
-              }
-            } finally {
-              if (mounted) setState(() => _isProcessing = false);
-            }
-          }
-        },
+              },
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.green,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
         child: _isProcessing
             ? const CircularProgressIndicator(color: Colors.white)
