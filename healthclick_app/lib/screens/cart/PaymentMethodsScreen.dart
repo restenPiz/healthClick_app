@@ -66,7 +66,8 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
               Divider(height: 30, color: dividerColor),
               _buildPaymentMethodSelector(isDarkMode, dividerColor),
               const SizedBox(height: 25),
-
+            _buildOrderSummary(summaryBackgroundColor, subtitleColor),
+            const SizedBox(height: 25),
               // Render Stripe ou Bank Transfer
               if (_isStripePayment)
                 StripeCheckoutWidget(
@@ -88,8 +89,6 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
                 ),
 
               const SizedBox(height: 30),
-              _buildOrderSummary(summaryBackgroundColor, subtitleColor),
-              const SizedBox(height: 20),
               _buildSubmitButton(),
             ],
           ),
@@ -135,16 +134,62 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
             isTopOption: true,
             isDarkMode: isDarkMode,
           ),
-          Divider(height: 1, thickness: 1, color: dividerColor),
-          _buildPaymentOption(
-            title: 'Transferência Bancária',
-            subtitle: 'BCI, BIM, Standard Bank',
-            icon: Icons.account_balance,
-            iconColor: Colors.green,
-            isSelected: !_isStripePayment,
-            onTap: () => setState(() => _isStripePayment = false),
-            isTopOption: false,
-            isDarkMode: isDarkMode,
+          // Divider(height: 1, thickness: 1, color: dividerColor),
+          // _buildPaymentOption(
+          //   title: 'Transferência Bancária',
+          //   subtitle: 'BCI, BIM, Standard Bank',
+          //   icon: Icons.account_balance,
+          //   iconColor: Colors.green,
+          //   isSelected: !_isStripePayment,
+          //   onTap: () => setState(() => _isStripePayment = false),
+          //   isTopOption: false,
+          //   isDarkMode: isDarkMode,
+          // ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildOrderSummary(Color backgroundColor, Color subtitleColor) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+          color: backgroundColor, borderRadius: BorderRadius.circular(12)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('Resumo do Pedido',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+          const SizedBox(height: 10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Subtotal', style: TextStyle(color: subtitleColor)),
+              Text('${widget.cart.totalAmount.toStringAsFixed(2)} MZN',
+                  style: const TextStyle(fontWeight: FontWeight.w500)),
+            ],
+          ),
+          const SizedBox(height: 5),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Taxa de entrega', style: TextStyle(color: subtitleColor)),
+              const Text('Grátis',
+                  style: TextStyle(fontWeight: FontWeight.w500)),
+            ],
+          ),
+          Divider(height: 20, color: subtitleColor.withOpacity(0.5)),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text('Total',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+              Text('${widget.cart.totalAmount.toStringAsFixed(2)} MZN',
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                      color: Colors.green)),
+            ],
           ),
         ],
       ),
@@ -217,88 +262,43 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
     );
   }
 
-  Widget _buildOrderSummary(Color backgroundColor, Color subtitleColor) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-          color: backgroundColor, borderRadius: BorderRadius.circular(12)),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text('Resumo do Pedido',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-          const SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text('Subtotal', style: TextStyle(color: subtitleColor)),
-              Text('${widget.cart.totalAmount.toStringAsFixed(2)} MZN',
-                  style: const TextStyle(fontWeight: FontWeight.w500)),
-            ],
-          ),
-          const SizedBox(height: 5),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text('Taxa de entrega', style: TextStyle(color: subtitleColor)),
-              const Text('Grátis',
-                  style: TextStyle(fontWeight: FontWeight.w500)),
-            ],
-          ),
-          Divider(height: 20, color: subtitleColor.withOpacity(0.5)),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text('Total',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-              Text('${widget.cart.totalAmount.toStringAsFixed(2)} MZN',
-                  style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
-                      color: Colors.green)),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildSubmitButton() {
     return SizedBox(
       width: double.infinity,
       height: 55,
-      child: ElevatedButton(
-        onPressed: _isProcessing
-            ? null
-            : () async {
-                if (_formKey.currentState!.validate()) {
-                  setState(() => _isProcessing = true);
-                  try {
-                    if (_isStripePayment) {
-                      // Stripe já é processado diretamente no widget
-                      Navigator.of(context)
-                          .pop(); // Você pode mudar essa lógica se quiser feedback
-                    } else {
-                      final isValid =
-                          _bankKey.currentState?.validateAndSubmit() ?? false;
-                      if (isValid) {
-                        Navigator.of(context).pop();
-                      }
-                    }
-                  } finally {
-                    if (mounted) setState(() => _isProcessing = false);
-                  }
-                }
-              },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.green,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        ),
-        child: _isProcessing
-            ? const CircularProgressIndicator(color: Colors.white)
-            : const Text('Finalizar Pagamento', style: TextStyle(fontSize: 16)),
-      ),
+      // child: ElevatedButton(
+      //   onPressed: _isProcessing
+      //       ? null
+      //       : () async {
+      //           if (_formKey.currentState!.validate()) {
+      //             setState(() => _isProcessing = true);
+      //             try {
+      //               if (_isStripePayment) {
+      //                 // Stripe já é processado diretamente no widget
+      //                 Navigator.of(context)
+      //                     .pop(); // Você pode mudar essa lógica se quiser feedback
+      //               } else {
+      //                 final isValid =
+      //                     _bankKey.currentState?.validateAndSubmit() ?? false;
+      //                 if (isValid) {
+      //                   Navigator.of(context).pop();
+      //                 }
+      //               }
+      //             } finally {
+      //               if (mounted) setState(() => _isProcessing = false);
+      //             }
+      //           }
+      //         },
+      //   style: ElevatedButton.styleFrom(
+      //     backgroundColor: Colors.green,
+      //     shape:
+      //         RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      //   ),
+      //   child: _isProcessing
+      //       ? const CircularProgressIndicator(color: Colors.white)
+      //       : const Text('Finalizar Pagamento', style: TextStyle(fontSize: 16)),
+      // ),
     );
   }
 }
