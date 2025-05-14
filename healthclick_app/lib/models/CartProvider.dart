@@ -1,3 +1,4 @@
+// File: lib/models/CartProvider.dart
 import 'package:flutter/foundation.dart';
 
 class CartItem {
@@ -14,6 +15,12 @@ class CartItem {
     required this.image,
     this.quantity = 1,
   });
+  
+  // Debug method to help diagnose issues
+  @override
+  String toString() {
+    return 'CartItem(id: $id, name: $name, price: $price, image: $image, quantity: $quantity)';
+  }
 }
 
 class CartProvider with ChangeNotifier {
@@ -32,10 +39,20 @@ class CartProvider with ChangeNotifier {
     _items.forEach((key, cartItem) {
       total += cartItem.price * cartItem.quantity;
     });
+    // Debug print to help diagnose
+    print('Total amount calculated: $total');
     return total;
   }
 
   void addItem(String productId, String name, double price, String image) {
+    // Debug log to verify the values being passed
+    print('Adding item to cart: ID=$productId, Name=$name, Price=$price, Image=$image');
+    
+    // Make sure price is a valid double
+    if (price <= 0) {
+      print('Warning: Product price is $price, which may be incorrect');
+    }
+
     if (_items.containsKey(productId)) {
       // Aumenta a quantidade se o produto já está no carrinho
       _items.update(
@@ -48,6 +65,7 @@ class CartProvider with ChangeNotifier {
           quantity: existingCartItem.quantity + 1,
         ),
       );
+      print('Updated quantity for ${_items[productId]?.name}, new quantity: ${_items[productId]?.quantity}');
     } else {
       // Adiciona novo item
       _items.putIfAbsent(
@@ -59,7 +77,15 @@ class CartProvider with ChangeNotifier {
           image: image,
         ),
       );
+      print('Added new item to cart: ${_items[productId]}');
     }
+    
+    // Print current cart contents for debugging
+    print('Cart contents after update:');
+    _items.forEach((key, value) {
+      print('- $key: ${value.name}, price: ${value.price}, quantity: ${value.quantity}');
+    });
+    
     notifyListeners();
   }
 

@@ -3,6 +3,7 @@ import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
 
 class StripeCheckoutWidget extends StatefulWidget {
   final double amount;
@@ -26,9 +27,6 @@ class _StripeCheckoutWidgetState extends State<StripeCheckoutWidget> {
   bool _isProcessing = false;
   final TextEditingController _emailController = TextEditingController();
 
-  // Inicialize o Stripe em main.dart com sua publishable key
-  // Stripe.publishableKey = 'pk_test_your_publishable_key';
-
   Future<void> _makePayment() async {
     if (_emailController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -40,37 +38,52 @@ class _StripeCheckoutWidgetState extends State<StripeCheckoutWidget> {
     setState(() => _isProcessing = true);
 
     try {
+      // Log para depuração - início do processo
+      print('🔍 Iniciando processo de pagamento');
+      print('🔍 Valor: ${widget.amount}, Moeda: ${widget.currency}');
+
       // 1. Criar setup de pagamento no servidor
+      print('🔍 Solicitando payment intent ao servidor...');
       final paymentIntentResult = await _createPaymentIntent();
-      if (paymentIntentResult == null)
+
+      if (paymentIntentResult == null) {
+        print('❌ Payment intent é nulo');
         throw Exception('Falha ao criar payment intent');
+      }
+
+      print(
+          '✅ Payment intent criado com sucesso: ${paymentIntentResult['id']}');
 
       // 2. Configurar dados de faturamento
       final billingDetails = BillingDetails(
         email: _emailController.text,
       );
 
+      print('🔍 Iniciando sheet de pagamento do Stripe...');
+
       // 3. Exibir sheet de pagamento Stripe
       await Stripe.instance.initPaymentSheet(
         paymentSheetParameters: SetupPaymentSheetParameters(
           paymentIntentClientSecret: paymentIntentResult['clientSecret'],
-          merchantDisplayName: 'Seu Nome de Negócio',
+          merchantDisplayName: 'HealthClick',
           billingDetails: billingDetails,
           style: ThemeMode.system,
-          // Customização:
-          appearance: PaymentSheetAppearance(
-            colors: PaymentSheetAppearanceColors(
-              primary: Colors.green,
-            ),
-          ),
         ),
       );
+
+      print('✅ Sheet de pagamento inicializado com sucesso');
+      print('🔍 Exibindo sheet de pagamento ao usuário...');
 
       // 4. Exibir folha de pagamento ao usuário
       await Stripe.instance.presentPaymentSheet();
 
+      print('✅ Usuário completou o pagamento no sheet');
+      print('🔍 Confirmando pagamento com o servidor...');
+
       // 5. Confirmar pagamento com servidor
       await _confirmPayment(paymentIntentResult['id']);
+
+      print('✅ Pagamento confirmado com o servidor');
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -79,10 +92,14 @@ class _StripeCheckoutWidgetState extends State<StripeCheckoutWidget> {
         Navigator.of(context).pop();
       }
     } catch (e) {
+      print('❌ ERRO NO PAGAMENTO: $e');
       if (e is StripeException) {
+        print(
+            '❌ Erro do Stripe: ${e.error.code} - ${e.error.localizedMessage}');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('❌ Erro: ${e.error.localizedMessage}')),
+            SnackBar(
+                content: Text('❌ Erro do Stripe: ${e.error.localizedMessage}')),
           );
         }
       } else {
@@ -93,6 +110,7 @@ class _StripeCheckoutWidgetState extends State<StripeCheckoutWidget> {
         }
       }
     } finally {
+      print('⏱️ Finalizando processo de pagamento');
       if (mounted) {
         setState(() => _isProcessing = false);
       }
@@ -104,9 +122,10 @@ class _StripeCheckoutWidgetState extends State<StripeCheckoutWidget> {
     final userId = user?.uid;
 
     try {
+      // A URL precisa ser a sua URL real
       final response = await http.post(
         Uri.parse(
-            'http://192.168.100.139:8000/api/stripe/create-payment-intent'),
+            'http://192.168.100.139:8000/api/stripe/create-checkout-session'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'amount': (widget.amount * 100).toInt(), // converter para centavos
@@ -117,15 +136,21 @@ class _StripeCheckoutWidgetState extends State<StripeCheckoutWidget> {
         }),
       );
 
+      print('🔍 Resposta do servidor (criar payment intent):');
+      print('🔍 Status: ${response.statusCode}');
+      print('🔍 Corpo: ${response.body}');
+
       final jsonResponse = jsonDecode(response.body);
 
       if (response.statusCode != 200 || jsonResponse['success'] != true) {
+        print('❌ Erro na resposta do servidor: ${jsonResponse['message']}');
         throw Exception(
             jsonResponse['message'] ?? 'Erro ao criar payment intent');
       }
 
       return jsonResponse['data'];
     } catch (e) {
+      print('❌ Exceção ao criar payment intent: $e');
       rethrow;
     }
   }
@@ -142,13 +167,19 @@ class _StripeCheckoutWidgetState extends State<StripeCheckoutWidget> {
         }),
       );
 
+      print('🔍 Resposta do servidor (confirmar pagamento):');
+      print('🔍 Status: ${response.statusCode}');
+      print('🔍 Corpo: ${response.body}');
+
       final jsonResponse = jsonDecode(response.body);
 
       if (response.statusCode != 200 || jsonResponse['success'] != true) {
+        print('❌ Erro na resposta de confirmação: ${jsonResponse['message']}');
         throw Exception(
             jsonResponse['message'] ?? 'Erro ao confirmar pagamento');
       }
     } catch (e) {
+      print('❌ Exceção ao confirmar pagamento: $e');
       rethrow;
     }
   }
