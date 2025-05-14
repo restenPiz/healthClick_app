@@ -3,7 +3,6 @@ import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:provider/provider.dart';
 
 class StripeCheckoutWidget extends StatefulWidget {
   final double amount;
@@ -26,11 +25,19 @@ class StripeCheckoutWidget extends StatefulWidget {
 class _StripeCheckoutWidgetState extends State<StripeCheckoutWidget> {
   bool _isProcessing = false;
   final TextEditingController _emailController = TextEditingController();
+  static const String apiBaseUrl = 'http://192.168.100.139:8000/api';
+
+  bool _isValidEmail(String email) {
+    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+    return emailRegex.hasMatch(email);
+  }
 
   Future<void> _makePayment() async {
-    if (_emailController.text.isEmpty) {
+    FocusScope.of(context).unfocus(); // Fechar o teclado
+
+    if (_emailController.text.isEmpty || !_isValidEmail(_emailController.text)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Por favor, forneça um email')),
+        const SnackBar(content: Text('Por favor, forneça um email válido')),
       );
       return;
     }
@@ -38,30 +45,18 @@ class _StripeCheckoutWidgetState extends State<StripeCheckoutWidget> {
     setState(() => _isProcessing = true);
 
     try {
-      // Log para depuração - início do processo
       print('🔍 Iniciando processo de pagamento');
-      print('🔍 Valor: ${widget.amount}, Moeda: ${widget.currency}');
 
-      // 1. Criar setup de pagamento no servidor
-      print('🔍 Solicitando payment intent ao servidor...');
       final paymentIntentResult = await _createPaymentIntent();
 
       if (paymentIntentResult == null) {
-        print('❌ Payment intent é nulo');
         throw Exception('Falha ao criar payment intent');
       }
 
-      print(
-          '✅ Payment intent criado com sucesso: ${paymentIntentResult['id']}');
-
-      // 2. Configurar dados de faturamento
       final billingDetails = BillingDetails(
         email: _emailController.text,
       );
 
-      print('🔍 Iniciando sheet de pagamento do Stripe...');
-
-      // 3. Exibir sheet de pagamento Stripe
       await Stripe.instance.initPaymentSheet(
         paymentSheetParameters: SetupPaymentSheetParameters(
           paymentIntentClientSecret: paymentIntentResult['clientSecret'],
@@ -71,19 +66,9 @@ class _StripeCheckoutWidgetState extends State<StripeCheckoutWidget> {
         ),
       );
 
-      print('✅ Sheet de pagamento inicializado com sucesso');
-      print('🔍 Exibindo sheet de pagamento ao usuário...');
-
-      // 4. Exibir folha de pagamento ao usuário
       await Stripe.instance.presentPaymentSheet();
 
-      print('✅ Usuário completou o pagamento no sheet');
-      print('🔍 Confirmando pagamento com o servidor...');
-
-      // 5. Confirmar pagamento com servidor
       await _confirmPayment(paymentIntentResult['id']);
-
-      print('✅ Pagamento confirmado com o servidor');
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -94,12 +79,11 @@ class _StripeCheckoutWidgetState extends State<StripeCheckoutWidget> {
     } catch (e) {
       print('❌ ERRO NO PAGAMENTO: $e');
       if (e is StripeException) {
-        print(
-            '❌ Erro do Stripe: ${e.error.code} - ${e.error.localizedMessage}');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-                content: Text('❌ Erro do Stripe: ${e.error.localizedMessage}')),
+              content: Text('❌ Erro do Stripe: ${e.error.localizedMessage}'),
+            ),
           );
         }
       } else {
@@ -110,7 +94,6 @@ class _StripeCheckoutWidgetState extends State<StripeCheckoutWidget> {
         }
       }
     } finally {
-      print('⏱️ Finalizando processo de pagamento');
       if (mounted) {
         setState(() => _isProcessing = false);
       }
@@ -118,34 +101,27 @@ class _StripeCheckoutWidgetState extends State<StripeCheckoutWidget> {
   }
 
   Future<Map<String, dynamic>?> _createPaymentIntent() async {
-    final user = FirebaseAuth.instance.currentUser;
-    final userId = user?.uid;
+    final userId = FirebaseAuth.instance.currentUser?.uid;
 
     try {
-      // A URL precisa ser a sua URL real
-      final response = await http.post(
-        Uri.parse(
-            'http://192.168.100.139:8000/api/stripe/create-checkout-session'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'amount': (widget.amount * 100).toInt(), // converter para centavos
-          'currency': widget.currency.toLowerCase(),
-          'email': _emailController.text,
-          'firebase_uid': userId,
-          'items': widget.items,
-        }),
-      );
-
-      print('🔍 Resposta do servidor (criar payment intent):');
-      print('🔍 Status: ${response.statusCode}');
-      print('🔍 Corpo: ${response.body}');
+      final response = await http
+          .post(
+            Uri.parse('$apiBaseUrl/stripe/create-checkout-session'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({
+              'amount': (widget.amount * 100).toInt(),
+              'currency': widget.currency.toLowerCase(),
+              'email': _emailController.text,
+              'firebase_uid': userId,
+              'items': widget.items,
+            }),
+          )
+          .timeout(const Duration(seconds: 10));
 
       final jsonResponse = jsonDecode(response.body);
 
       if (response.statusCode != 200 || jsonResponse['success'] != true) {
-        print('❌ Erro na resposta do servidor: ${jsonResponse['message']}');
-        throw Exception(
-            jsonResponse['message'] ?? 'Erro ao criar payment intent');
+        throw Exception(jsonResponse['message'] ?? 'Erro ao criar pagamento');
       }
 
       return jsonResponse['data'];
@@ -157,31 +133,33 @@ class _StripeCheckoutWidgetState extends State<StripeCheckoutWidget> {
 
   Future<void> _confirmPayment(String paymentIntentId) async {
     try {
-      final response = await http.post(
-        Uri.parse('http://192.168.100.139:8000/api/stripe/confirm-payment'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'payment_intent_id': paymentIntentId,
-          'firebase_uid': FirebaseAuth.instance.currentUser?.uid,
-          'items': widget.items,
-        }),
-      );
-
-      print('🔍 Resposta do servidor (confirmar pagamento):');
-      print('🔍 Status: ${response.statusCode}');
-      print('🔍 Corpo: ${response.body}');
+      final response = await http
+          .post(
+            Uri.parse('$apiBaseUrl/stripe/confirm-payment'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({
+              'payment_intent_id': paymentIntentId,
+              'firebase_uid': FirebaseAuth.instance.currentUser?.uid,
+              'items': widget.items,
+            }),
+          )
+          .timeout(const Duration(seconds: 10));
 
       final jsonResponse = jsonDecode(response.body);
 
       if (response.statusCode != 200 || jsonResponse['success'] != true) {
-        print('❌ Erro na resposta de confirmação: ${jsonResponse['message']}');
-        throw Exception(
-            jsonResponse['message'] ?? 'Erro ao confirmar pagamento');
+        throw Exception(jsonResponse['message'] ?? 'Erro ao confirmar pagamento');
       }
     } catch (e) {
       print('❌ Exceção ao confirmar pagamento: $e');
       rethrow;
     }
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    super.dispose();
   }
 
   @override
@@ -194,8 +172,7 @@ class _StripeCheckoutWidgetState extends State<StripeCheckoutWidget> {
       children: [
         Text(
           'Informações de Pagamento',
-          style: theme.textTheme.titleMedium
-              ?.copyWith(fontWeight: FontWeight.bold),
+          style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 16),
         TextFormField(
@@ -218,9 +195,7 @@ class _StripeCheckoutWidgetState extends State<StripeCheckoutWidget> {
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.green,
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
               padding: const EdgeInsets.symmetric(vertical: 14),
               disabledBackgroundColor: Colors.grey,
             ),
