@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
+import 'package:healthclick_app/models/CartProvider.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
 
 class StripeCheckoutWidget extends StatefulWidget {
   final double amount;
@@ -150,6 +152,12 @@ class _StripeCheckoutWidgetState extends State<StripeCheckoutWidget> {
       if (response.statusCode != 200 || jsonResponse['success'] != true) {
         throw Exception(jsonResponse['message'] ?? 'Erro ao confirmar pagamento');
       }
+      
+      Provider.of<CartProvider>(context, listen: false).clear();
+
+      setState(() {
+        widget.items.clear();
+      });
     } catch (e) {
       print('❌ Exceção ao confirmar pagamento: $e');
       rethrow;
