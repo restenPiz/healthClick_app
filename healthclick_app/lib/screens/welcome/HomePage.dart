@@ -70,7 +70,8 @@ class _HomePageState extends State<HomePage> {
           products = data.take(2).map((product) {
             return {
               "name": product['product_name'],
-              "price": product['product_price'],
+               "price":
+                  double.tryParse(product['product_price'].toString()) ?? 0.0,
               "description": product['product_description'],
               "image": 'http://cloudev.org/storage/${product['product_file']}',
               "quantity": product['quantity'],

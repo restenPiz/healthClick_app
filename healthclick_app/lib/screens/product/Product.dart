@@ -42,7 +42,8 @@ class _ProductState extends State<Product> {
             return {
               "id": product['id'],
               "name": product['product_name'],
-              "price": product['product_price'],
+              "price":
+                  double.tryParse(product['product_price'].toString()) ?? 0.0,
               "description": product['product_description'],
               "image": 'http://cloudev.org/storage/${product['product_file']}',
               "quantity": product['quantity'],
