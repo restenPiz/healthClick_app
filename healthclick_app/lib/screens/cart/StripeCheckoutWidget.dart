@@ -108,7 +108,7 @@ class _StripeCheckoutWidgetState extends State<StripeCheckoutWidget> {
     try {
       final response = await http
           .post(
-            Uri.parse('$apiBaseUrl/stripe/create-checkout-session'),
+            Uri.parse('http://192.168.100.139:8000/api/stripe/create-checkout-session'),
             headers: {'Content-Type': 'application/json'},
             body: jsonEncode({
               'amount': (widget.amount * 100).toInt(),
@@ -137,7 +137,7 @@ class _StripeCheckoutWidgetState extends State<StripeCheckoutWidget> {
     try {
       final response = await http
           .post(
-            Uri.parse('$apiBaseUrl/stripe/confirm-payment'),
+            Uri.parse('http://192.168.100.139:8000/api/stripe/confirm-payment'),
             headers: {'Content-Type': 'application/json'},
             body: jsonEncode({
               'payment_intent_id': paymentIntentId,
