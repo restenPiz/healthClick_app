@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:healthclick_app/screens/auth/Login.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 // Classe utilitária para gerenciar dimensões responsivas
 class AppSize {
@@ -47,12 +48,115 @@ class ForgotPassword extends StatefulWidget {
 }
 
 class _ForgotPasswordState extends State<ForgotPassword> {
+  // Controller para o campo de email
+  final TextEditingController emailController = TextEditingController();
+
+  // Variável para controlar o estado de loading do botão
+  bool _isResetting = false;
+
+  // Instância do Firebase Auth
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  // Método para enviar o email de reset de senha
+  Future<void> _resetPassword() async {
+    final email = emailController.text.trim();
+
+    // Validação básica de email
+    if (email.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter your email address')),
+      );
+      return;
+    }
+
+    // Validação de formato de email usando regex básico
+    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+    if (!emailRegex.hasMatch(email)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a valid email address')),
+      );
+      return;
+    }
+
+    // Ativar indicador de loading
+    setState(() {
+      _isResetting = true;
+    });
+
+    try {
+      // Enviar email de redefinição de senha
+      await _auth.sendPasswordResetEmail(email: email);
+
+      // Mostrar mensagem de sucesso
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Password reset email sent to $email'),
+          backgroundColor: Colors.green,
+          duration: const Duration(seconds: 5),
+        ),
+      );
+
+      // Opcional: Navegar de volta para a tela de login após um breve atraso
+      Future.delayed(const Duration(seconds: 2), () {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const Login()),
+        );
+      });
+    } on FirebaseAuthException catch (e) {
+      // Tratamento de erros específicos do Firebase Auth
+      String errorMessage;
+
+      switch (e.code) {
+        case 'user-not-found':
+          errorMessage = 'No user found with this email address.';
+          break;
+        case 'invalid-email':
+          errorMessage = 'The email address is invalid.';
+          break;
+        case 'too-many-requests':
+          errorMessage = 'Too many requests. Please try again later.';
+          break;
+        default:
+          errorMessage = 'An error occurred. Please try again later.';
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(errorMessage),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } catch (e) {
+      // Tratamento de outros erros
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      // Desativar indicador de loading, independentemente do resultado
+      setState(() {
+        _isResetting = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // Inicializando a classe AppSize para tornar a interface responsiva
     AppSize.init(context);
 
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+      ),
       body: SingleChildScrollView(
         child: Padding(
           padding: EdgeInsets.all(AppSize.wp(4)),
@@ -69,10 +173,20 @@ class _ForgotPasswordState extends State<ForgotPassword> {
               ),
               SizedBox(height: AppSize.hp(2)),
 
-              const Center(
-                child: Text(
-                  'Enter your email address to reset your password.',
-                  textAlign: TextAlign.center,
+              Text(
+                'Forgot Password',
+                style: TextStyle(
+                  fontSize: AppSize.sp(24),
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: AppSize.hp(1)),
+
+              Text(
+                'Enter your email address below, and we\'ll send you instructions to reset your password.',
+                style: TextStyle(
+                  fontSize: AppSize.sp(14),
+                  color: Colors.grey[600],
                 ),
               ),
               SizedBox(height: AppSize.hp(3)),
@@ -81,6 +195,8 @@ class _ForgotPasswordState extends State<ForgotPassword> {
               SizedBox(
                 height: AppSize.hp(7),
                 child: TextField(
+                  controller: emailController,
+                  keyboardType: TextInputType.emailAddress,
                   decoration: InputDecoration(
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(AppSize.wp(8)),
@@ -97,6 +213,10 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                     ),
                     hintText: 'Enter your email',
                     prefixIcon: const Icon(Icons.email),
+                    contentPadding: EdgeInsets.symmetric(
+                      vertical: AppSize.hp(1.5),
+                      horizontal: AppSize.wp(4),
+                    ),
                   ),
                 ),
               ),
@@ -105,38 +225,63 @@ class _ForgotPasswordState extends State<ForgotPassword> {
               // Botão de reset de senha
               SizedBox(
                 width: double.infinity,
+                height: AppSize.hp(6.5),
                 child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
+                  onPressed: _isResetting ? null : _resetPassword,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green,
                     foregroundColor: Colors.white,
-                    padding: EdgeInsets.symmetric(vertical: AppSize.hp(2)),
+                    padding: EdgeInsets.symmetric(vertical: AppSize.hp(1.5)),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(AppSize.wp(8)),
                     ),
+                    // Quando o botão estiver desativado, ainda terá um visual semelhante
+                    disabledBackgroundColor: Colors.green.withOpacity(0.7),
+                    disabledForegroundColor: Colors.white70,
                   ),
-                  child: Text(
-                    'Reset Password',
-                    style: TextStyle(fontSize: AppSize.sp(20)),
-                  ),
+                  child: _isResetting
+                      ? Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            SizedBox(
+                              width: AppSize.wp(5),
+                              height: AppSize.wp(5),
+                              child: const CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2.0,
+                              ),
+                            ),
+                            SizedBox(width: AppSize.wp(3)),
+                            Text(
+                              'Sending email...',
+                              style: TextStyle(fontSize: AppSize.sp(16)),
+                            ),
+                          ],
+                        )
+                      : Text(
+                          'Reset Password',
+                          style: TextStyle(fontSize: AppSize.sp(17)),
+                        ),
                 ),
               ),
               SizedBox(height: AppSize.hp(3)),
 
               // Link para redirecionar ao login
-              GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const Login()),
-                  );
-                },
-                child: const Center(
+              Center(
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => const Login()),
+                    );
+                  },
                   child: Text(
                     'Remember Your Password? Sign In',
-                    style: TextStyle(color: Colors.blue),
+                    style: TextStyle(
+                      color: Colors.blue,
+                      fontSize: AppSize.sp(15),
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
@@ -145,5 +290,12 @@ class _ForgotPasswordState extends State<ForgotPassword> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    // Limpar o controller quando o widget for destruído
+    emailController.dispose();
+    super.dispose();
   }
 }
