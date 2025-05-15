@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:healthclick_app/SessionTimeoutManager.dart';
 import 'package:healthclick_app/ThemeProvider.dart';
 import 'package:healthclick_app/screens/welcome/HomePage.dart';
 import 'package:healthclick_app/screens/welcome/SplashLogin.dart';
@@ -10,7 +11,7 @@ import 'package:healthclick_app/screens/auth/Login.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 
-// Adicionar o provedor de autenticação
+// Provedor de autenticação com gerenciamento de timeout de sessão
 class AuthProvider with ChangeNotifier {
   AuthProvider() {
     // Verificando se já existe um usuário autenticado ao iniciar o app
@@ -115,8 +116,59 @@ class MyApp extends StatelessWidget {
   }
 }
 
-// Adicionar o AuthWrapper para verificar o estado de autenticação
-class AuthWrapper extends StatelessWidget {
+// AuthWrapper modificado para lidar com o lifecycle do app
+class AuthWrapper extends StatefulWidget {
+  @override
+  _AuthWrapperState createState() => _AuthWrapperState();
+}
+
+class _AuthWrapperState extends State<AuthWrapper> with WidgetsBindingObserver {
+  SessionTimeoutManager? _sessionManager;
+
+  @override
+  void initState() {
+    super.initState();
+    // Registrar observer para detectar mudanças no estado do app
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Inicializar o gerenciador de sessão
+    final authProvider = Provider.of<AuthProvider>(context);
+    if (authProvider.isAuthenticated && _sessionManager == null) {
+      _sessionManager = SessionTimeoutManager(
+        context: context,
+        logout: () => authProvider.signOut(),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    // Remover observer e recursos
+    WidgetsBinding.instance.removeObserver(this);
+    _sessionManager?.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    // Só gerenciar timeout se o usuário estiver autenticado
+    if (authProvider.isAuthenticated) {
+      if (state == AppLifecycleState.paused ||
+          state == AppLifecycleState.inactive) {
+        // App foi para background
+        _sessionManager?.appToBackground();
+      } else if (state == AppLifecycleState.resumed) {
+        // App voltou para foreground
+        _sessionManager?.appToForeground();
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
