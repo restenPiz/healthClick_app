@@ -17,7 +17,7 @@ class Product extends StatefulWidget {
 }
 
 class _ProductState extends State<Product> {
-  final String baseUrl = 'http://192.168.100.139:8000/api/products';
+  final String baseUrl = 'https://cloudev.org/api/products';
   List<Map<String, dynamic>> products = [];
   List<Map<String, dynamic>> filteredProducts = [];
   int _currentIndex = 1;
@@ -45,7 +45,7 @@ class _ProductState extends State<Product> {
               "price":
                   double.tryParse(product['product_price'].toString()) ?? 0.0,
               "description": product['product_description'],
-              "image": 'http://192.168.100.139:8000/storage/${product['product_file']}',
+              "image": 'https://cloudev.org/storage/${product['product_file']}',
               "quantity": product['quantity'],
               "category": product['category'] != null
                   ? product['category']['category_name']

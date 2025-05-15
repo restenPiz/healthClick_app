@@ -264,41 +264,7 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
 
 
   Widget _buildSubmitButton() {
-    return SizedBox(
-      width: double.infinity,
-      height: 55,
-      // child: ElevatedButton(
-      //   onPressed: _isProcessing
-      //       ? null
-      //       : () async {
-      //           if (_formKey.currentState!.validate()) {
-      //             setState(() => _isProcessing = true);
-      //             try {
-      //               if (_isStripePayment) {
-      //                 // Stripe já é processado diretamente no widget
-      //                 Navigator.of(context)
-      //                     .pop(); // Você pode mudar essa lógica se quiser feedback
-      //               } else {
-      //                 final isValid =
-      //                     _bankKey.currentState?.validateAndSubmit() ?? false;
-      //                 if (isValid) {
-      //                   Navigator.of(context).pop();
-      //                 }
-      //               }
-      //             } finally {
-      //               if (mounted) setState(() => _isProcessing = false);
-      //             }
-      //           }
-      //         },
-      //   style: ElevatedButton.styleFrom(
-      //     backgroundColor: Colors.green,
-      //     shape:
-      //         RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      //   ),
-      //   child: _isProcessing
-      //       ? const CircularProgressIndicator(color: Colors.white)
-      //       : const Text('Finalizar Pagamento', style: TextStyle(fontSize: 16)),
-      // ),
+    return const SizedBox(
     );
   }
 }

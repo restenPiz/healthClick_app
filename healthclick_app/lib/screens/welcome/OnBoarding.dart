@@ -85,7 +85,7 @@ class _OnBoardingState extends State<OnBoarding> {
                   ),
                 ),
               ),
-              SizedBox(height: AppSize.hp(3)), // Ajustando o espaçamento
+              SizedBox(height: AppSize.hp(2)), // Ajustando o espaçamento
 
               const Text(
                 'Bem Vindo ao Aplicativo SaúdeClick',
@@ -97,7 +97,7 @@ class _OnBoardingState extends State<OnBoarding> {
               SizedBox(height: AppSize.hp(2)),
 
               const Text(
-                'Este é um aplicativo criado para atender à demanda por medicamentos em Moçambique e outros países. O aplicativo visa automatizar os processos de compra e entrega de medicamentos a pacientes ou beneficiários.',
+                'Este aplicativo foi desenvolvido com o objetivo de modernizar e facilitar o acesso a medicamentos em Moçambique e outros países em desenvolvimento. A plataforma conecta pacientes, farmácias e serviços de entrega, oferecendo uma solução integrada e eficiente para a aquisição de medicamentos.O aplicativo permite que os usuários pesquisem medicamentos, consultem farmácias próximas, realizem pedidos online e acompanhem o status da entrega em tempo real. Além disso, oferece recursos como pagamentos digitais seguros e histórico de compras. ',
                 style: TextStyle(fontSize: 15),
                 textAlign: TextAlign.justify,
               ),

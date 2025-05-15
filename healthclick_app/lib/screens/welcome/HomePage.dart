@@ -67,7 +67,7 @@ class _HomePageState extends State<HomePage> {
         List<dynamic> data = jsonData['products'];
 
         setState(() {
-          products = data.take(2).map((product) {
+          products = data.take(3).map((product) {
             return {
               "name": product['product_name'],
                "price":

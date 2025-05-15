@@ -27,7 +27,7 @@ class StripeCheckoutWidget extends StatefulWidget {
 class _StripeCheckoutWidgetState extends State<StripeCheckoutWidget> {
   bool _isProcessing = false;
   final TextEditingController _emailController = TextEditingController();
-  static const String apiBaseUrl = 'http://192.168.100.139:8000/api';
+  static const String apiBaseUrl = 'https://cloudev.org/api';
 
   bool _isValidEmail(String email) {
     final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
@@ -108,7 +108,7 @@ class _StripeCheckoutWidgetState extends State<StripeCheckoutWidget> {
     try {
       final response = await http
           .post(
-            Uri.parse('http://192.168.100.139:8000/api/stripe/create-checkout-session'),
+            Uri.parse('https://cloudev.org/api/stripe/create-checkout-session'),
             headers: {'Content-Type': 'application/json'},
             body: jsonEncode({
               'amount': (widget.amount * 100).toInt(),
@@ -137,7 +137,7 @@ class _StripeCheckoutWidgetState extends State<StripeCheckoutWidget> {
     try {
       final response = await http
           .post(
-            Uri.parse('http://192.168.100.139:8000/api/stripe/confirm-payment'),
+            Uri.parse('https://cloudev.org/api/stripe/confirm-payment'),
             headers: {'Content-Type': 'application/json'},
             body: jsonEncode({
               'payment_intent_id': paymentIntentId,
@@ -185,7 +185,7 @@ class _StripeCheckoutWidgetState extends State<StripeCheckoutWidget> {
         const SizedBox(height: 16),
         TextFormField(
           controller: _emailController,
-          decoration: InputDecoration(
+          decoration: InputDecoration( 
             labelText: 'Email',
             hintText: 'seuemail@exemplo.com',
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
