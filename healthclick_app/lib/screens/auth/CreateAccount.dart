@@ -94,7 +94,7 @@ class _CreateAccountState extends State<CreateAccount> {
       if (user == null) throw Exception('Erro ao autenticar com Firebase');
 
       final response = await http.post(
-        Uri.parse('http://192.168.100.139:8000/api/sync-firebase-uid'),
+        Uri.parse('https://cloudev.org/api/sync-firebase-uid'),
         body: {
           'firebase_uid': user.uid,
           'email': user.email ?? '',
@@ -164,7 +164,7 @@ class _CreateAccountState extends State<CreateAccount> {
 
       if (user != null) {
         final response = await http.post(
-          Uri.parse('http://192.168.100.139:8000/api/sync-firebase-uid'),
+          Uri.parse('https://cloudev.org/api/sync-firebase-uid'),
           headers: {'Content-Type': 'application/json'},
           body: jsonEncode({
             'firebase_uid': user.uid,
