@@ -27,8 +27,8 @@ class _ProductCategoryState extends State<ProductCategory> {
   List<Map<String, dynamic>> products = [];
   int _currentIndex = 1;
   late String baseUrl;
+  bool _isLoading = true;
 
-  //*Search input
   TextEditingController searchController = TextEditingController();
 
   @override
@@ -36,7 +36,6 @@ class _ProductCategoryState extends State<ProductCategory> {
     super.initState();
     baseUrl = 'http://cloudev.org/api/products/category/${widget.categoryId}';
     getProducts();
-    print("URL: $baseUrl");
 
     searchController.addListener(() {
       _filterProducts(searchController.text);
@@ -45,12 +44,12 @@ class _ProductCategoryState extends State<ProductCategory> {
 
   @override
   void dispose() {
-    // Limpa o controlador quando o widget for descartado
     searchController.dispose();
     super.dispose();
   }
 
   Future<void> getProducts() async {
+    setState(() => _isLoading = true);
     try {
       var url = Uri.parse(baseUrl);
       var response = await http.get(url);
@@ -62,6 +61,7 @@ class _ProductCategoryState extends State<ProductCategory> {
         setState(() {
           products = data.map((product) {
             return {
+              "id": product['id'],
               "name": product['product_name'],
               "price":
                   double.tryParse(product['product_price'].toString()) ?? 0.0,
@@ -74,30 +74,31 @@ class _ProductCategoryState extends State<ProductCategory> {
             };
           }).toList();
           filteredProducts = List.from(products);
+          _isLoading = false;
         });
       } else {
         throw Exception('Falha ao carregar produtos: ${response.statusCode}');
       }
     } catch (e) {
       print('Erro: $e');
-      throw Exception('Falha ao carregar produtos');
+      setState(() {
+        _isLoading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erro ao carregar produtos: $e')),
+      );
     }
   }
 
-  //*Search Product Method
   void _filterProducts(String searchText) {
     setState(() {
       if (searchText.isEmpty) {
-        // Se a pesquisa estiver vazia, mostre todos os produtos
         filteredProducts = List.from(products);
       } else {
-        // Filtra os produtos pelo nome, ignorando maiúsculas/minúsculas
         filteredProducts = products.where((product) {
           final productName = product['name'].toString().toLowerCase();
           final categoryName = product['category'].toString().toLowerCase();
           final searchLower = searchText.toLowerCase();
-
-          // Pesquisa por nome ou categoria
           return productName.contains(searchLower) ||
               categoryName.contains(searchLower);
         }).toList();
@@ -113,24 +114,13 @@ class _ProductCategoryState extends State<ProductCategory> {
 
   void _addToCart(Map<String, dynamic> product, BuildContext context) {
     try {
-      // Imprimir dados para depuração
-      print('Dados do produto: $product');
-
-      // Verificar e obter valores com segurança
       final String productId = product['id']?.toString() ??
           DateTime.now().millisecondsSinceEpoch.toString();
-      final String name = product['name']?.toString() ?? 'Produto';
+      final String name = product['name'] ?? 'Produto';
       final double price =
           product['price'] is num ? (product['price'] as num).toDouble() : 0.0;
-      final String image = product['image']?.toString() ?? '';
+      final String image = product['image'] ?? '';
 
-      // Registrar valores para depuração
-      print('ID usado: $productId');
-      print('Nome usado: $name');
-      print('Preço usado: $price');
-      print('Imagem usada: $image');
-
-      // Adicionar ao carrinho
       final cart = Provider.of<CartProvider>(context, listen: false);
       cart.addItem(productId, name, price, image);
 
@@ -162,14 +152,12 @@ class _ProductCategoryState extends State<ProductCategory> {
   Widget build(BuildContext context) {
     User? currentUser = FirebaseAuth.instance.currentUser;
     final cart = Provider.of<CartProvider>(context);
-
-    // Get screen dimensions
     final Size screenSize = MediaQuery.of(context).size;
+
     final bool isSmallScreen = screenSize.width < 600;
     final bool isMediumScreen =
         screenSize.width >= 600 && screenSize.width < 900;
 
-    // Determine grid column count based on screen size
     int crossAxisCount = isSmallScreen
         ? 2
         : isMediumScreen
@@ -183,104 +171,109 @@ class _ProductCategoryState extends State<ProductCategory> {
 
     return Scaffold(
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding:
-                EdgeInsets.all(screenSize.width * 0.04), // Responsive padding
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(height: screenSize.height * 0.01),
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: CircleAvatar(
-                    radius: isSmallScreen ? 20 : 25,
-                    backgroundImage: currentUser?.photoURL != null
-                        ? NetworkImage(currentUser!.photoURL!)
-                        : const AssetImage("assets/dif.jpg") as ImageProvider,
-                  ),
-                  title: Text(
-                    "Olá ${currentUser?.displayName ?? currentUser?.email?.split('@')[0] ?? 'Visitante'}",
-                    style: TextStyle(
-                        fontSize: isSmallScreen ? 15 : 17,
-                        fontWeight: FontWeight.bold),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                SizedBox(height: screenSize.height * 0.02),
-                Text(
-                  'Todos Produtos',
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: isSmallScreen ? 15 : 17),
-                ),
-                SizedBox(height: screenSize.height * 0.015),
-                TextField(
-                  controller: searchController,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(30)),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30),
-                      borderSide: const BorderSide(color: Colors.grey),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30),
-                      borderSide: const BorderSide(color: Colors.blue),
-                    ),
-                    hintText: 'Pesquisar o Produto',
-                    prefixIcon: const Icon(Icons.search),
-                    suffixIcon: searchController.text.isNotEmpty
-                        ? IconButton(
-                            icon: const Icon(Icons.clear),
-                            onPressed: () {
-                              searchController.clear();
-                              _filterProducts('');
-                            },
-                          )
-                        : null,
-                    contentPadding: EdgeInsets.symmetric(
-                        vertical: isSmallScreen ? 10 : 15,
-                        horizontal: isSmallScreen ? 15 : 20),
-                  ),
-                  onChanged: _filterProducts,
-                ),
-                SizedBox(height: screenSize.height * 0.015),
-                filteredProducts.isEmpty
-                    ? Center(
-                        child: Padding(
-                          padding: EdgeInsets.all(screenSize.width * 0.05),
-                          child: Text(
-                            'Nenhum produto encontrado',
-                            style: TextStyle(fontSize: isSmallScreen ? 14 : 16),
-                          ),
+        child: _isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : SingleChildScrollView(
+                child: Padding(
+                  padding: EdgeInsets.all(screenSize.width * 0.04),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(height: screenSize.height * 0.01),
+                      ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        leading: CircleAvatar(
+                          radius: isSmallScreen ? 20 : 25,
+                          backgroundImage: currentUser?.photoURL != null
+                              ? NetworkImage(currentUser!.photoURL!)
+                              : const AssetImage("assets/dif.jpg")
+                                  as ImageProvider,
                         ),
-                      )
-                    : GridView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: crossAxisCount,
-                          crossAxisSpacing: 8,
-                          mainAxisSpacing: 8,
-                          childAspectRatio: childAspectRatio,
+                        title: Text(
+                          "Olá ${currentUser?.displayName ?? currentUser?.email?.split('@')[0] ?? 'Visitante'}",
+                          style: TextStyle(
+                              fontSize: isSmallScreen ? 15 : 17,
+                              fontWeight: FontWeight.bold),
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        itemCount: filteredProducts.length,
-                        itemBuilder: (context, index) {
-                          final product = filteredProducts[index];
-
-                          return ProductCard(
-                            product: product,
-                            context: context,
-                            onAddToCart: () => _addToCart(product, context),
-                            isSmallScreen: isSmallScreen,
-                          );
-                        },
                       ),
-              ],
-            ),
-          ),
-        ),
+                      SizedBox(height: screenSize.height * 0.02),
+                      Text(
+                        'Todos Produtos',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: isSmallScreen ? 15 : 17),
+                      ),
+                      SizedBox(height: screenSize.height * 0.015),
+                      TextField(
+                        controller: searchController,
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(30)),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(30),
+                            borderSide: const BorderSide(color: Colors.grey),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(30),
+                            borderSide: const BorderSide(color: Colors.blue),
+                          ),
+                          hintText: 'Pesquisar o Produto',
+                          prefixIcon: const Icon(Icons.search),
+                          suffixIcon: searchController.text.isNotEmpty
+                              ? IconButton(
+                                  icon: const Icon(Icons.clear),
+                                  onPressed: () {
+                                    searchController.clear();
+                                    _filterProducts('');
+                                  },
+                                )
+                              : null,
+                          contentPadding: EdgeInsets.symmetric(
+                              vertical: isSmallScreen ? 10 : 15,
+                              horizontal: isSmallScreen ? 15 : 20),
+                        ),
+                        onChanged: _filterProducts,
+                      ),
+                      SizedBox(height: screenSize.height * 0.015),
+                      filteredProducts.isEmpty
+                          ? Center(
+                              child: Padding(
+                                padding:
+                                    EdgeInsets.all(screenSize.width * 0.05),
+                                child: Text(
+                                  'Nenhum produto encontrado',
+                                  style: TextStyle(
+                                      fontSize: isSmallScreen ? 14 : 16),
+                                ),
+                              ),
+                            )
+                          : GridView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              gridDelegate:
+                                  SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: crossAxisCount,
+                                crossAxisSpacing: 8,
+                                mainAxisSpacing: 8,
+                                childAspectRatio: childAspectRatio,
+                              ),
+                              itemCount: filteredProducts.length,
+                              itemBuilder: (context, index) {
+                                final product = filteredProducts[index];
+                                return ProductCard(
+                                  product: product,
+                                  context: context,
+                                  onAddToCart: () =>
+                                      _addToCart(product, context),
+                                  isSmallScreen: isSmallScreen,
+                                );
+                              },
+                            ),
+                    ],
+                  ),
+                ),
+              ),
       ),
       bottomNavigationBar: AppBottomNav(
         currentIndex: _currentIndex,
@@ -328,7 +321,8 @@ class _ProductCategoryState extends State<ProductCategory> {
   }
 }
 
-// Extracted Product Card for better code organization and reusability
+// ================== COMPONENTE DE CARD EXTRAÍDO ==================
+
 class ProductCard extends StatelessWidget {
   final Map<String, dynamic> product;
   final BuildContext context;
@@ -345,7 +339,6 @@ class ProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Get screen dimensions
     final Size screenSize = MediaQuery.of(context).size;
 
     return GestureDetector(
