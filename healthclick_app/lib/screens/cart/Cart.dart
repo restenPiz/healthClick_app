@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+
 class Cart extends StatefulWidget {
   const Cart({super.key});
 
@@ -19,6 +20,9 @@ class _CartState extends State<Cart> {
   int _salesCount = 0;
   File? _comprovativoImage;
   final ImagePicker _picker = ImagePicker();
+  // Definir taxa de entrega
+  final double _deliveryFee = 50.0;
+  bool _includeDelivery = true; // Por padrão, incluir entrega
 
   Future<int?> buscarUserId(String firebaseUid) async {
     print("Buscando user_id para Firebase UID: $firebaseUid");
@@ -47,6 +51,8 @@ class _CartState extends State<Cart> {
       "valor": double.parse(valor),
       "firebase_uid": userId,
       "payment_type": "movel", // Adicionando tipo de pagamento
+      "delivery_fee":
+          _includeDelivery ? _deliveryFee : 0.0, // Incluir taxa de entrega
       "items": cart.items.entries
           .map((entry) => {
                 "name": entry.value.name,
@@ -156,6 +162,9 @@ class _CartState extends State<Cart> {
     request.fields['valor'] = valor;
     request.fields['firebase_uid'] = userId ?? '';
     request.fields['payment_type'] = 'banco';
+    request.fields['delivery_fee'] = _includeDelivery
+        ? _deliveryFee.toString()
+        : "0"; // Incluir taxa de entrega
     request.fields['items'] = json.encode(cart.items.entries
         .map((entry) => {
               "name": entry.value.name,
@@ -261,7 +270,7 @@ class _CartState extends State<Cart> {
   }
 
   //*Method for redirect to stripe widget
- void _mostrarFormPagamentoBancario(BuildContext context, CartProvider cart) {
+  void _mostrarFormPagamentoBancario(BuildContext context, CartProvider cart) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -269,7 +278,7 @@ class _CartState extends State<Cart> {
       builder: (ctx) => PaymentMethodsScreen(cart: cart),
     );
   }
-  
+
   Future<List<dynamic>> _fetchOrderHistory() async {
     try {
       final user = FirebaseAuth.instance.currentUser;
@@ -556,7 +565,11 @@ class _CartState extends State<Cart> {
                               return;
                             }
 
-                            final valor = cart.totalAmount.toStringAsFixed(2);
+                            // Calcular o valor total com entrega
+                            final valor = (_includeDelivery
+                                    ? cart.totalAmount + _deliveryFee
+                                    : cart.totalAmount)
+                                .toStringAsFixed(2);
 
                             Navigator.of(ctx).pop(); // Fecha o modal
 
@@ -589,6 +602,11 @@ class _CartState extends State<Cart> {
         ),
       ),
     );
+  }
+
+  // Calcular o valor total incluindo entrega se necessário
+  double _calculateTotal(CartProvider cart) {
+    return cart.totalAmount + (_includeDelivery ? _deliveryFee : 0);
   }
 
   @override
@@ -688,18 +706,50 @@ class _CartState extends State<Cart> {
                     },
                   ),
           ),
+          // Seção de entrega
+          if (cart.items.isNotEmpty)
+            
+          // Resumo do carrinho
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            child: Column(
               children: [
-                const Text('Total', style: TextStyle(fontSize: 20)),
-                Chip(
-                  label: Text(
-                    '${cart.totalAmount.toStringAsFixed(2)} MZN',
-                    style: const TextStyle(color: Colors.white),
+                // Subtotal
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('Subtotal'),
+                    Text('${cart.totalAmount.toStringAsFixed(2)} MZN'),
+                  ],
+                ),
+                // Taxa de entrega
+                if (_includeDelivery)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('Taxa de Entrega'),
+                        Text('${_deliveryFee.toStringAsFixed(2)} MZN'),
+                      ],
+                    ),
                   ),
-                  backgroundColor: Theme.of(context).primaryColor,
+                const Divider(),
+                // Total geral
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('Total',
+                        style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold)),
+                    Chip(
+                      label: Text(
+                        '${_calculateTotal(cart).toStringAsFixed(2)} MZN',
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                      backgroundColor: Theme.of(context).primaryColor,
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -726,7 +776,7 @@ class _CartState extends State<Cart> {
                         BorderRadius.circular(12), // Bordas arredondadas
                   ),
                   minimumSize: const Size(200, 50),
-                ), 
+                ),
                 child: const Text(
                   'Finalizar Compra',
                   style: TextStyle(
