@@ -23,13 +23,19 @@ class ProductCategory extends StatefulWidget {
 }
 
 class _ProductCategoryState extends State<ProductCategory> {
+  late String baseUrl;
   List<Map<String, dynamic>> filteredProducts = [];
   List<Map<String, dynamic>> products = [];
+  TextEditingController searchController = TextEditingController();
+
   int _currentIndex = 1;
-  late String baseUrl;
   bool _isLoading = true;
 
-  TextEditingController searchController = TextEditingController();
+  @override
+  void dispose() {
+    searchController.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -40,12 +46,6 @@ class _ProductCategoryState extends State<ProductCategory> {
     searchController.addListener(() {
       _filterProducts(searchController.text);
     });
-  }
-
-  @override
-  void dispose() {
-    searchController.dispose();
-    super.dispose();
   }
 
   Future<void> getProducts() async {
@@ -324,11 +324,6 @@ class _ProductCategoryState extends State<ProductCategory> {
 // ================== COMPONENTE DE CARD EXTRAÍDO ==================
 
 class ProductCard extends StatelessWidget {
-  final Map<String, dynamic> product;
-  final BuildContext context;
-  final Function onAddToCart;
-  final bool isSmallScreen;
-
   const ProductCard({
     super.key,
     required this.product,
@@ -336,6 +331,11 @@ class ProductCard extends StatelessWidget {
     required this.onAddToCart,
     required this.isSmallScreen,
   });
+
+  final BuildContext context;
+  final bool isSmallScreen;
+  final Function onAddToCart;
+  final Map<String, dynamic> product;
 
   @override
   Widget build(BuildContext context) {
@@ -354,6 +354,7 @@ class ProductCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            const SizedBox(height: 10,),
             Padding(
               padding: EdgeInsets.symmetric(
                 horizontal: screenSize.width * 0.01,
@@ -361,7 +362,7 @@ class ProductCard extends StatelessWidget {
               ),
               child: Text(
                 product['category'] ?? 'Categoria',
-                style: TextStyle(fontSize: isSmallScreen ? 11 : 13),
+                style: TextStyle(fontSize: isSmallScreen ? 13 : 15),
                 overflow: TextOverflow.ellipsis,
               ),
             ),
@@ -392,7 +393,7 @@ class ProductCard extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            Divider(thickness: 1, indent: 10, endIndent: 10),
+            const Divider(thickness: 1, indent: 10, endIndent: 10),
             Padding(
               padding: EdgeInsets.symmetric(
                 horizontal: screenSize.width * 0.02,
