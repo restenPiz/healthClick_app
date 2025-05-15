@@ -1,5 +1,3 @@
-// ignore_for_file: prefer_const_constructors
-
 import 'dart:convert';
 
 import 'package:firebase_auth/firebase_auth.dart';
@@ -11,6 +9,7 @@ import 'package:healthclick_app/screens/pharmacy/PharmacyDetails.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:custom_refresh_indicator/custom_refresh_indicator.dart';
+import 'package:cached_network_image/cached_network_image.dart'; // Importando CachedNetworkImage
 
 class Pharmacy extends StatefulWidget {
   const Pharmacy({super.key});
@@ -21,51 +20,84 @@ class Pharmacy extends StatefulWidget {
 
 class _PharmacyState extends State<Pharmacy> {
   int _currentIndex = 2;
-  bool _isLoading =
-      false; // Adicionando um estado para controlar o carregamento
+  bool _isLoading = false;
+  bool _hasError = false;
+  String _errorMessage = '';
 
   List<Map<String, dynamic>> pharmacies = [];
+  final int _itemsPerPage = 5; // Número de farmácias carregadas por vez
+  int _currentPage = 1;
+  bool _hasMoreData = true;
+  bool _isLoadingMore = false;
 
-  Future<void> getPharmacies() async {
+  final ScrollController _scrollController = ScrollController();
+
+  Future<void> getPharmacies({bool refresh = false}) async {
+    if (refresh) {
+      setState(() {
+        _currentPage = 1;
+        _hasMoreData = true;
+        pharmacies.clear();
+        _hasError = false;
+        _errorMessage = '';
+      });
+    }
+
+    if (!_hasMoreData || _isLoadingMore) return;
+
     setState(() {
-      _isLoading = true; // Ativar indicador de carregamento
+      refresh ? _isLoading = true : _isLoadingMore = true;
     });
 
     try {
-      var url = Uri.parse('http://cloudev.org/api/pharmacies');
+      // Adicionando parâmetros de paginação à URL
+      var url = Uri.parse(
+          'http://cloudev.org/api/pharmacies?page=$_currentPage&per_page=$_itemsPerPage');
       var response = await http.get(url);
 
       if (response.statusCode == 200) {
         var jsonData = json.decode(response.body);
         List<dynamic> data = jsonData['pharmacies'];
 
-        setState(() {
-          pharmacies = data.map((pharmacy) {
-            return {
-              "id": pharmacy['id'],
-              "name": pharmacy['pharmacy_name'],
-              "location": pharmacy['pharmacy_location'],
-              "contact": pharmacy['pharmacy_contact'],
-              "image": pharmacy['pharmacy_file'],
-              "description": pharmacy['pharmacy_description'],
-              "userEmail": pharmacy['user']['email'],
-              "userName": pharmacy['user']['name'],
-            };
-          }).toList();
-          _isLoading = false; // Desativar indicador de carregamento
-        });
+        // Verificar se tem mais dados para carregar
+        _hasMoreData = data.length >= _itemsPerPage;
+
+        if (data.isNotEmpty) {
+          setState(() {
+            List<Map<String, dynamic>> newPharmacies = data.map((pharmacy) {
+              return {
+                "id": pharmacy['id'],
+                "name": pharmacy['pharmacy_name'],
+                "location": pharmacy['pharmacy_location'],
+                "contact": pharmacy['pharmacy_contact'],
+                "image": pharmacy['pharmacy_file'],
+                "description": pharmacy['pharmacy_description'],
+                "userEmail": pharmacy['user']['email'],
+                "userName": pharmacy['user']['name'],
+              };
+            }).toList();
+
+            pharmacies.addAll(newPharmacies);
+            _currentPage++;
+          });
+        }
       } else {
         setState(() {
-          _isLoading = false; // Desativar indicador mesmo em caso de erro
+          _hasError = true;
+          _errorMessage = 'Falha ao carregar farmácias: ${response.statusCode}';
         });
-        throw Exception('Falha ao carregar farmácias: ${response.statusCode}');
       }
     } catch (e) {
       setState(() {
-        _isLoading = false; // Desativar indicador mesmo em caso de erro
+        _hasError = true;
+        _errorMessage = 'Erro na conexão: $e';
       });
       print('Erro: $e');
-      throw Exception('Falha ao carregar farmácias');
+    } finally {
+      setState(() {
+        _isLoading = false;
+        _isLoadingMore = false;
+      });
     }
   }
 
@@ -75,10 +107,28 @@ class _PharmacyState extends State<Pharmacy> {
     });
   }
 
+  void _setupScrollListener() {
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels >=
+              _scrollController.position.maxScrollExtent - 200 &&
+          !_isLoadingMore &&
+          _hasMoreData) {
+        getPharmacies();
+      }
+    });
+  }
+
   @override
   void initState() {
     super.initState();
-    getPharmacies();
+    getPharmacies(refresh: true);
+    _setupScrollListener();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -95,7 +145,7 @@ class _PharmacyState extends State<Pharmacy> {
     return Scaffold(
       body: CustomRefreshIndicator(
         onRefresh: () async {
-          return getPharmacies();
+          return getPharmacies(refresh: true);
         },
         trigger: IndicatorTrigger.leadingEdge,
         builder: (
@@ -126,93 +176,38 @@ class _PharmacyState extends State<Pharmacy> {
           );
         },
         child: SafeArea(
-          child: SingleChildScrollView(
-            physics: AlwaysScrollableScrollPhysics(),
-            child: Padding(
-              padding:
-                  EdgeInsets.all(screenSize.width * 0.04), // Responsive padding
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(height: screenSize.height * 0.01),
-                  ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: CircleAvatar(
-                      radius: isSmallScreen ? 20 : 25,
-                      backgroundImage: currentUser?.photoURL != null
-                          ? NetworkImage(currentUser!.photoURL!)
-                          : const AssetImage("assets/dif.jpg") as ImageProvider,
-                    ),
-                    title: Text(
-                      "Olá ${currentUser?.displayName ?? currentUser?.email?.split('@')[0] ?? 'Visitante'}",
-                      style: TextStyle(
-                          fontSize: isSmallScreen ? 15 : 17,
-                          fontWeight: FontWeight.bold),
-                      overflow: TextOverflow.ellipsis,
-                    ),
+          child: Padding(
+            padding: EdgeInsets.all(screenSize.width * 0.04),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(height: screenSize.height * 0.01),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: CircleAvatar(
+                    radius: isSmallScreen ? 20 : 25,
+                    backgroundImage: currentUser?.photoURL != null
+                        ? CachedNetworkImageProvider(currentUser!.photoURL!)
+                        : const AssetImage("assets/dif.jpg") as ImageProvider,
                   ),
-                  SizedBox(height: screenSize.height * 0.02),
-                  Text(
-                    "Farmácias Próximas",
+                  title: Text(
+                    "Olá ${currentUser?.displayName ?? currentUser?.email?.split('@')[0] ?? 'Visitante'}",
                     style: TextStyle(
-                        fontSize: isSmallScreen ? 16 : 18,
+                        fontSize: isSmallScreen ? 15 : 17,
                         fontWeight: FontWeight.bold),
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  _isLoading
-                      ? Center(
-                          child: Padding(
-                            padding: EdgeInsets.all(screenSize.width * 0.05),
-                            child:
-                                CircularProgressIndicator(color: Colors.green),
-                          ),
-                        )
-                      : pharmacies.isEmpty
-                          ? Center(
-                              child: Padding(
-                                padding:
-                                    EdgeInsets.all(screenSize.width * 0.05),
-                                child: Text(
-                                  'Nenhuma farmácia encontrada',
-                                  style: TextStyle(
-                                      fontSize: isSmallScreen ? 14 : 16),
-                                ),
-                              ),
-                            )
-                          : isMediumScreen || !isSmallScreen
-                              // Grid view for medium and large screens
-                              ? GridView.builder(
-                                  shrinkWrap: true,
-                                  physics: NeverScrollableScrollPhysics(),
-                                  gridDelegate:
-                                      SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisCount: isMediumScreen ? 2 : 3,
-                                    childAspectRatio: 3.5,
-                                    crossAxisSpacing: 8,
-                                    mainAxisSpacing: 8,
-                                  ),
-                                  itemCount: pharmacies.length,
-                                  itemBuilder: (context, index) {
-                                    return PharmacyCard(
-                                      pharmacy: pharmacies[index],
-                                      isSmallScreen: isSmallScreen,
-                                    );
-                                  },
-                                )
-                              // List view for small screens (original layout)
-                              : ListView.builder(
-                                  shrinkWrap: true,
-                                  physics: NeverScrollableScrollPhysics(),
-                                  itemCount: pharmacies.length,
-                                  itemBuilder: (context, index) {
-                                    return PharmacyCard(
-                                      pharmacy: pharmacies[index],
-                                      isSmallScreen: isSmallScreen,
-                                    );
-                                  },
-                                ),
-                ],
-              ),
+                ),
+                SizedBox(height: screenSize.height * 0.02),
+                Text(
+                  "Farmácias Próximas",
+                  style: TextStyle(
+                      fontSize: isSmallScreen ? 16 : 18,
+                      fontWeight: FontWeight.bold),
+                ),
+                _buildPharmaciesList(isSmallScreen, isMediumScreen, screenSize),
+              ],
             ),
           ),
         ),
@@ -265,6 +260,117 @@ class _PharmacyState extends State<Pharmacy> {
       ),
     );
   }
+
+  Widget _buildPharmaciesList(
+      bool isSmallScreen, bool isMediumScreen, Size screenSize) {
+    if (_isLoading && pharmacies.isEmpty) {
+      return const Expanded(
+        child: Center(
+          child: CircularProgressIndicator(color: Colors.green),
+        ),
+      );
+    }
+
+    if (_hasError) {
+      return Expanded(
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                _errorMessage,
+                style: TextStyle(fontSize: isSmallScreen ? 14 : 16),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () => getPharmacies(refresh: true),
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                child: const Text('Tentar novamente',
+                    style: TextStyle(color: Colors.white)),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (pharmacies.isEmpty) {
+      return Expanded(
+        child: Center(
+          child: Text(
+            'Nenhuma farmácia encontrada',
+            style: TextStyle(fontSize: isSmallScreen ? 14 : 16),
+          ),
+        ),
+      );
+    }
+
+    // Definir o widget de lista apropriado com base no tamanho da tela
+    Widget pharmaciesListWidget;
+    if (isMediumScreen || !isSmallScreen) {
+      // Grid view para telas médias e grandes
+      pharmaciesListWidget = GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: isMediumScreen ? 2 : 3,
+          childAspectRatio: 3.5,
+          crossAxisSpacing: 8,
+          mainAxisSpacing: 8,
+        ),
+        itemCount: pharmacies.length,
+        itemBuilder: (context, index) {
+          return PharmacyCard(
+            pharmacy: pharmacies[index],
+            isSmallScreen: isSmallScreen,
+          );
+        },
+      );
+    } else {
+      // Lista para telas pequenas
+      pharmaciesListWidget = ListView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: pharmacies.length,
+        itemBuilder: (context, index) {
+          return PharmacyCard(
+            pharmacy: pharmacies[index],
+            isSmallScreen: isSmallScreen,
+          );
+        },
+      );
+    }
+
+    return Expanded(
+      child: ListView(
+        controller: _scrollController,
+        children: [
+          pharmaciesListWidget,
+          if (_isLoadingMore)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 16.0),
+              child: Center(
+                child: CircularProgressIndicator(color: Colors.green),
+              ),
+            ),
+          if (!_hasMoreData && pharmacies.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16.0),
+              child: Center(
+                child: Text(
+                  'Você chegou ao fim da lista',
+                  style: TextStyle(
+                    color: Colors.grey,
+                    fontSize: isSmallScreen ? 12 : 14,
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
 }
 
 class PharmacyCard extends StatelessWidget {
@@ -292,13 +398,31 @@ class PharmacyCard extends StatelessWidget {
           horizontal: screenSize.width * 0.03,
           vertical: screenSize.height * 0.005,
         ),
-        leading: CircleAvatar(
-          radius: isSmallScreen ? 20 : 25,
-          backgroundImage: pharmacy['image'] != null
-              ? NetworkImage('http://cloudev.org/storage/${pharmacy['image']}')
-              : AssetImage('assets/images/default_pharmacy.png')
-                  as ImageProvider,
-        ),
+        leading: pharmacy['image'] != null
+            ? ClipRRect(
+                borderRadius: BorderRadius.circular(isSmallScreen ? 20 : 25),
+                child: CachedNetworkImage(
+                  imageUrl: 'http://cloudev.org/storage/${pharmacy['image']}',
+                  width: isSmallScreen ? 40 : 50,
+                  height: isSmallScreen ? 40 : 50,
+                  fit: BoxFit.cover,
+                  placeholder: (context, url) => CircleAvatar(
+                    radius: isSmallScreen ? 20 : 25,
+                    backgroundColor: Colors.grey[300],
+                    child: Icon(Icons.local_pharmacy, color: Colors.grey[500]),
+                  ),
+                  errorWidget: (context, url, error) => CircleAvatar(
+                    radius: isSmallScreen ? 20 : 25,
+                    backgroundColor: Colors.grey[300],
+                    child: Icon(Icons.error, color: Colors.red),
+                  ),
+                ),
+              )
+            : CircleAvatar(
+                radius: isSmallScreen ? 20 : 25,
+                backgroundColor: Colors.grey[300],
+                child: Icon(Icons.local_pharmacy, color: Colors.grey[500]),
+              ),
         title: Text(
           pharmacy['name']!,
           style: TextStyle(
