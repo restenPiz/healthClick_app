@@ -4,98 +4,26 @@ import 'package:healthclick_app/screens/cart/StripeCheckoutWidget.dart';
 import 'package:healthclick_app/screens/cart/BankTransferWidget.dart';
 
 class PaymentMethodsScreen extends StatefulWidget {
-  final CartProvider cart;
-
   const PaymentMethodsScreen({
     Key? key,
     required this.cart,
   }) : super(key: key);
+
+  final CartProvider cart;
 
   @override
   _PaymentMethodsScreenState createState() => _PaymentMethodsScreenState();
 }
 
 class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
-  bool _isStripePayment = true;
-  final _formKey = GlobalKey<FormState>();
+  final double deliveryFee = 50.0;
+
   final GlobalKey<BankTransferWidgetState> _bankKey =
       GlobalKey<BankTransferWidgetState>();
+
+  final _formKey = GlobalKey<FormState>();
   bool _isProcessing = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final cardColor = isDarkMode ? Theme.of(context).cardColor : Colors.white;
-    final dividerColor =
-        isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300;
-    final subtitleColor =
-        isDarkMode ? Colors.grey.shade300 : Colors.grey.shade600;
-    final shadowColor = isDarkMode ? Colors.black54 : Colors.black26;
-    final summaryBackgroundColor =
-        isDarkMode ? Colors.grey.shade800 : Colors.grey.shade100;
-
-    return Container(
-      decoration: BoxDecoration(
-        color: cardColor,
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(25),
-          topRight: Radius.circular(25),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: shadowColor,
-            blurRadius: 10,
-            offset: const Offset(0, -5),
-          ),
-        ],
-      ),
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom + 20,
-        left: 20,
-        right: 20,
-        top: 20,
-      ),
-      child: SingleChildScrollView(
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildHeader(),
-              Divider(height: 30, color: dividerColor),
-              _buildPaymentMethodSelector(isDarkMode, dividerColor),
-              const SizedBox(height: 25),
-            _buildOrderSummary(summaryBackgroundColor, subtitleColor),
-            const SizedBox(height: 25),
-              // Render Stripe ou Bank Transfer
-              if (_isStripePayment)
-                StripeCheckoutWidget(
-                  amount: (widget.cart.totalAmount * 1).toDouble(),
-                  currency: 'mzn',
-                  items: widget.cart.items.entries.map((entry) {
-                    return {
-                      "name": entry.value.name,
-                      "price": entry.value.price,
-                      "quantity": entry.value.quantity,
-                    };
-                  }).toList(),
-                  scrollController: ScrollController(),
-                )
-              else
-                BankTransferWidget(
-                  key: _bankKey,
-                  cart: widget.cart,
-                ),
-
-              const SizedBox(height: 30),
-              _buildSubmitButton(),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+  bool _isStripePayment = true;
 
   Widget _buildHeader() {
     return Row(
@@ -134,27 +62,20 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
             isTopOption: true,
             isDarkMode: isDarkMode,
           ),
-          // Divider(height: 1, thickness: 1, color: dividerColor),
-          // _buildPaymentOption(
-          //   title: 'Transferência Bancária',
-          //   subtitle: 'BCI, BIM, Standard Bank',
-          //   icon: Icons.account_balance,
-          //   iconColor: Colors.green,
-          //   isSelected: !_isStripePayment,
-          //   onTap: () => setState(() => _isStripePayment = false),
-          //   isTopOption: false,
-          //   isDarkMode: isDarkMode,
-          // ),
         ],
       ),
     );
   }
 
   Widget _buildOrderSummary(Color backgroundColor, Color subtitleColor) {
+    final double totalWithDelivery = widget.cart.totalAmount + deliveryFee;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-          color: backgroundColor, borderRadius: BorderRadius.circular(12)),
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(12),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -174,8 +95,8 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text('Taxa de entrega', style: TextStyle(color: subtitleColor)),
-              const Text('Grátis',
-                  style: TextStyle(fontWeight: FontWeight.w500)),
+              Text('${deliveryFee.toStringAsFixed(2)} MZN',
+                  style: const TextStyle(fontWeight: FontWeight.w500)),
             ],
           ),
           Divider(height: 20, color: subtitleColor.withOpacity(0.5)),
@@ -184,7 +105,7 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
             children: [
               const Text('Total',
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-              Text('${widget.cart.totalAmount.toStringAsFixed(2)} MZN',
+              Text('${totalWithDelivery.toStringAsFixed(2)} MZN',
                   style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 18,
@@ -262,9 +183,82 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
     );
   }
 
-
   Widget _buildSubmitButton() {
-    return const SizedBox(
+    return const SizedBox();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final cardColor = isDarkMode ? Theme.of(context).cardColor : Colors.white;
+    final dividerColor =
+        isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300;
+    final subtitleColor =
+        isDarkMode ? Colors.grey.shade300 : Colors.grey.shade600;
+    final shadowColor = isDarkMode ? Colors.black54 : Colors.black26;
+    final summaryBackgroundColor =
+        isDarkMode ? Colors.grey.shade800 : Colors.grey.shade100;
+
+    final totalWithDelivery = widget.cart.totalAmount + deliveryFee;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: cardColor,
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(25),
+          topRight: Radius.circular(25),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: shadowColor,
+            blurRadius: 10,
+            offset: const Offset(0, -5),
+          ),
+        ],
+      ),
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+        left: 20,
+        right: 20,
+        top: 20,
+      ),
+      child: SingleChildScrollView(
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildHeader(),
+              Divider(height: 30, color: dividerColor),
+              _buildPaymentMethodSelector(isDarkMode, dividerColor),
+              const SizedBox(height: 25),
+              _buildOrderSummary(summaryBackgroundColor, subtitleColor),
+              const SizedBox(height: 25),
+              if (_isStripePayment)
+                StripeCheckoutWidget(
+                  amount: totalWithDelivery,
+                  currency: 'mzn',
+                  items: widget.cart.items.entries.map((entry) {
+                    return {
+                      "name": entry.value.name,
+                      "price": entry.value.price,
+                      "quantity": entry.value.quantity,
+                    };
+                  }).toList(),
+                  scrollController: ScrollController(),
+                )
+              else
+                BankTransferWidget(
+                  key: _bankKey,
+                  cart: widget.cart,
+                ),
+              const SizedBox(height: 30),
+              _buildSubmitButton(),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

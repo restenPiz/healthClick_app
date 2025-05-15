@@ -715,6 +715,7 @@ class _CartState extends State<Cart> {
             child: Column(
               children: [
                 // Subtotal
+                const SizedBox(height:7),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
