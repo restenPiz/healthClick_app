@@ -11,26 +11,29 @@ class SplashLogin extends StatefulWidget {
 }
 
 class _SplashLoginState extends State<SplashLogin> {
-
   @override
   void initState() {
     super.initState();
-    Timer(Duration(seconds: 6), () {
+    // Redireciona para a tela de login após 6 segundos
+    Timer(const Duration(seconds: 6), () {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-            builder: (context) => Login()), // sua tela de login
+            builder: (context) => const Login()), // sua tela de login
       );
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context); // Pega o tema atual (dark/light)
+
     return Scaffold(
-      backgroundColor: Colors.white, // cor de fundo opcional
+      backgroundColor:
+          theme.scaffoldBackgroundColor, // Adapta o fundo conforme o tema
       body: Center(
         child: Image.asset(
-          'assets/Saude.png', // seu logo
+          'assets/Saude.png', // Seu logo
           width: 240,
           height: 240,
           fit: BoxFit.cover,

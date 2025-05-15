@@ -71,7 +71,7 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
               // Render Stripe ou Bank Transfer
               if (_isStripePayment)
                 StripeCheckoutWidget(
-                  amount: (widget.cart.totalAmount * 100).toDouble(),
+                  amount: (widget.cart.totalAmount * 1).toDouble(),
                   currency: 'mzn',
                   items: widget.cart.items.entries.map((entry) {
                     return {

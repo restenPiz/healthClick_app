@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:healthclick_app/ThemeProvider.dart';
 import 'package:healthclick_app/screens/layouts/AppBottom.dart';
+import 'package:healthclick_app/screens/profile/HelpPage.dart';
 import 'package:healthclick_app/screens/profile/ProfileEdit.dart';
 import 'package:healthclick_app/screens/welcome/SplashLogin.dart';
 import 'package:provider/provider.dart';
@@ -129,18 +130,26 @@ class _ProfileState extends State<Profile> {
                   indent: screenSize.width * 0.05,
                   endIndent: screenSize.width * 0.05,
                 ),
-                ListTile(
-                  leading: Icon(
-                    Icons.help,
-                    size: isSmallScreen ? 24 : 28,
-                  ),
-                  title: Text(
-                    'Ajuda',
-                    style: TextStyle(fontSize: itemTextSize),
-                  ),
-                  contentPadding: EdgeInsets.symmetric(
-                    horizontal: horizontalPadding,
-                    vertical: verticalSpacing * 0.3,
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const HelpPage()),
+                    );
+                  },
+                  child: ListTile(
+                    leading: Icon(
+                      Icons.help,
+                      size: isSmallScreen ? 24 : 28,
+                    ),
+                    title: Text(
+                      'Ajuda',
+                      style: TextStyle(fontSize: itemTextSize),
+                    ),
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: horizontalPadding,
+                      vertical: verticalSpacing * 0.3,
+                    ),
                   ),
                 ),
                 Divider(
