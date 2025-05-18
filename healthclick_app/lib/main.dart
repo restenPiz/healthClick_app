@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:healthclick_app/SessionTimeoutManager.dart';
 import 'package:healthclick_app/ThemeProvider.dart';
 import 'package:healthclick_app/screens/welcome/HomePage.dart';
@@ -11,12 +12,10 @@ import 'package:healthclick_app/screens/auth/Login.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 
-// Provedor de autenticação com gerenciamento de timeout de sessão
+// 🔐 Provedor de autenticação com gerenciamento de estado
 class AuthProvider with ChangeNotifier {
   AuthProvider() {
-    // Verificando se já existe um usuário autenticado ao iniciar o app
     _checkCurrentUser();
-    // Ouvindo mudanças no estado de autenticação
     _auth.authStateChanges().listen((User? user) {
       _user = user;
       _isLoading = false;
@@ -29,19 +28,19 @@ class AuthProvider with ChangeNotifier {
   User? _user;
 
   bool get isLoading => _isLoading;
-
   bool get isAuthenticated => _user != null;
-
   User? get user => _user;
 
   Future<User?> signIn(String email, String password) async {
     try {
       _isLoading = true;
       notifyListeners();
-      // Fazer login com email e senha
       UserCredential credential = await _auth.signInWithEmailAndPassword(
-          email: email, password: password);
-      return credential.user;
+        email: email,
+        password: password,
+      );
+      _user = credential.user;
+      return _user;
     } catch (e) {
       _isLoading = false;
       notifyListeners();
@@ -50,11 +49,24 @@ class AuthProvider with ChangeNotifier {
   }
 
   Future<void> signOut() async {
-    await _auth.signOut();
+    await FirebaseAuth.instance.signOut();
+    await GoogleSignIn().signOut();
+    _user = null;
+    notifyListeners();
   }
 
   Future<void> _checkCurrentUser() async {
-    _user = _auth.currentUser;
+    try {
+      User? current = _auth.currentUser;
+      if (current != null) {
+        await current.reload(); // 🛠 Garante que o estado é atualizado
+        _user = _auth.currentUser;
+      } else {
+        _user = null;
+      }
+    } catch (_) {
+      _user = null;
+    }
     _isLoading = false;
     notifyListeners();
   }
@@ -63,19 +75,19 @@ class AuthProvider with ChangeNotifier {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Inicialização do Firebase
+  // Inicializa Firebase
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  // Inicialização completa do Stripe
+  // Opcional: deslogar sempre ao iniciar o app (para evitar sessão antiga no desenvolvimento)
+  await FirebaseAuth.instance.signOut();
+  await GoogleSignIn().signOut();
+
+  // Inicializa Stripe
   Stripe.publishableKey =
       'pk_test_51RMC3iQqtk7VgypaekoLTk2YDZaaFHifeaugbkKAeGvb3TXctB7Ovex9ZnnsTIYJuW2wmfIZa51OekpVnm6VEtnO00EsaxesXv';
 
-  // Configurar aparência e opções do Stripe
-  // await Stripe.instance.applySettings();
-
-  // Executar o app com os providers
   runApp(
     MultiProvider(
       providers: [
@@ -109,31 +121,17 @@ class MyApp extends StatelessWidget {
       darkTheme: ThemeData(
         brightness: Brightness.dark,
         primarySwatch: Colors.blue,
-      ), 
-      // Substituir o home pelo AuthWrapper
-      home: AuthWrapper(),
+      ),
+      home: const AuthWrapper(),
     );
   }
 }
 
-// AuthWrapper modificado para lidar com o lifecycle do app
-class HomePageWrapper extends StatelessWidget {
-  const HomePageWrapper({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    // Initialize AppSize here before showing HomePage
-    // This ensures AppSize is initialized before it's used in HomePage
-    AppSize.init(context);
-
-    return const HomePage();
-  }
-}
-
-// AuthWrapper modificado para lidar com o lifecycle do app
+// 🔄 Tela intermediária que decide para onde ir com base na autenticação
 class AuthWrapper extends StatefulWidget {
+  const AuthWrapper({super.key});
   @override
-  _AuthWrapperState createState() => _AuthWrapperState();
+  State<AuthWrapper> createState() => _AuthWrapperState();
 }
 
 class _AuthWrapperState extends State<AuthWrapper> with WidgetsBindingObserver {
@@ -142,14 +140,12 @@ class _AuthWrapperState extends State<AuthWrapper> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
-    // Registrar observer para detectar mudanças no estado do app
     WidgetsBinding.instance.addObserver(this);
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Inicializar o gerenciador de sessão
     final authProvider = Provider.of<AuthProvider>(context);
     if (authProvider.isAuthenticated && _sessionManager == null) {
       _sessionManager = SessionTimeoutManager(
@@ -161,7 +157,6 @@ class _AuthWrapperState extends State<AuthWrapper> with WidgetsBindingObserver {
 
   @override
   void dispose() {
-    // Remover observer e recursos
     WidgetsBinding.instance.removeObserver(this);
     _sessionManager?.dispose();
     super.dispose();
@@ -170,14 +165,11 @@ class _AuthWrapperState extends State<AuthWrapper> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    // Só gerenciar timeout se o usuário estiver autenticado
     if (authProvider.isAuthenticated) {
       if (state == AppLifecycleState.paused ||
           state == AppLifecycleState.inactive) {
-        // App foi para background
         _sessionManager?.appToBackground();
       } else if (state == AppLifecycleState.resumed) {
-        // App voltou para foreground
         _sessionManager?.appToForeground();
       }
     }
@@ -187,18 +179,25 @@ class _AuthWrapperState extends State<AuthWrapper> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
 
-    // Enquanto verifica o estado de autenticação, mostra a tela de splash
     if (authProvider.isLoading) {
-      return const SplashLogin();
+      return const SplashLogin(); // pode ser um loader ou splash
     }
 
-    // Redireciona com base no estado de autenticação
     if (authProvider.isAuthenticated) {
-      // Use HomePageWrapper instead of HomePage directly to ensure AppSize is initialized
       return const HomePageWrapper();
     } else {
-      // Use Login() when not authenticated
       return const Login();
     }
+  }
+}
+
+// 🏠 Wrapper que inicializa AppSize antes da HomePage
+class HomePageWrapper extends StatelessWidget {
+  const HomePageWrapper({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    AppSize.init(context);
+    return const HomePage();
   }
 }
