@@ -109,10 +109,24 @@ class MyApp extends StatelessWidget {
       darkTheme: ThemeData(
         brightness: Brightness.dark,
         primarySwatch: Colors.blue,
-      ),
+      ), 
       // Substituir o home pelo AuthWrapper
       home: AuthWrapper(),
     );
+  }
+}
+
+// AuthWrapper modificado para lidar com o lifecycle do app
+class HomePageWrapper extends StatelessWidget {
+  const HomePageWrapper({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    // Initialize AppSize here before showing HomePage
+    // This ensures AppSize is initialized before it's used in HomePage
+    AppSize.init(context);
+
+    return const HomePage();
   }
 }
 
@@ -172,15 +186,19 @@ class _AuthWrapperState extends State<AuthWrapper> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
+
     // Enquanto verifica o estado de autenticação, mostra a tela de splash
     if (authProvider.isLoading) {
       return const SplashLogin();
     }
+
     // Redireciona com base no estado de autenticação
     if (authProvider.isAuthenticated) {
-      return const HomePage();
+      // Use HomePageWrapper instead of HomePage directly to ensure AppSize is initialized
+      return const HomePageWrapper();
     } else {
-      return const SplashLogin();
+      // Use Login() when not authenticated
+      return const Login();
     }
   }
 }

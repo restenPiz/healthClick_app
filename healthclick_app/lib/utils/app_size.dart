@@ -13,7 +13,11 @@ class AppSize {
   static late double safeBlockVertical;
   static late double textScaleFactor;
 
+  static bool _initialized = false;
+
   static void init(BuildContext context) {
+    if (_initialized) return; // Prevent multiple initializations
+
     _mediaQueryData = MediaQuery.of(context);
     screenWidth = _mediaQueryData.size.width;
     screenHeight = _mediaQueryData.size.height;
@@ -28,12 +32,36 @@ class AppSize {
         _mediaQueryData.padding.top + _mediaQueryData.padding.bottom;
     safeBlockHorizontal = (screenWidth - _safeAreaHorizontal) / 100;
     safeBlockVertical = (screenHeight - _safeAreaVertical) / 100;
+
+    _initialized = true;
   }
 
-  // Para elementos que devem ser proporcionais ao tamanho da tela
-  static double hp(double percentage) => blockSizeVertical * percentage;
-  static double wp(double percentage) => blockSizeHorizontal * percentage;
+  // Verify initialization status
+  static bool get isInitialized => _initialized;
 
-  // Para textos responsivos
-  static double sp(double size) => size * textScaleFactor;
+  // For elements that should be proportional to screen size
+  static double hp(double percentage) {
+    if (!_initialized) {
+      print('WARNING: AppSize not initialized, using default values');
+      return percentage * 5; // Default fallback value
+    }
+    return blockSizeVertical * percentage;
+  }
+
+  static double wp(double percentage) {
+    if (!_initialized) {
+      print('WARNING: AppSize not initialized, using default values');
+      return percentage * 3; // Default fallback value
+    }
+    return blockSizeHorizontal * percentage;
+  }
+
+  // For responsive text
+  static double sp(double size) {
+    if (!_initialized) {
+      print('WARNING: AppSize not initialized, using default values');
+      return size; // Default fallback value
+    }
+    return size * textScaleFactor;
+  }
 }
