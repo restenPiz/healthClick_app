@@ -44,10 +44,7 @@ class _HomePageState extends State<HomePage> {
 
         setState(() {
           categories = data.map((category) {
-            return {
-              "name": category['category_name'],
-              "id": category['id']
-            };
+            return {"name": category['category_name'], "id": category['id']};
           }).toList();
         });
       }
@@ -57,6 +54,7 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  //?Getting the products from the API
   Future<void> getProducts() async {
     try {
       var url = Uri.parse('https://cloudev.org/api/products');
@@ -70,7 +68,7 @@ class _HomePageState extends State<HomePage> {
           products = data.take(3).map((product) {
             return {
               "name": product['product_name'],
-               "price":
+              "price":
                   double.tryParse(product['product_price'].toString()) ?? 0.0,
               "description": product['product_description'],
               "image": 'http://cloudev.org/storage/${product['product_file']}',
@@ -90,6 +88,7 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  //? Navigate to ProductDetails Using the product ID
   void _addToCart(Map<String, dynamic> product, BuildContext context) {
     try {
       final String productId = product['id']?.toString() ??
@@ -146,16 +145,17 @@ class _HomePageState extends State<HomePage> {
     final isSmallScreen = screenSize.width < 360;
     final isMediumScreen = screenSize.width >= 360 && screenSize.width < 600;
     final isLargeScreen = screenSize.width >= 600;
-    
+
     // Calculate responsive values
     final double horizontalPadding = isSmallScreen ? 8.0 : 16.0;
-    final double carouselHeight = isSmallScreen ? 150.0 : (isMediumScreen ? 200.0 : 250.0);
+    final double carouselHeight =
+        isSmallScreen ? 150.0 : (isMediumScreen ? 200.0 : 250.0);
     final int gridCrossAxisCount = isLargeScreen ? 3 : 2;
     final double childAspectRatio = isSmallScreen ? 0.50 : 0.55;
-    
+
     User? currentUser = FirebaseAuth.instance.currentUser;
     final cart = Provider.of<CartProvider>(context);
-    
+
     return Scaffold(
       body: CustomRefreshIndicator(
         onRefresh: () async {
@@ -199,7 +199,7 @@ class _HomePageState extends State<HomePage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SizedBox(height: screenSize.height * 0.02),
-                
+
                 // User Greeting Section - Responsive
                 ListTile(
                   leading: CircleAvatar(
@@ -215,14 +215,13 @@ class _HomePageState extends State<HomePage> {
                   subtitle: Text(
                     "O que você deseja?",
                     style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: isSmallScreen ? 15 : 17
-                    ),
+                        fontWeight: FontWeight.bold,
+                        fontSize: isSmallScreen ? 15 : 17),
                   ),
                 ),
-                
+
                 SizedBox(height: screenSize.height * 0.02),
-                
+
                 // Carousel - Responsive
                 GFCarousel(
                   autoPlay: true,
@@ -249,7 +248,7 @@ class _HomePageState extends State<HomePage> {
                     });
                   },
                 ),
-                
+
                 SizedBox(height: screenSize.height * 0.025),
 
                 // Categories Header - Responsive
@@ -259,13 +258,12 @@ class _HomePageState extends State<HomePage> {
                     Text(
                       'Categorias',
                       style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: isSmallScreen ? 15 : 17
-                      ),
+                          fontWeight: FontWeight.bold,
+                          fontSize: isSmallScreen ? 15 : 17),
                     ),
                   ],
                 ),
-                
+
                 SizedBox(height: screenSize.height * 0.015),
 
                 // Category Cards Section - Responsive
@@ -276,7 +274,7 @@ class _HomePageState extends State<HomePage> {
                       int index = entry.key;
                       Map<String, dynamic> category = entry.value;
                       String categoryName = category['name'] ?? 'Sem nome';
-                      
+
                       return Padding(
                         padding: const EdgeInsets.only(right: 10),
                         child: GestureDetector(
@@ -314,7 +312,8 @@ class _HomePageState extends State<HomePage> {
                                 ],
                               ),
                               child: Padding(
-                                padding: EdgeInsets.symmetric(horizontal: isSmallScreen ? 6.0 : 8.0),
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: isSmallScreen ? 6.0 : 8.0),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
@@ -345,7 +344,7 @@ class _HomePageState extends State<HomePage> {
                     }).toList(),
                   ),
                 ),
-                
+
                 SizedBox(height: screenSize.height * 0.025),
 
                 // Products Section Header - Responsive
@@ -355,26 +354,23 @@ class _HomePageState extends State<HomePage> {
                     Text(
                       'Produtos',
                       style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: isSmallScreen ? 15 : 17
-                      ),
+                          fontWeight: FontWeight.bold,
+                          fontSize: isSmallScreen ? 15 : 17),
                     ),
                     GestureDetector(
                       onTap: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const Product()
-                          ),
+                              builder: (context) => const Product()),
                         );
                       },
                       child: Text(
                         'Ver Todos',
                         style: TextStyle(
-                          color: Colors.blue,
-                          fontWeight: FontWeight.bold,
-                          fontSize: isSmallScreen ? 15 : 17
-                        ),
+                            color: Colors.blue,
+                            fontWeight: FontWeight.bold,
+                            fontSize: isSmallScreen ? 15 : 17),
                       ),
                     ),
                   ],
@@ -385,7 +381,8 @@ class _HomePageState extends State<HomePage> {
                     ? Center(
                         child: Padding(
                           padding: EdgeInsets.all(screenSize.height * 0.025),
-                          child: const CircularProgressIndicator(color: Colors.green),
+                          child: const CircularProgressIndicator(
+                              color: Colors.green),
                         ),
                       )
                     : GridView.builder(
@@ -406,15 +403,14 @@ class _HomePageState extends State<HomePage> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (_) => ProductDetails(product: product)
-                                ),
+                                    builder: (_) =>
+                                        ProductDetails(product: product)),
                               );
                             },
                             child: Card(
                               elevation: 2,
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12)
-                              ),
+                                  borderRadius: BorderRadius.circular(12)),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -422,7 +418,8 @@ class _HomePageState extends State<HomePage> {
                                     dense: isSmallScreen,
                                     leading: Text(
                                       product['category'] ?? 'Categoria',
-                                      style: TextStyle(fontSize: isSmallScreen ? 11 : 13),
+                                      style: TextStyle(
+                                          fontSize: isSmallScreen ? 11 : 13),
                                     ),
                                   ),
                                   ClipRRect(
@@ -430,18 +427,18 @@ class _HomePageState extends State<HomePage> {
                                     child: Image.network(
                                       product['image'],
                                       width: double.infinity,
-                                      height: isSmallScreen ? 120 : 150,
+                                      height: isSmallScreen ? 120 : 145,
                                       fit: BoxFit.cover,
-                                      errorBuilder: (context, error, stackTrace) {
-                                        return Icon(
-                                          Icons.broken_image,
-                                          size: isSmallScreen ? 100 : 120
-                                        );
+                                      errorBuilder:
+                                          (context, error, stackTrace) {
+                                        return Icon(Icons.broken_image,
+                                            size: isSmallScreen ? 100 : 120);
                                       },
                                     ),
                                   ),
                                   Padding(
-                                    padding: EdgeInsets.all(isSmallScreen ? 6.0 : 8.0),
+                                    padding: EdgeInsets.all(
+                                        isSmallScreen ? 6.0 : 8.0),
                                     child: Text(
                                       product['name'],
                                       style: TextStyle(
@@ -453,30 +450,30 @@ class _HomePageState extends State<HomePage> {
                                     ),
                                   ),
                                   Divider(
-                                    thickness: 1,
-                                    indent: isSmallScreen ? 8 : 10,
-                                    endIndent: isSmallScreen ? 8 : 10
-                                  ),
+                                      thickness: 1,
+                                      indent: isSmallScreen ? 8 : 10,
+                                      endIndent: isSmallScreen ? 8 : 10),
                                   Padding(
                                     padding: EdgeInsets.symmetric(
-                                      horizontal: isSmallScreen ? 6.0 : 8.0
-                                    ),
+                                        horizontal: isSmallScreen ? 6.0 : 8.0),
                                     child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
                                       children: [
                                         Text(
                                           "${product['price']} MZN",
                                           style: TextStyle(
-                                            fontSize: isSmallScreen ? 12 : 14,
-                                            color: Colors.blue
-                                          ),
+                                              fontSize: isSmallScreen ? 12 : 14,
+                                              color: Colors.blue),
                                         ),
                                         ElevatedButton(
-                                          onPressed: () => _addToCart(product, context),
+                                          onPressed: () =>
+                                              _addToCart(product, context),
                                           style: ElevatedButton.styleFrom(
                                             backgroundColor: Colors.green,
                                             shape: const CircleBorder(),
-                                            padding: EdgeInsets.all(isSmallScreen ? 6 : 8),
+                                            padding: EdgeInsets.all(
+                                                isSmallScreen ? 6 : 8),
                                           ),
                                           child: Icon(
                                             Icons.add,
@@ -498,6 +495,7 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ),
+      //* Responsive Bottom Navigation Bar
       bottomNavigationBar: AppBottomNav(
         currentIndex: _currentIndex,
         onTap: _onTap,

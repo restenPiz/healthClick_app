@@ -6,7 +6,6 @@
 //     final Map<String, dynamic> pharmacy;
 //   const PharmacyDetails({super.key, required this.pharmacy});
 
-
 //   @override
 //   State<PharmacyDetails> createState() => _PharmacyDetailsState();
 // }
@@ -178,7 +177,7 @@ class PharmacyDetails extends StatefulWidget {
 }
 
 class _PharmacyDetailsState extends State<PharmacyDetails> {
-  int _currentIndex = 0;
+  final int _currentIndex = 0;
   final GFBottomSheetController _controller = GFBottomSheetController();
   late GoogleMapController mapController;
   late CameraPosition _initialCameraPosition;
@@ -216,23 +215,22 @@ class _PharmacyDetailsState extends State<PharmacyDetails> {
     final screenSize = mediaQuery.size;
     final textScaleFactor = mediaQuery.textScaleFactor;
     final isSmallScreen = screenSize.width < 600;
-    
+
     // Calculate responsive image height (max 40% of screen height on small devices)
-    final imageHeight = isSmallScreen 
-        ? screenSize.height * 0.3 
-        : screenSize.height * 0.4;
-    
+    final imageHeight =
+        isSmallScreen ? screenSize.height * 0.3 : screenSize.height * 0.4;
+
     // Calculate responsive paddings
     final mainPadding = screenSize.width * 0.04;
-    
+
     // Calculate responsive text sizes
     final titleSize = isSmallScreen ? 18.0 : 20.0;
     final descriptionSize = isSmallScreen ? 14.0 : 16.0;
-    
+
     // Calculate bottom sheet height proportional to screen
     final bottomSheetMaxHeight = screenSize.height * 0.75;
     final bottomSheetHeaderHeight = screenSize.height * 0.12;
-    
+
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
@@ -256,7 +254,8 @@ class _PharmacyDetailsState extends State<PharmacyDetails> {
                       fontSize: titleSize,
                       fontWeight: FontWeight.bold,
                     ),
-                    textAlign: isSmallScreen ? TextAlign.start : TextAlign.center,
+                    textAlign:
+                        isSmallScreen ? TextAlign.start : TextAlign.center,
                   ),
                   contentPadding: EdgeInsets.zero,
                 ),
@@ -314,9 +313,9 @@ class _PharmacyDetailsState extends State<PharmacyDetails> {
         maxContentHeight: bottomSheetMaxHeight,
         stickyHeaderHeight: bottomSheetHeaderHeight,
         stickyHeader: Container(
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             color: Colors.grey,
-            borderRadius: const BorderRadius.only(
+            borderRadius: BorderRadius.only(
               topLeft: Radius.circular(16),
               topRight: Radius.circular(16),
             ),
@@ -325,8 +324,10 @@ class _PharmacyDetailsState extends State<PharmacyDetails> {
             avatar: GFAvatar(
               size: isSmallScreen ? GFSize.SMALL : GFSize.MEDIUM,
               backgroundImage: pharmacy['image'] != null
-                  ? NetworkImage('http://cloudev.org/storage/${pharmacy['image']}')
-                  : const AssetImage('assets/images/default_pharmacy.png') as ImageProvider,
+                  ? NetworkImage(
+                      'http://cloudev.org/storage/${pharmacy['image']}')
+                  : const AssetImage('assets/images/default_pharmacy.png')
+                      as ImageProvider,
             ),
             titleText: pharmacy['name'],
             subTitleText: 'Localização da Farmácia',

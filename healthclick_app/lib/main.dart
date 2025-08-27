@@ -114,7 +114,6 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         scaffoldBackgroundColor: Colors.white,
         colorScheme: const ColorScheme.light(
-          background: Colors.white,
           surface: Colors.white,
         ),
       ),

@@ -160,6 +160,7 @@ class _PharmacyState extends State<Pharmacy> {
                 top: 0,
                 left: 0,
                 right: 0,
+                //*Improve better user experience with animated opacity
                 child: AnimatedOpacity(
                   opacity: controller.value > 0.0 ? 1.0 : 0.0,
                   duration: const Duration(milliseconds: 200),
@@ -284,6 +285,7 @@ class _PharmacyState extends State<Pharmacy> {
               ),
               const SizedBox(height: 16),
               ElevatedButton(
+                //*Method on pressed to get the pharmacies again
                 onPressed: () => getPharmacies(refresh: true),
                 style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
                 child: const Text('Tentar novamente',
@@ -414,7 +416,7 @@ class PharmacyCard extends StatelessWidget {
                   errorWidget: (context, url, error) => CircleAvatar(
                     radius: isSmallScreen ? 20 : 25,
                     backgroundColor: Colors.grey[300],
-                    child: Icon(Icons.error, color: Colors.red),
+                    child: const Icon(Icons.error, color: Colors.red),
                   ),
                 ),
               )

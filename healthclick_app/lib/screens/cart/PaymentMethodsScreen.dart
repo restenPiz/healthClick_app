@@ -5,9 +5,9 @@ import 'package:healthclick_app/screens/cart/BankTransferWidget.dart';
 
 class PaymentMethodsScreen extends StatefulWidget {
   const PaymentMethodsScreen({
-    Key? key,
+    super.key,
     required this.cart,
-  }) : super(key: key);
+  });
 
   final CartProvider cart;
 
@@ -22,7 +22,7 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
       GlobalKey<BankTransferWidgetState>();
 
   final _formKey = GlobalKey<FormState>();
-  bool _isProcessing = false;
+  final bool _isProcessing = false;
   bool _isStripePayment = true;
 
   Widget _buildHeader() {

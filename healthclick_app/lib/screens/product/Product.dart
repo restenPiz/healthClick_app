@@ -347,7 +347,7 @@ class _ProductState extends State<Product> {
                                           width: double.infinity,
                                           height: isSmallScreen
                                               ? 120
-                                              : (isLargeScreen ? 180 : 150),
+                                              : (isLargeScreen ? 180 : 145),
                                           fit: BoxFit.cover,
                                           errorBuilder:
                                               (context, error, stackTrace) {

@@ -13,12 +13,12 @@ class StripeCheckoutWidget extends StatefulWidget {
   final ScrollController scrollController;
 
   const StripeCheckoutWidget({
-    Key? key,
+    super.key,
     required this.amount,
     required this.currency,
     required this.items,
     required this.scrollController,
-  }) : super(key: key);
+  });
 
   @override
   State<StripeCheckoutWidget> createState() => _StripeCheckoutWidgetState();
@@ -37,7 +37,8 @@ class _StripeCheckoutWidgetState extends State<StripeCheckoutWidget> {
   Future<void> _makePayment() async {
     FocusScope.of(context).unfocus(); // Fechar o teclado
 
-    if (_emailController.text.isEmpty || !_isValidEmail(_emailController.text)) {
+    if (_emailController.text.isEmpty ||
+        !_isValidEmail(_emailController.text)) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Por favor, forneça um email válido')),
       );
@@ -150,9 +151,10 @@ class _StripeCheckoutWidgetState extends State<StripeCheckoutWidget> {
       final jsonResponse = jsonDecode(response.body);
 
       if (response.statusCode != 200 || jsonResponse['success'] != true) {
-        throw Exception(jsonResponse['message'] ?? 'Erro ao confirmar pagamento');
+        throw Exception(
+            jsonResponse['message'] ?? 'Erro ao confirmar pagamento');
       }
-      
+
       Provider.of<CartProvider>(context, listen: false).clear();
 
       setState(() {
@@ -180,12 +182,13 @@ class _StripeCheckoutWidgetState extends State<StripeCheckoutWidget> {
       children: [
         Text(
           'Informações de Pagamento',
-          style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+          style: theme.textTheme.titleMedium
+              ?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 16),
         TextFormField(
           controller: _emailController,
-          decoration: InputDecoration( 
+          decoration: InputDecoration(
             labelText: 'Email',
             hintText: 'seuemail@exemplo.com',
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
@@ -203,7 +206,8 @@ class _StripeCheckoutWidgetState extends State<StripeCheckoutWidget> {
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.green,
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10)),
               padding: const EdgeInsets.symmetric(vertical: 14),
               disabledBackgroundColor: Colors.grey,
             ),

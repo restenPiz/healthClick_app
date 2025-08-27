@@ -256,11 +256,11 @@ class _CreateAccountState extends State<CreateAccount> {
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(AppSize.wp(8)),
-                      borderSide: BorderSide(color: Colors.grey),
+                      borderSide: const BorderSide(color: Colors.grey),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(AppSize.wp(8)),
-                      borderSide: BorderSide(color: Colors.blue),
+                      borderSide: const BorderSide(color: Colors.blue),
                     ),
                     hintText: 'Your Email Address',
                     prefixIcon: const Icon(Icons.email),
@@ -283,11 +283,11 @@ class _CreateAccountState extends State<CreateAccount> {
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(AppSize.wp(8)),
-                      borderSide: BorderSide(color: Colors.grey),
+                      borderSide: const BorderSide(color: Colors.grey),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(AppSize.wp(8)),
-                      borderSide: BorderSide(color: Colors.blue),
+                      borderSide: const BorderSide(color: Colors.blue),
                     ),
                     hintText: 'Your Password',
                     prefixIcon: const Icon(Icons.lock),
@@ -310,11 +310,11 @@ class _CreateAccountState extends State<CreateAccount> {
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(AppSize.wp(8)),
-                      borderSide: BorderSide(color: Colors.grey),
+                      borderSide: const BorderSide(color: Colors.grey),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(AppSize.wp(8)),
-                      borderSide: BorderSide(color: Colors.blue),
+                      borderSide: const BorderSide(color: Colors.blue),
                     ),
                     hintText: 'Your Password Confirmation',
                     prefixIcon: const Icon(Icons.lock),
@@ -373,7 +373,7 @@ class _CreateAccountState extends State<CreateAccount> {
                                   SizedBox(
                                     width: AppSize.wp(5),
                                     height: AppSize.wp(5),
-                                    child: CircularProgressIndicator(
+                                    child: const CircularProgressIndicator(
                                       color: Colors.white,
                                       strokeWidth: 2.0,
                                     ),
@@ -433,7 +433,7 @@ class _CreateAccountState extends State<CreateAccount> {
                                   SizedBox(
                                     width: AppSize.wp(5),
                                     height: AppSize.wp(5),
-                                    child: CircularProgressIndicator(
+                                    child: const CircularProgressIndicator(
                                       color: Colors.blue,
                                       strokeWidth: 2.0,
                                     ),

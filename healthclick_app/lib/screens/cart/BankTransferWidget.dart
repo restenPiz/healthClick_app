@@ -6,15 +6,14 @@ import 'package:healthclick_app/models/CartProvider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:provider/provider.dart';
 
 class BankTransferWidget extends StatefulWidget {
   final CartProvider cart;
 
   const BankTransferWidget({
-    Key? key,
+    super.key,
     required this.cart,
-  }) : super(key: key);
+  });
 
   @override
   BankTransferWidgetState createState() => BankTransferWidgetState();
@@ -59,7 +58,8 @@ class BankTransferWidgetState extends State<BankTransferWidget> {
 
   Future<bool> _realizarPagamentoBancario() async {
     final context = this.context;
-    final url = Uri.parse('http://192.168.100.139:8000/api/stripe/create-checkout-session');
+    final url = Uri.parse(
+        'http://192.168.100.139:8000/api/stripe/create-checkout-session');
     final user = FirebaseAuth.instance.currentUser;
     final userId = user?.uid;
 

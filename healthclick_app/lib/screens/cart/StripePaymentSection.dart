@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'package:provider/provider.dart';
-
 class StripePaymentSection extends StatelessWidget {
-  const StripePaymentSection({Key? key}) : super(key: key);
+  const StripePaymentSection({super.key});
 
   @override
   Widget build(BuildContext context) {

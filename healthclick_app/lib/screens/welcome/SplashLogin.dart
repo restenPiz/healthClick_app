@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:healthclick_app/screens/auth/Login.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 class SplashLogin extends StatefulWidget {
   const SplashLogin({super.key});
@@ -28,6 +27,7 @@ class _SplashLoginState extends State<SplashLogin> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context); // Pega o tema atual (dark/light)
 
+    // * Defining the scaffold method
     return Scaffold(
       backgroundColor:
           theme.scaffoldBackgroundColor, // Adapta o fundo conforme o tema

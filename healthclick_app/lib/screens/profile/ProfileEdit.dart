@@ -1,6 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:healthclick_app/screens/auth/Login.dart';
 
 class ProfileEdit extends StatefulWidget {
   const ProfileEdit({super.key});
@@ -20,7 +19,8 @@ class _ProfileEditState extends State<ProfileEdit> {
     // Preencher os campos com os dados atuais do usuário
     User? currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser != null) {
-      _nameController.text = currentUser.displayName ?? currentUser.email?.split('@')[0] ?? '';
+      _nameController.text =
+          currentUser.displayName ?? currentUser.email?.split('@')[0] ?? '';
       _emailController.text = currentUser.email ?? '';
     }
   }
@@ -122,9 +122,7 @@ class _ProfileEditState extends State<ProfileEdit> {
                 ),
                 title: const Text(
                   "Editar Perfil",
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20),
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
                 ),
               ),
               const SizedBox(height: 30),
@@ -139,16 +137,17 @@ class _ProfileEditState extends State<ProfileEdit> {
               const SizedBox(height: 20),
               Center(
                 child: Text(
-                  "${currentUser?.displayName ?? currentUser?.email?.split('@')[0] ?? 'Visitante'}",
+                  currentUser?.displayName ??
+                      currentUser?.email?.split('@')[0] ??
+                      'Visitante',
                   style: const TextStyle(
-                      fontSize: 25,
-                      fontWeight: FontWeight.bold),
+                      fontSize: 25, fontWeight: FontWeight.bold),
                 ),
               ),
               const SizedBox(height: 10),
               Center(
                 child: Text(
-                  '${currentUser?.email ?? 'Visitante'}',
+                  currentUser?.email ?? 'Visitante',
                   style: const TextStyle(fontSize: 18),
                 ),
               ),
@@ -174,7 +173,8 @@ class _ProfileEditState extends State<ProfileEdit> {
                     borderSide: const BorderSide(color: Colors.blue),
                   ),
                   hintText: currentUser?.displayName ??
-                      currentUser?.email?.split('@')[0] ?? 'Escreva o seu nome',
+                      currentUser?.email?.split('@')[0] ??
+                      'Escreva o seu nome',
                   prefixIcon: const Icon(Icons.person_2),
                   contentPadding: EdgeInsets.symmetric(
                     vertical: isSmallScreen ? 12 : 16,

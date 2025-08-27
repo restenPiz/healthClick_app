@@ -76,7 +76,9 @@ class _ProfileState extends State<Profile> {
                 SizedBox(height: verticalSpacing),
                 Center(
                   child: Text(
-                    "${currentUser?.displayName ?? currentUser?.email?.split('@')[0] ?? 'Visitante'}",
+                    currentUser?.displayName ??
+                        currentUser?.email?.split('@')[0] ??
+                        'Visitante',
                     style: TextStyle(
                       fontSize: nameTextSize,
                       fontWeight: FontWeight.bold,
@@ -89,7 +91,7 @@ class _ProfileState extends State<Profile> {
                 SizedBox(height: verticalSpacing * 0.5),
                 Center(
                   child: Text(
-                    "${currentUser?.email ?? 'Visitante'}",
+                    currentUser?.email ?? 'Visitante',
                     style: TextStyle(fontSize: emailTextSize),
                     textAlign: TextAlign.center,
                     overflow: TextOverflow.ellipsis,
@@ -199,7 +201,7 @@ class _ProfileState extends State<Profile> {
                           context,
                           MaterialPageRoute(
                               builder: (context) => const SplashLogin()),
-                          (route) => false, 
+                          (route) => false,
                         );
                       },
                       style: ElevatedButton.styleFrom(

@@ -22,7 +22,7 @@ class _CartState extends State<Cart> {
   final ImagePicker _picker = ImagePicker();
   // Definir taxa de entrega
   final double _deliveryFee = 50.0;
-  bool _includeDelivery = true; // Por padrão, incluir entrega
+  final bool _includeDelivery = true; // Por padrão, incluir entrega
 
   Future<int?> buscarUserId(String firebaseUid) async {
     print("Buscando user_id para Firebase UID: $firebaseUid");
@@ -431,8 +431,8 @@ class _CartState extends State<Cart> {
   }
 
   void _showDeliveryForm(BuildContext context, int saleId) {
-    final _addressController = TextEditingController();
-    final _contactController = TextEditingController();
+    final addressController = TextEditingController();
+    final contactController = TextEditingController();
 
     showDialog(
       context: context,
@@ -442,14 +442,14 @@ class _CartState extends State<Cart> {
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
-              controller: _addressController,
+              controller: addressController,
               decoration: const InputDecoration(
                 labelText: "Endereço de entrega",
               ),
             ),
             const SizedBox(height: 10),
             TextField(
-              controller: _contactController,
+              controller: contactController,
               decoration: const InputDecoration(
                 labelText: "Contacto",
               ),
@@ -464,8 +464,8 @@ class _CartState extends State<Cart> {
           ),
           ElevatedButton(
             onPressed: () async {
-              final address = _addressController.text.trim();
-              final contact = _contactController.text.trim();
+              final address = addressController.text.trim();
+              final contact = contactController.text.trim();
 
               if (address.isEmpty || contact.isEmpty) {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -708,53 +708,53 @@ class _CartState extends State<Cart> {
           ),
           // Seção de entrega
           if (cart.items.isNotEmpty)
-            
-          // Resumo do carrinho
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              children: [
-                // Subtotal
-                const SizedBox(height:7),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text('Subtotal'),
-                    Text('${cart.totalAmount.toStringAsFixed(2)} MZN'),
-                  ],
-                ),
-                // Taxa de entrega
-                if (_includeDelivery)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text('Taxa de Entrega'),
-                        Text('${_deliveryFee.toStringAsFixed(2)} MZN'),
-                      ],
-                    ),
+
+            // Resumo do carrinho
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                children: [
+                  // Subtotal
+                  const SizedBox(height: 7),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Subtotal'),
+                      Text('${cart.totalAmount.toStringAsFixed(2)} MZN'),
+                    ],
                   ),
-                const Divider(),
-                // Total geral
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text('Total',
-                        style: TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold)),
-                    Chip(
-                      label: Text(
-                        '${_calculateTotal(cart).toStringAsFixed(2)} MZN',
-                        style: const TextStyle(color: Colors.white),
+                  // Taxa de entrega
+                  if (_includeDelivery)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text('Taxa de Entrega'),
+                          Text('${_deliveryFee.toStringAsFixed(2)} MZN'),
+                        ],
                       ),
-                      backgroundColor: Theme.of(context).primaryColor,
                     ),
-                  ],
-                ),
-              ],
+                  const Divider(),
+                  // Total geral
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Total',
+                          style: TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.bold)),
+                      Chip(
+                        label: Text(
+                          '${_calculateTotal(cart).toStringAsFixed(2)} MZN',
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                        backgroundColor: Theme.of(context).primaryColor,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
           const SizedBox(height: 10),
           Padding(
             padding: const EdgeInsets.all(12.0),
