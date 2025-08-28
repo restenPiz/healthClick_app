@@ -354,7 +354,9 @@ class ProductCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 10,),
+            const SizedBox(
+              height: 10,
+            ),
             Padding(
               padding: EdgeInsets.symmetric(
                 horizontal: screenSize.width * 0.01,
@@ -393,7 +395,7 @@ class ProductCard extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            const Divider(thickness: 1, indent: 10, endIndent: 10),
+            const Divider(thickness: 0.2, indent: 10, endIndent: 10),
             Padding(
               padding: EdgeInsets.symmetric(
                 horizontal: screenSize.width * 0.02,
@@ -405,7 +407,9 @@ class ProductCard extends StatelessWidget {
                   Text(
                     "${product['price']} MZN",
                     style: TextStyle(
-                        fontSize: isSmallScreen ? 12 : 14, color: Colors.blue),
+                        fontSize: isSmallScreen ? 12 : 14,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blue),
                   ),
                   ElevatedButton(
                     onPressed: () => onAddToCart(),
