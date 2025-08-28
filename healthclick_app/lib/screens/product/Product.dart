@@ -375,7 +375,7 @@ class _ProductState extends State<Product> {
 
                                       // Divider - Responsive
                                       Divider(
-                                          thickness: 1,
+                                          thickness: 0.2,
                                           indent: isSmallScreen ? 8 : 10,
                                           endIndent: isSmallScreen ? 8 : 10),
 
@@ -393,6 +393,7 @@ class _ProductState extends State<Product> {
                                               style: TextStyle(
                                                   fontSize:
                                                       isSmallScreen ? 12 : 14,
+                                                  fontWeight: FontWeight.bold,
                                                   color: Colors.blue),
                                             ),
                                             ElevatedButton(

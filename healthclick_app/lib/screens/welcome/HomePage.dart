@@ -450,7 +450,7 @@ class _HomePageState extends State<HomePage> {
                                     ),
                                   ),
                                   Divider(
-                                      thickness: 1,
+                                      thickness: 0.2,
                                       indent: isSmallScreen ? 8 : 10,
                                       endIndent: isSmallScreen ? 8 : 10),
                                   Padding(
