@@ -464,6 +464,7 @@ class _HomePageState extends State<HomePage> {
                                           "${product['price']} MZN",
                                           style: TextStyle(
                                               fontSize: isSmallScreen ? 12 : 14,
+                                              fontWeight: FontWeight.bold,
                                               color: Colors.blue),
                                         ),
                                         ElevatedButton(
