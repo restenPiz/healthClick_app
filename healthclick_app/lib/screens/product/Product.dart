@@ -109,6 +109,7 @@ class _ProductState extends State<Product> {
     });
   }
 
+  //Start with the addCart method
   void _addToCart(Map<String, dynamic> product, BuildContext context) {
     try {
       final String productId = product['id']?.toString() ??
